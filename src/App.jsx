@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./App.css";
 import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
