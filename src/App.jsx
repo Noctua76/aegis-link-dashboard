@@ -5,6 +5,19 @@ import GuardStatus from "./components/GuardStatus";
 import IncidentCard from "./components/IncidentCard";
 
 function App() {
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
+
+const menuItems = [
+  "Dashboard",
+  "Live Incidents",
+  "Event Logs",
+  "Alert Activity",
+  "Guards",
+  "Alert Profiles",
+  "System Status",
+  "Analytics",
+  "Settings",
+];
   const sites = [
     {
       name: "Ekali",
