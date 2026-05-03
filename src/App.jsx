@@ -346,6 +346,77 @@ const menuItems = [
     </section>
   </>
 )}
+        {activeMenu === "System Status" && (
+  <>
+    <header style={{ marginBottom: "28px" }}>
+      <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "700" }}>
+        System Status
+      </h1>
+      <p style={{ marginTop: "8px", color: "#9ca3af", fontSize: "15px" }}>
+        Operational health of the Aegis Link infrastructure
+      </p>
+    </header>
+
+    <section className="system-status-grid">
+      <div className="system-status-card online">
+        <div>
+          <h3>Web App</h3>
+          <p>Guard interface and alert trigger</p>
+        </div>
+        <span>Online</span>
+      </div>
+
+      <div className="system-status-card online">
+        <div>
+          <h3>Backend API</h3>
+          <p>Incident orchestration and event handling</p>
+        </div>
+        <span>Online</span>
+      </div>
+
+      <div className="system-status-card online">
+        <div>
+          <h3>SMS Gateway</h3>
+          <p>Vonage SMS delivery channel</p>
+        </div>
+        <span>Operational</span>
+      </div>
+
+      <div className="system-status-card online">
+        <div>
+          <h3>Voice Calls</h3>
+          <p>Automated outbound emergency calls</p>
+        </div>
+        <span>Operational</span>
+      </div>
+
+      <div className="system-status-card warning">
+        <div>
+          <h3>AI Intake</h3>
+          <p>Post-alert structured questioning flow</p>
+        </div>
+        <span>Demo Mode</span>
+      </div>
+
+      <div className="system-status-card warning">
+        <div>
+          <h3>Database</h3>
+          <p>Incident history and audit persistence</p>
+        </div>
+        <span>Pending</span>
+      </div>
+    </section>
+
+    <section className="system-status-panel">
+      <h2>Current Infrastructure State</h2>
+      <p>
+        The dashboard currently operates as a live demo interface. In production,
+        this section will reflect real-time health checks from the web app,
+        backend, Vonage SMS/call services, AI intake flow, and database layer.
+      </p>
+    </section>
+  </>
+)}
       </main>
     </div>
   );
