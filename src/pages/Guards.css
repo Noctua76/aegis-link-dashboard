@@ -1,1 +1,25 @@
+.guards-page {
+  padding: 32px;
+  color: #e5e7eb;
+}
 
+.guards-page h1 {
+  font-size: 32px;
+  margin-bottom: 24px;
+}
+
+.guards-page h2 {
+  margin-top: 28px;
+  margin-bottom: 14px;
+  font-size: 20px;
+}
+
+.guards-page h3 {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  color: #93c5fd;
+}
+
+.guards-page div {
+  margin-bottom: 8px;
+}
