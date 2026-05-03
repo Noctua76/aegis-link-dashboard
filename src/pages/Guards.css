@@ -1,25 +1,242 @@
 .guards-page {
   padding: 32px;
-  color: #e5e7eb;
+  color: #ffffff;
 }
 
-.guards-page h1 {
+.guards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.guards-header h1 {
   font-size: 32px;
-  margin-bottom: 24px;
+  margin: 0;
 }
 
-.guards-page h2 {
-  margin-top: 28px;
-  margin-bottom: 14px;
-  font-size: 20px;
+.guards-header p {
+  margin-top: 8px;
+  color: #9ca3af;
 }
 
-.guards-page h3 {
+.live-badge {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.guards-section {
+  margin-bottom: 34px;
+}
+
+.guards-section h2,
+.backend-panel h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.active-guards-grid,
+.location-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.guard-card,
+.location-card,
+.backend-panel {
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.guard-card {
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.guard-card:hover {
+  border-color: #22c55e;
+  transform: translateY(-2px);
+}
+
+.guard-card-header,
+.location-header,
+.location-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.guard-card h3,
+.location-card h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.guard-card p,
+.location-card p,
+.backend-panel p {
+  color: #9ca3af;
+  margin-top: 6px;
+}
+
+.guard-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.guard-info-grid div {
+  background: #101010;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.guard-info-grid span,
+.location-row span,
+.modal-grid span,
+.notes-box span {
+  display: block;
+  color: #9ca3af;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.guard-info-grid strong {
+  font-size: 14px;
+}
+
+.location-list {
   margin-top: 18px;
-  margin-bottom: 8px;
-  color: #93c5fd;
+  display: grid;
+  gap: 12px;
 }
 
-.guards-page div {
-  margin-bottom: 8px;
+.location-row {
+  background: #101010;
+  border-radius: 12px;
+  padding: 14px;
+  align-items: center;
+}
+
+.location-row div {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.status-pill.on-duty {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.status-pill.standby {
+  background: rgba(250, 204, 21, 0.12);
+  color: #facc15;
+}
+
+.status-pill.off-duty {
+  background: rgba(156, 163, 175, 0.12);
+  color: #9ca3af;
+}
+
+.status-pill.offline,
+.status-pill.late {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.backend-panel {
+  margin-top: 10px;
+}
+
+.backend-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.backend-grid code {
+  background: #101010;
+  border: 1px solid #2a2a2a;
+  color: #93c5fd;
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.guard-modal {
+  width: min(720px, 92vw);
+  background: #181818;
+  border: 1px solid #2a2a2a;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-header button {
+  background: #101010;
+  color: #ffffff;
+  border: 1px solid #333;
+  border-radius: 10px;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.modal-grid p,
+.notes-box {
+  background: #101010;
+  padding: 14px;
+  border-radius: 12px;
+  margin: 0;
+}
+
+.notes-box {
+  margin-top: 14px;
+}
+
+.notes-box p {
+  margin: 6px 0 0;
+  color: #e5e7eb;
 }
