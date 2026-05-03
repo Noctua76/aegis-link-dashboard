@@ -79,17 +79,20 @@ function App() {
         <h2 style={{ marginTop: 0 }}>Aegis Link</h2>
 
         <nav>
-  <ul className="sidebar-menu">
-    <li className="sidebar-item active">Dashboard</li>
-    <li className="sidebar-item">Live Incidents</li>
-    <li className="sidebar-item">Event Logs</li>
-    <li className="sidebar-item">Users</li>
-    <li className="sidebar-item">Alert Profiles</li>
-    <li className="sidebar-item">Notifications</li>
-    <li className="sidebar-item">Reports</li>
-    <li className="sidebar-item">System Status</li>
-    <li className="sidebar-item">Settings</li>
-  </ul>
+  <ul style={{ listStyle: "none", padding: 0, margin: "24px 0 0 0" }}>
+  <li style={{ padding: "10px 0" }}>Dashboard</li>
+
+  <li style={{ padding: "10px 0" }}>Live Incidents</li>
+  <li style={{ padding: "10px 0" }}>Event Logs</li>
+  <li style={{ padding: "10px 0" }}>Alert Activity</li>
+
+  <li style={{ padding: "10px 0" }}>Guards</li>
+  <li style={{ padding: "10px 0" }}>Alert Profiles</li>
+
+  <li style={{ padding: "10px 0" }}>System Status</li>
+  <li style={{ padding: "10px 0" }}>Analytics</li>
+  <li style={{ padding: "10px 0" }}>Settings</li>
+</ul>
 </nav>
       </aside>
 
