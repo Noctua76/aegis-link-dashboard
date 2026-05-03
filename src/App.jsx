@@ -93,20 +93,17 @@ const menuItems = [
         <h2 style={{ marginTop: 0 }}>Aegis Link</h2>
 
         <nav>
-  <ul style={{ listStyle: "none", padding: 0, margin: "24px 0 0 0" }}>
-  <li style={{ padding: "10px 0" }}>Dashboard</li>
-
-  <li style={{ padding: "10px 0" }}>Live Incidents</li>
-  <li style={{ padding: "10px 0" }}>Event Logs</li>
-  <li style={{ padding: "10px 0" }}>Alert Activity</li>
-
-  <li style={{ padding: "10px 0" }}>Guards</li>
-  <li style={{ padding: "10px 0" }}>Alert Profiles</li>
-
-  <li style={{ padding: "10px 0" }}>System Status</li>
-  <li style={{ padding: "10px 0" }}>Analytics</li>
-  <li style={{ padding: "10px 0" }}>Settings</li>
-</ul>
+  <ul className="sidebar-menu">
+    {menuItems.map((item) => (
+      <li
+        key={item}
+        className={`sidebar-item ${activeMenu === item ? "active" : ""}`}
+        onClick={() => setActiveMenu(item)}
+      >
+        {item}
+      </li>
+    ))}
+  </ul>
 </nav>
       </aside>
 
