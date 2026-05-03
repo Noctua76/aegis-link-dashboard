@@ -240,3 +240,62 @@
   margin: 6px 0 0;
   color: #e5e7eb;
 }
+.current-session-card {
+  background: #101010;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 18px;
+}
+
+.current-session-card > span,
+.previous-session-list > span {
+  display: block;
+  color: #9ca3af;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.current-session-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.current-session-row p,
+.login-line {
+  color: #9ca3af;
+  margin: 5px 0 0;
+}
+
+.previous-session-list {
+  margin-top: 14px;
+  background: #101010;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.previous-session-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #242424;
+  color: #d1d5db;
+  font-size: 13px;
+}
+
+.previous-session-row:first-of-type {
+  border-top: none;
+}
+
+.status-pill.covered {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+.status-pill.logged-out {
+  background: rgba(156, 163, 175, 0.12);
+  color: #9ca3af;
+}
