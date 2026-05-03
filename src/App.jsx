@@ -3,6 +3,7 @@ import "./App.css";
 import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
 import IncidentCard from "./components/IncidentCard";
+import Guards from "./pages/Guards";
 
 function App() {
   const [activeMenu, setActiveMenu] = useState("Dashboard");
@@ -346,6 +347,7 @@ const menuItems = [
     </section>
   </>
 )}
+        {activeMenu === "Guards" && <Guards />}
         {activeMenu === "System Status" && (
   <>
     <header style={{ marginBottom: "28px" }}>
