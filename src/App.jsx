@@ -116,6 +116,8 @@ const menuItems = [
           boxSizing: "border-box",
         }}
       >
+        {activeMenu === "Dashboard" && (
+  <>
         <header style={{ marginBottom: "28px" }}>
           <h1
             style={{
@@ -284,6 +286,66 @@ const menuItems = [
             </div>
           </div>
         </section>
+    </>
+)}
+        {activeMenu === "Live Incidents" && (
+  <>
+    <header style={{ marginBottom: "28px" }}>
+      <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "700" }}>
+        Live Incidents
+      </h1>
+      <p style={{ marginTop: "8px", color: "#9ca3af", fontSize: "15px" }}>
+        Real-time incident monitoring across all active sites
+      </p>
+    </header>
+
+    <section style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+      {["All", "Active", "In Progress", "Escalated", "Resolved"].map((filter) => (
+        <button key={filter} className="filter-button">
+          {filter}
+        </button>
+      ))}
+    </section>
+
+    <section style={{ display: "grid", gap: "16px" }}>
+      {incidents.map((incident, index) => (
+        <div key={index} className={`incident-detail-card ${incident.type}`}>
+          <div className="incident-card-header">
+            <div>
+              <h3>{incident.title}</h3>
+              <p>Incident ID: INC-2025-00{index + 1}</p>
+            </div>
+
+            <span className="incident-status">
+              {incident.type === "alert" ? "Active" : "In Progress"}
+            </span>
+          </div>
+
+          <div className="incident-meta-grid">
+            <p><strong>Site:</strong> {incident.site}</p>
+            <p><strong>Guard:</strong> {incident.guard}</p>
+            <p><strong>Triggered at:</strong> {incident.time}</p>
+            <p><strong>Priority:</strong> High</p>
+          </div>
+
+          <div className="incident-flow">
+            <span>🚨 Trigger Received</span>
+            <span>📩 SMS {incident.smsStatus}</span>
+            <span>📞 Call {incident.callStatus}</span>
+            <span>🤖 AI {incident.aiStatus}</span>
+          </div>
+
+          <div className="incident-ai-box">
+            <h4>AI Intake</h4>
+            <p><strong>What happened?</strong> Suspicious movement reported.</p>
+            <p><strong>Where?</strong> {incident.site}</p>
+            <p><strong>Need support?</strong> Yes, supervisor review required.</p>
+          </div>
+        </div>
+      ))}
+    </section>
+  </>
+)}
       </main>
     </div>
   );
