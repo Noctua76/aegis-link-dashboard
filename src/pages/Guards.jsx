@@ -103,38 +103,14 @@ export default function Guards() {
 
   return (
     <div className="guards-page">
-      <header className="guards-header">
-        <div>
-          <div
-  style={{
-    textAlign: "center",
-    marginBottom: "24px",
-  }}
->
-  <h1
-    style={{
-      margin: 0,
-      fontSize: "32px",
-      fontWeight: "700",
-      color: "#ffffff",
-    }}
-  >
-    Guards
-  </h1>
+      <header className="guards-header centered-guards-header">
+  <div className="guards-title-block">
+    <h1>Guards</h1>
+    <p>Live guard coverage, assigned sites, shifts and login status.</p>
+  </div>
 
-  <p
-    style={{
-      marginTop: "8px",
-      color: "#9ca3af",
-      fontSize: "15px",
-    }}
-  >
-    Live guard coverage, assigned sites, shifts and login status.
-  </p>
-</div>
-        </div>
-        <div className="live-badge">● Live Coverage</div>
-      </header>
+  <div className="live-badge">● Live Coverage</div>
+</header>
 
       <section className="guards-section">
         <h2>Active Guards Now</h2>
