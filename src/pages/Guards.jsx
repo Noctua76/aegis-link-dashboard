@@ -274,48 +274,29 @@ export default function Guards() {
             </div>
 
             <div className="modal-grid">
-              <p>
-                <span>Current Guard</span>
-                {selectedLocation.currentGuard
-                  ? selectedLocation.currentGuard.fullName
-                  : "No active guard"}
-              </p>
-              <p>
-                <span>Role</span>
-                {selectedLocation.currentGuard
-                  ? selectedLocation.currentGuard.role
-                  : "—"}
-              </p>
-              <p>
-                <span>Login Time</span>
-                {selectedLocation.currentSession
-                  ? selectedLocation.currentSession.loginAt
-                  : "—"}
-              </p>
-              <p>
-                <span>Coverage Status</span>
-                {selectedLocation.coverageStatus}
-              </p>
-              <p>
-                <span>Site Phone</span>
-                {selectedLocation.sitePhone}
-              </p>
-              <p>
-                <span>Address</span>
-                {selectedLocation.address}
-              </p>
-            </div>
+  <p>
+    <span>Site Phone</span>
+    {selectedLocation.sitePhone || "—"}
+  </p>
 
-            <div className="notes-box">
-              <span>Assigned Guards</span>
+  <p>
+    <span>Address</span>
+    {selectedLocation.address || "—"}
+  </p>
+</div>
 
-              {selectedLocation.guards.map((guard) => (
-                <p key={guard.id}>
-                  {guard.fullName} · {guard.role} ·{" "}
-                  {guard.status || "Assigned"}
-                </p>
-              ))}
-            </div>
+<div className="notes-box">
+  <span>Previous Guards / Last Month</span>
+
+  {selectedLocation.guards
+    .filter((guard) => guard.id !== selectedLocation.currentGuard?.id)
+    .slice(0, 2)
+    .map((guard) => (
+      <p key={guard.id}>
+        {guard.fullName} · {guard.role} · {guard.status || "Previous"}
+      </p>
+    ))}
+</div>
           </div>
         </div>
       )}
