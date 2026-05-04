@@ -141,6 +141,45 @@ export const activeSessions = [
   },
 ];
 
+export const guardSessionsHistory = [
+  {
+    id: "history-ekali-001",
+    siteId: "site-ekali",
+    guardId: "guard-nikos-papadakis",
+    loginAt: "07:00",
+    logoutAt: "15:00",
+    date: "2026-05-04",
+    status: "Logged Out",
+  },
+  {
+    id: "history-ekali-002",
+    siteId: "site-ekali",
+    guardId: "guard-petros-markou",
+    loginAt: "23:00",
+    logoutAt: "07:00",
+    date: "2026-05-03",
+    status: "Logged Out",
+  },
+  {
+    id: "history-astir-001",
+    siteId: "site-astir",
+    guardId: "guard-marios-ioannou",
+    loginAt: "08:00",
+    logoutAt: "14:00",
+    date: "2026-05-04",
+    status: "Logged Out",
+  },
+  {
+    id: "history-astir-002",
+    siteId: "site-astir",
+    guardId: "guard-dimitris-karras",
+    loginAt: "22:00",
+    logoutAt: "08:00",
+    date: "2026-05-03",
+    status: "Logged Out",
+  },
+];
+
 export const incidents = [
   {
     id: "INC-2025-001",
@@ -186,4 +225,8 @@ export function getActiveSessionBySiteId(siteId) {
 
 export function getGuardsBySiteId(siteId) {
   return guards.filter((guard) => guard.siteId === siteId);
+}
+
+export function getGuardSessionsHistoryBySiteId(siteId) {
+  return guardSessionsHistory.filter((session) => session.siteId === siteId);
 }
