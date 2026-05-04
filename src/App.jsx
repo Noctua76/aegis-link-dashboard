@@ -4,6 +4,15 @@ import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
 import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
+import {
+  sites as securitySites,
+  guards as securityGuards,
+  activeSessions,
+  incidents as securityIncidents,
+  getSiteById,
+  getGuardById,
+  getActiveSessionBySiteId,
+} from "./data/securityData";
 
 function App() {
   const [activeMenu, setActiveMenu] = useState(() => {
@@ -24,66 +33,45 @@ const menuItems = [
   useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
 }, [activeMenu]);
-  const sites = [
-    {
-      name: "Ekali",
-      location: "Ekali",
-      guardsAssigned: 4,
-      guardsOnDuty: 1,
-      activeGuard: "N. Papadakis",
-      status: "alert",
-    },
-    {
-      name: "Astir Vouliagmenis",
-      location: "Vouliagmeni",
-      guardsAssigned: 6,
-      guardsOnDuty: 2,
-      activeGuard: "M. Ioannou",
-      status: "normal",
-    },
-  ];
+  const dashboardSites = securitySites.map((site) => {
+  const activeSession = getActiveSessionBySiteId(site.id);
+  const activeGuard = activeSession
+    ? getGuardById(activeSession.guardId)
+    : null;
 
-  const guards = [
-    {
-      name: "N. Papadakis",
-      site: "Ekali",
-      shift: "14:00 - 22:00",
-      status: "On Duty",
-      loggedInAt: "13:56",
-    },
-    {
-      name: "M. Ioannou",
-      site: "Astir Vouliagmenis",
-      shift: "08:00 - 16:00",
-      status: "On Duty",
-      loggedInAt: "07:52",
-    },
-  ];
+  return {
+    name: site.name,
+    location: site.location,
+    guardsAssigned: site.guardsAssigned,
+    guardsOnDuty: activeSession ? 1 : 0,
+    activeGuard: activeGuard ? activeGuard.fullName : "No active guard",
+    status: site.status === "Alert Active" ? "alert" : "normal",
+  };
+});
 
-  const incidents = [
-    {
-      title: "Alert Triggered",
-      site: "Ekali",
-      guard: "N. Papadakis",
-      location: "Zone 3",
-      time: "14:32:18",
-      smsStatus: "Delivered",
-      callStatus: "Answered",
-      aiStatus: "Completed",
-      type: "alert",
-    },
-    {
-      title: "Call in Progress",
-      site: "Astir Vouliagmenis",
-      guard: "M. Ioannou",
-      location: "Main Gate",
-      time: "14:35:41",
-      smsStatus: "Delivered",
-      callStatus: "Dialing",
-      aiStatus: "Pending",
-      type: "warning",
-    },
-  ];
+const guardsOnDuty = activeSessions.map((session) => {
+  const guard = getGuardById(session.guardId);
+  const site = getSiteById(session.siteId);
+
+  return {
+    name: guard.fullName,
+    site: site.name,
+    shift: session.shift,
+    status: session.status,
+    loggedInAt: session.loginAt,
+  };
+});
+
+const dashboardIncidents = securityIncidents.map((incident) => {
+  const site = getSiteById(incident.siteId);
+  const guard = getGuardById(incident.guardId);
+
+  return {
+    ...incident,
+    site: site.name,
+    guard: guard.fullName,
+  };
+});
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", margin: 0 }}>
@@ -172,7 +160,9 @@ const menuItems = [
 
           <div style={{ background: "#181818", padding: "20px", borderRadius: "12px" }}>
             <div>Guards On Duty</div>
-            <div style={{ fontSize: "28px", marginTop: "10px", color: "#22c55e" }}>2</div>
+            <div style={{ fontSize: "28px", marginTop: "10px", color: "#22c55e" }}>
+  {activeSessions.length}
+</div>
           </div>
         </section>
 
@@ -195,9 +185,9 @@ const menuItems = [
               gap: "16px",
             }}
           >
-            {sites.map((site, index) => (
-              <SiteCard key={index} site={site} />
-            ))}
+            {dashboardSites.map((site, index) => (
+  <SiteCard key={index} site={site} />
+))}
           </div>
         </section>
 
@@ -220,9 +210,9 @@ const menuItems = [
               gap: "16px",
             }}
           >
-            {guards.map((guard, index) => (
-              <GuardStatus key={index} guard={guard} />
-            ))}
+            {guardsOnDuty.map((guard, index) => (
+  <GuardStatus key={index} guard={guard} />
+))}
           </div>
         </section>
 
@@ -314,7 +304,7 @@ const menuItems = [
     </section>
 
     <section style={{ display: "grid", gap: "16px" }}>
-      {incidents.map((incident, index) => (
+      {dashboardIncidents.map((incident, index) => (
         <div key={index} className={`incident-detail-card ${incident.type}`}>
           <div className="incident-card-header">
             <div>
