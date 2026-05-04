@@ -3,8 +3,8 @@ import "./Guards.css";
 
 import {
   sites,
-  guards,
   activeSessions,
+  guardSessionsHistory,
   getSiteById,
   getGuardById,
   getGuardsBySiteId,
@@ -45,24 +45,33 @@ export default function Guards() {
     .filter(Boolean);
 
   const guardsByLocation = sites.map((site) => {
-    const siteGuards = getGuardsBySiteId(site.id);
+  const siteGuards = getGuardsBySiteId(site.id);
 
-    const currentSession = activeSessions.find(
-      (session) => session.siteId === site.id
-    );
+  const currentSession = activeSessions.find(
+    (session) => session.siteId === site.id
+  );
 
-    const currentGuard = currentSession
-      ? getGuardById(currentSession.guardId)
-      : null;
+  const currentGuard = currentSession
+    ? getGuardById(currentSession.guardId)
+    : null;
 
-    return {
-      ...site,
-      guards: siteGuards,
-      currentSession,
-      currentGuard,
-      coverageStatus: currentGuard ? "Covered" : "Uncovered",
-    };
-  });
+  const recentSessions = guardSessionsHistory
+    .filter((session) => session.siteId === site.id)
+    .slice(0, 2)
+    .map((session) => ({
+      ...session,
+      guard: getGuardById(session.guardId),
+    }));
+
+  return {
+    ...site,
+    guards: siteGuards,
+    currentSession,
+    currentGuard,
+    recentSessions,
+    coverageStatus: currentGuard ? "Covered" : "Uncovered",
+  };
+});
 
   return (
     <div className="guards-page">
@@ -288,14 +297,12 @@ export default function Guards() {
 <div className="notes-box">
   <span>Previous Guards / Last Month</span>
 
-  {selectedLocation.guards
-    .filter((guard) => guard.id !== selectedLocation.currentGuard?.id)
-    .slice(0, 2)
-    .map((guard) => (
-      <p key={guard.id}>
-        {guard.fullName} · {guard.role} · {guard.status || "Previous"}
-      </p>
-    ))}
+  {selectedLocation.recentSessions.map((session) => (
+    <p key={session.id}>
+      {session.guard?.fullName || "Unknown Guard"} · {session.loginAt} –{" "}
+      {session.logoutAt} · {session.status}
+    </p>
+  ))}
 </div>
           </div>
         </div>
