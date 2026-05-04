@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
@@ -6,7 +6,9 @@ import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
 
 function App() {
-  const [activeMenu, setActiveMenu] = useState("Dashboard");
+  const [activeMenu, setActiveMenu] = useState(() => {
+  return localStorage.getItem("aegis-active-menu") || "Dashboard";
+});
 
 const menuItems = [
   "Dashboard",
@@ -19,6 +21,9 @@ const menuItems = [
   "Analytics",
   "Settings",
 ];
+  useEffect(() => {
+  localStorage.setItem("aegis-active-menu", activeMenu);
+}, [activeMenu]);
   const sites = [
     {
       name: "Ekali",
