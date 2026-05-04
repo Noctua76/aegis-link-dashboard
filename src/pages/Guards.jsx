@@ -276,12 +276,12 @@ export default function Guards() {
             <div className="modal-grid">
   <p>
     <span>Site Phone</span>
-    {selectedLocation.sitePhone || "—"}
+    {selectedLocation.companyPhone || "—"}
   </p>
 
   <p>
     <span>Address</span>
-    {selectedLocation.address || "—"}
+    {selectedLocation.location || "—"}
   </p>
 </div>
 
