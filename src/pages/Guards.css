@@ -299,3 +299,31 @@
   background: rgba(156, 163, 175, 0.12);
   color: #9ca3af;
 }
+.centered-guards-header {
+  position: relative;
+  justify-content: center;
+  text-align: center;
+}
+
+.guards-title-block {
+  text-align: center;
+}
+
+.guards-title-block h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.guards-title-block p {
+  margin-top: 8px;
+  color: #9ca3af;
+  font-size: 15px;
+}
+
+.centered-guards-header .live-badge {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
