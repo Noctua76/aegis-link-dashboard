@@ -4,6 +4,7 @@ import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
 import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
+import Sites from "./pages/Sites";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -342,6 +343,8 @@ const dashboardIncidents = securityIncidents.map((incident) => {
   </>
 )}
         {activeMenu === "Guards" && <Guards />}
+        {activeMenu === "Sites" && <Sites />}
+        
         {activeMenu === "System Status" && (
   <>
     <header style={{ marginBottom: "28px" }}>
