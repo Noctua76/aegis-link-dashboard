@@ -57,7 +57,8 @@ export default function Guards() {
 
   const recentSessions = guardSessionsHistory
     .filter((session) => session.siteId === site.id)
-    .slice(0, 2)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+.slice(0, 2)
     .map((session) => ({
       ...session,
       guard: getGuardById(session.guardId),
