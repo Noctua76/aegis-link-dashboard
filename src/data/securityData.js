@@ -6,7 +6,23 @@ export const sites = [
     clientType: "Private Residence",
     companyPhone: "+30 210XXXXXXX",
     status: "Alert Active",
-    notes: "Residential security site with perimeter monitoring.",
+    notes: {
+  summary: "Residential security site with perimeter monitoring.",
+  sop: [
+    "Monitor the perimeter at regular intervals.",
+    "Check all entry points during each patrol cycle.",
+    "Record all incoming and outgoing visitors.",
+  ],
+  specialInstructions: [
+    "Confirm owner presence before allowing access.",
+    "Night patrol must include full external perimeter check.",
+  ],
+  emergencyProtocol: [
+    "Trigger alert through Aegis Link.",
+    "Notify operations manager immediately.",
+    "Remain in secure position until escalation response.",
+  ],
+},
     shiftPattern: ["07:00 – 15:00", "15:00 – 23:00", "23:00 – 07:00"],
     guardsAssigned: 4,
   },
@@ -17,7 +33,23 @@ export const sites = [
     clientType: "Hotel / Resort Site",
     companyPhone: "+30 210YYYYYYY",
     status: "Normal",
-    notes: "Large hospitality site with entrance control and patrol coverage.",
+    notes: {
+  summary: "Large hospitality site with entrance control and patrol coverage.",
+  sop: [
+    "Monitor main entrance and service access points.",
+    "Log supplier and visitor movement.",
+    "Perform scheduled patrols across assigned zones.",
+  ],
+  specialInstructions: [
+    "Coordinate with reception before allowing restricted access.",
+    "Report unusual guest or vehicle movement immediately.",
+  ],
+  emergencyProtocol: [
+    "Trigger alert through Aegis Link.",
+    "Notify site supervisor and operations manager.",
+    "Follow escalation protocol until incident is resolved.",
+  ],
+},
     shiftPattern: ["08:00 – 14:00", "14:00 – 22:00", "22:00 – 08:00"],
     guardsAssigned: 4,
   },
