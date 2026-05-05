@@ -157,6 +157,25 @@
   padding: 24px;
   width: 900px;
   max-width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.site-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.site-modal::-webkit-scrollbar-track {
+  background: #0c0c0c;
+  border-radius: 999px;
+}
+
+.site-modal::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 999px;
+}
+
+.site-modal::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
 }
 
 .site-modal-grid {
