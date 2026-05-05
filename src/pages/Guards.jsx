@@ -56,13 +56,18 @@ export default function Guards() {
     : null;
 
   const recentSessions = guardSessionsHistory
-    .filter((session) => session.siteId === site.id)
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-.slice(0, 2)
-    .map((session) => ({
-      ...session,
-      guard: getGuardById(session.guardId),
-    }));
+  .filter((session) => session.siteId === site.id)
+  .sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.loginAt}`).getTime();
+    const dateB = new Date(`${b.date}T${b.loginAt}`).getTime();
+
+    return dateB - dateA;
+  })
+  .slice(0, 2)
+  .map((session) => ({
+    ...session,
+    guard: getGuardById(session.guardId),
+  }));
 
   return {
     ...site,
