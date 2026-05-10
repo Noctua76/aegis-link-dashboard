@@ -1,1 +1,137 @@
+.event-logs-page {
+  padding: 32px;
+  color: #ffffff;
+}
 
+.event-logs-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.event-logs-header h1 {
+  font-size: 32px;
+  margin-bottom: 6px;
+}
+
+.event-logs-header p {
+  opacity: 0.7;
+}
+
+.event-logs-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.event-summary-card {
+  background: #111;
+  border: 1px solid #1f1f1f;
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+}
+
+.event-summary-card span {
+  display: block;
+  font-size: 13px;
+  opacity: 0.65;
+  margin-bottom: 8px;
+}
+
+.event-summary-card strong {
+  font-size: 26px;
+}
+
+.event-logs-table {
+  background: #101010;
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.event-logs-table-header,
+.event-log-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.4fr 1fr 0.8fr 0.8fr 0.9fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.event-logs-table-header {
+  background: #151515;
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.event-log-row {
+  border-top: 1px solid #1f1f1f;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.event-log-row:hover {
+  background: #161616;
+}
+
+.status-pill {
+  display: inline-block;
+  width: fit-content;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-pill.on-duty {
+  background: rgba(0, 200, 120, 0.12);
+  color: #00c878;
+}
+
+.status-pill.logged-out {
+  background: rgba(120, 150, 180, 0.12);
+  color: #9fb7d0;
+}
+
+.status-pill.missed-logout {
+  background: rgba(255, 80, 80, 0.12);
+  color: #ff5050;
+}
+
+.event-log-modal {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 18px;
+  padding: 24px;
+  width: 850px;
+  max-width: 95%;
+}
+
+.event-log-modal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.event-log-modal-grid p,
+.event-log-notes {
+  background: #0c0c0c;
+  border: 1px solid #1f1f1f;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 0;
+}
+
+.event-log-modal-grid span,
+.event-log-notes span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+
+.event-log-notes p {
+  margin: 0;
+}
