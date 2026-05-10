@@ -487,3 +487,85 @@
 .guards-location-card:active {
   transform: scale(0.985);
 }
+/* ======================================================
+   MOBILE DASHBOARD LAYOUT
+====================================================== */
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .app,
+  .dashboard-layout,
+  .layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  aside,
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    min-width: 100%;
+    height: auto;
+    padding: 14px 12px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0b0b0b;
+  }
+
+  aside h1,
+  .sidebar h1 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  .sidebar-menu {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0;
+    padding-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .sidebar-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar-item {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+
+  .sidebar-item.active {
+    border-left: none;
+    border-bottom: 3px solid #22c55e;
+  }
+
+  main,
+  .main-content,
+  .content {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+}
