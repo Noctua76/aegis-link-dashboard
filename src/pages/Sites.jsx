@@ -244,6 +244,20 @@ export default function Sites() {
             </div>
 
             <div className="site-detail-box">
+              {selectedSite.sopFile && (
+  <div className="site-detail-box">
+    <span>SOP Document</span>
+
+    <a
+      href={selectedSite.sopFile}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="sop-button"
+    >
+      View SOP Document
+    </a>
+  </div>
+)}
               <span>SOP</span>
               {selectedSite.notes.sop.map((item) => (
                 <p key={item}>• {item}</p>
