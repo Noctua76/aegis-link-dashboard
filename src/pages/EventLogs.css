@@ -4,17 +4,86 @@
 }
 
 .event-logs-header {
-  text-align: center;
-  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .event-logs-header h1 {
   font-size: 32px;
-  margin-bottom: 6px;
+  margin: 0 0 6px;
 }
 
 .event-logs-header p {
   opacity: 0.7;
+  margin: 0;
+}
+
+.eventlogs-live-clock {
+  background: #111;
+  border: 1px solid #1f1f1f;
+  border-radius: 14px;
+  padding: 14px 18px;
+  min-width: 230px;
+  text-align: right;
+}
+
+.eventlogs-live-clock span {
+  display: block;
+  font-size: 12px;
+  color: #8a8a8a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.eventlogs-live-clock strong {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.event-site-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.event-site-tabs button {
+  background: #111;
+  border: 1px solid #1f1f1f;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.event-site-tabs button.active {
+  border-color: #00c878;
+  color: #00c878;
+  background: rgba(0, 200, 120, 0.08);
+}
+
+.event-logs-context {
+  background: #101010;
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 22px;
+}
+
+.event-logs-context h2 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.event-logs-context p {
+  margin: 0;
+  opacity: 0.65;
 }
 
 .event-logs-summary-grid {
@@ -53,7 +122,7 @@
 .event-logs-table-header,
 .event-log-row {
   display: grid;
-  grid-template-columns: 1.4fr 1.4fr 1fr 0.8fr 0.8fr 0.9fr 1fr;
+  grid-template-columns: 1.3fr 1.3fr 0.9fr 1.2fr 0.7fr 0.7fr 0.9fr 1fr;
   gap: 12px;
   align-items: center;
   padding: 14px 18px;
@@ -75,7 +144,8 @@
   background: #161616;
 }
 
-.status-pill {
+.status-pill,
+.delay-pill {
   display: inline-block;
   width: fit-content;
   padding: 5px 10px;
@@ -97,6 +167,16 @@
 .status-pill.missed-logout {
   background: rgba(255, 80, 80, 0.12);
   color: #ff5050;
+}
+
+.delay-pill.on-time {
+  background: rgba(0, 200, 120, 0.12);
+  color: #00c878;
+}
+
+.delay-pill.late {
+  background: rgba(255, 190, 80, 0.12);
+  color: #ffbe50;
 }
 
 .event-log-modal {
