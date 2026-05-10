@@ -569,3 +569,48 @@
     font-size: 22px;
   }
 }
+@media (max-width: 768px) {
+  body,
+  html,
+  #root {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  #root > div {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  aside {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    box-sizing: border-box;
+  }
+
+  main {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  .sidebar-menu {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .sidebar-item {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
