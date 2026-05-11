@@ -614,3 +614,29 @@
     white-space: nowrap;
   }
 }
+@media (max-width: 768px) {
+  * {
+    box-sizing: border-box;
+  }
+
+  body,
+  html,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  main {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .guards-page,
+  .sites-page,
+  .event-logs-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
