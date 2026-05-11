@@ -327,3 +327,32 @@
   right: 0;
   top: 0;
 }
+@media (max-width: 768px) {
+  .active-guards-grid,
+  .location-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guard-card,
+  .location-card {
+    width: 100%;
+  }
+
+  .guard-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guard-card-header,
+  .location-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .centered-guards-header {
+    text-align: center;
+  }
+
+  .live-badge {
+    margin-top: 12px;
+  }
+}
