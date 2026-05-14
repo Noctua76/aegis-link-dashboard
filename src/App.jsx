@@ -93,10 +93,7 @@ const dashboardIncidents = securityIncidents.map((incident) => {
     className="sidebar-brand-logo"
   />
 
-  <h2>Aegis Link</h2>
-
-  <span>Security Operations Platform</span>
-</div>
+  </div>
 
         <nav>
   <ul className="sidebar-menu">
