@@ -86,16 +86,16 @@ const dashboardIncidents = securityIncidents.map((incident) => {
           boxSizing: "border-box",
         }}
       >
-        <div className="sidebar-logo">
-  <img src={aegisLogo} alt="Aegis Link Logo" />
+        <div className="sidebar-brand">
+  <img
+    src={aegisLogo}
+    alt="Aegis Link Logo"
+    className="sidebar-brand-logo"
+  />
 
-  <div className="sidebar-logo-text">
-    <h2 style={{ margin: 0 }}>Aegis Link</h2>
+  <h2>Aegis Link</h2>
 
-    <span className="sidebar-subtitle">
-      Security Operations Platform
-    </span>
-  </div>
+  <span>Security Operations Platform</span>
 </div>
 
         <nav>
