@@ -1,3 +1,4 @@
+import aegisLogo from "./assets/aegis-logo.png";
 import { useEffect, useState } from "react";
 import "./App.css";
 import SiteCard from "./components/SiteCard";
@@ -85,7 +86,17 @@ const dashboardIncidents = securityIncidents.map((incident) => {
           boxSizing: "border-box",
         }}
       >
-        <h2 style={{ marginTop: 0 }}>Aegis Link</h2>
+        <div className="sidebar-logo">
+  <img src={aegisLogo} alt="Aegis Link Logo" />
+
+  <div className="sidebar-logo-text">
+    <h2 style={{ margin: 0 }}>Aegis Link</h2>
+
+    <span className="sidebar-subtitle">
+      Security Operations Platform
+    </span>
+  </div>
+</div>
 
         <nav>
   <ul className="sidebar-menu">
