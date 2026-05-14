@@ -215,3 +215,46 @@
 .event-log-notes p {
   margin: 0;
 }
+@media (max-width: 768px) {
+  .event-logs-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .eventlogs-live-clock {
+    width: 100%;
+    text-align: center;
+  }
+
+  .event-site-tabs {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+
+  .event-site-tabs button {
+    flex: 0 0 auto;
+  }
+
+  .event-logs-summary-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 14px;
+    padding-bottom: 8px;
+  }
+
+  .event-summary-card {
+    min-width: 150px;
+    flex: 0 0 auto;
+  }
+
+  .event-logs-table {
+    overflow-x: auto;
+  }
+
+  .event-logs-table-header,
+  .event-log-row {
+    min-width: 900px;
+  }
+}
