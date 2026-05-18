@@ -763,3 +763,18 @@
   color:#ff5d5d;
   font-size:14px;
 }
+.logout-button{
+  width:100%;
+  margin-top:18px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#1b1b1b;
+  color:#ffffff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.logout-button:hover{
+  background:#252525;
+}
