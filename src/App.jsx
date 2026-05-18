@@ -18,6 +18,54 @@ import {
 } from "./data/securityData";
 
 function App() {
+  const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+
+const [currentUser, setCurrentUser] = useState(() => {
+  const savedUser = localStorage.getItem("aegis-current-user");
+  return savedUser ? JSON.parse(savedUser) : null;
+});
+
+const [loginForm, setLoginForm] = useState({
+  username: "",
+  password: "",
+});
+
+const [loginError, setLoginError] = useState("");
+const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+const handleLogin = async (event) => {
+  event.preventDefault();
+  setLoginError("");
+  setIsLoggingIn(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(loginForm),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    localStorage.setItem("aegis-current-user", JSON.stringify(data));
+    setCurrentUser(data);
+  } catch (error) {
+    setLoginError(error.message || "Invalid username or password");
+  } finally {
+    setIsLoggingIn(false);
+  }
+};
+
+const handleLogout = () => {
+  localStorage.removeItem("aegis-current-user");
+  setCurrentUser(null);
+};
   const [activeMenu, setActiveMenu] = useState(() => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
 });
@@ -74,7 +122,45 @@ const dashboardIncidents = securityIncidents.map((incident) => {
     guard: guard.fullName,
   };
 });
+if (!currentUser) {
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <img src={aegisLogo} alt="Aegis Link Logo" className="login-logo" />
 
+        <h1>Aegis Link</h1>
+        <p>Security Operations Access</p>
+
+        <form onSubmit={handleLogin} className="login-form">
+          <input
+            type="text"
+            placeholder="Username"
+            value={loginForm.username}
+            onChange={(e) =>
+              setLoginForm({ ...loginForm, username: e.target.value })
+            }
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={loginForm.password}
+            onChange={(e) =>
+              setLoginForm({ ...loginForm, password: e.target.value })
+            }
+          />
+
+          {loginError && <span className="login-error">{loginError}</span>}
+
+          <button type="submit" disabled={isLoggingIn}>
+            {isLoggingIn ? "Checking..." : "Login"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+  
   return (
     <div style={{ display: "flex", minHeight: "100vh", margin: 0 }}>
       <aside
