@@ -173,6 +173,9 @@ if (!currentUser) {
         }}
       >
         <div className="sidebar-brand">
+          <button className="logout-button" onClick={handleLogout}>
+  Logout
+</button>
   <img
     src={aegisLogo}
     alt="Aegis Link Logo"
