@@ -69,7 +69,7 @@ const handleLogout = () => {
   const [activeMenu, setActiveMenu] = useState(() => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
 });
-
+const [liveActiveGuards, setLiveActiveGuards] = useState([]);
 const menuItems = [
   "Dashboard",
   "Live Incidents",
@@ -82,6 +82,25 @@ const menuItems = [
 ];
   useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
+    const fetchActiveGuards = async () => {
+  try {
+    const response = await fetch(
+      "https://noctua-panic-backend-production.up.railway.app/guards/active"
+    );
+
+    const data = await response.json();
+
+    setLiveActiveGuards(data);
+  } catch (err) {
+    console.error("Failed loading active guards:", err);
+  }
+};
+
+fetchActiveGuards();
+
+const interval = setInterval(fetchActiveGuards, 10000);
+
+return () => clearInterval(interval);
 }, [activeMenu]);
   const dashboardSites = securitySites.map((site) => {
   const activeSession = getActiveSessionBySiteId(site.id);
