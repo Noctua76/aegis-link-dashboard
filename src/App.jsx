@@ -327,7 +327,7 @@ if (!currentUser) {
               gap: "16px",
             }}
           >
-            {guardsOnDuty.map((guard, index) => (
+            {liveActiveGuards.map((guard, index) => (
   <GuardStatus key={index} guard={guard} />
 ))}
           </div>
