@@ -63,7 +63,23 @@ const handleLogin = async (event) => {
   }
 };
 
-const handleLogout = () => {
+const handleLogout = async () => {
+  const username =
+    currentUser?.user?.username ||
+    currentUser?.username;
+
+  try {
+    await fetch(`${API_BASE_URL}/admin/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    });
+  } catch (err) {
+    console.error("Logout tracking failed", err);
+  }
+
   localStorage.removeItem("aegis-current-user");
   setCurrentUser(null);
 };
