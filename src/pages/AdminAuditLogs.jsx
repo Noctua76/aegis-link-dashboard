@@ -113,8 +113,6 @@ function AdminAuditLogs() {
           }}
         />
 
-        <button onClick={() => setStatusFilter("all")}>All</button>
-
         <button
   onClick={() => setStatusFilter("all")}
   style={{
@@ -129,14 +127,16 @@ function AdminAuditLogs() {
 <button
   onClick={() => setStatusFilter("active")}
   style={{
-    cursor: "pointer",
-    background: statusFilter === "active" ? "#16a34a" : "#15803d",
-    color: "#fff",
-    padding: "10px 22px",
-    borderRadius: "8px",
-    border: "1px solid #22c55e",
-    opacity: statusFilter === "active" ? 1 : 0.75,
-  }}
+cursor: "pointer",
+opacity: statusFilter === "all" ? 1 : 0.65,
+transform: statusFilter === "all" ? "scale(1.03)" : "scale(1)",
+background: statusFilter === "all" ? "#4b5563" : "#374151",
+color: "#fff",
+border: "1px solid #6b7280",
+padding: "10px 18px",
+borderRadius: "8px",
+transition: "all 0.2s ease",
+}}
 >
   Active
 </button>
