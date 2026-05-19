@@ -188,6 +188,11 @@ if (!currentUser) {
           <button className="logout-button" onClick={handleLogout}>
   Logout
 </button>
+          <div className="current-user-box">
+  <span>Logged in as</span>
+  <strong>{currentUser?.username}</strong>
+  <small>● Active</small>
+</div>
   <img
     src={aegisLogo}
     alt="Aegis Link Logo"
