@@ -107,6 +107,55 @@ const menuItems = [
 
 }, []);
   useEffect(() => {
+
+if (!currentUser) return;
+
+const sendHeartbeat = async () => {
+
+try{
+
+await fetch(
+`${API_BASE_URL}/admin/heartbeat`,
+{
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+username:
+currentUser?.user?.username ||
+currentUser?.username
+})
+
+}
+);
+
+}catch(err){
+
+console.error(
+"Heartbeat failed",
+err
+);
+
+}
+
+};
+
+sendHeartbeat();
+
+const interval =
+setInterval(
+sendHeartbeat,
+30000
+);
+
+return () =>
+clearInterval(interval);
+
+}, [currentUser]);
+  useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
     const fetchActiveGuards = async () => {
   try {
