@@ -7,6 +7,7 @@ import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
 import Sites from "./pages/Sites";
 import EventLogs from "./pages/EventLogs";
+const [onlineAdmins, setOnlineAdmins] = useState([]);
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -81,6 +82,30 @@ const menuItems = [
   "Settings",
 ];
   useEffect(() => {
+    const loadAdmins = async () => {
+    try {
+      const response = await fetch(
+        "https://noctua-panic-backend-production.up.railway.app/admin/active"
+      );
+
+      const data = await response.json();
+
+      if (data.status === "ok") {
+        setOnlineAdmins(data.admins);
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadAdmins();
+
+  const interval = setInterval(loadAdmins, 10000);
+
+  return () => clearInterval(interval);
+
+}, []);
   localStorage.setItem("aegis-active-menu", activeMenu);
     const fetchActiveGuards = async () => {
   try {
@@ -192,6 +217,23 @@ if (!currentUser) {
   <span>Logged in as</span>
   <strong>{currentUser?.username || currentUser?.user?.username}</strong>
   <small>● Active</small>
+</div>
+          <div className="current-user-box">
+
+<span>ONLINE ADMINS</span>
+
+{onlineAdmins.map((admin) => (
+
+<div key={admin.username}>
+
+<small>
+🟢 {admin.username}
+</small>
+
+</div>
+
+))}
+
 </div>
   <img
     src={aegisLogo}
