@@ -1,11 +1,19 @@
 function GuardStatus({ guard }) {
   return (
     <div className="guard-status-card">
-      <h3>{guard.name}</h3>
-      <p><strong>Site:</strong> {guard.site}</p>
-      <p><strong>Shift:</strong> {guard.shift}</p>
-      <p><strong>Status:</strong> {guard.status}</p>
-      <p><strong>Logged in:</strong> {guard.loggedInAt}</p>
+      <h3>{guard.full_name}</h3>
+
+      <p>
+        <strong>Site:</strong> {guard.site_name}
+      </p>
+
+      <p>
+        <strong>Status:</strong> {" "}On Duty
+      </p>
+
+      <p>
+        <strong>Logged in:</strong> {new Date(guard.check_in_time).toLocaleTimeString()}
+      </p>
     </div>
   );
 }
