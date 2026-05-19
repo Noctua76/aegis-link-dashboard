@@ -118,18 +118,11 @@ return () => clearInterval(interval);
   };
 });
 
-const guardsOnDuty = activeSessions.map((session) => {
-  const guard = getGuardById(session.guardId);
-  const site = getSiteById(session.siteId);
-
-  return {
-    name: guard.fullName,
-    site: site.name,
-    shift: session.shift,
-    status: session.status,
-    loggedInAt: session.loginAt,
-  };
-});
+const guardsOnDuty = liveActiveGuards.map((guard) => ({
+  full_name: guard.full_name,
+  site_name: guard.site_name,
+  check_in_time: guard.check_in_time,
+}));
 
 const dashboardIncidents = securityIncidents.map((incident) => {
   const site = getSiteById(incident.siteId);
