@@ -1,141 +1,229 @@
 import { useEffect, useState } from "react";
 
+const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+
 function formatDate(value) {
   if (!value) return "-";
 
-  return new Date(value).toLocaleString(
-    "el-GR",
-    { timeZone: "Europe/Athens" }
-  );
+  return new Date(value).toLocaleString("el-GR", {
+    timeZone: "Europe/Athens",
+  });
+}
+
+function isReallyActive(session) {
+  if (!session.is_active || !session.last_seen) return false;
+
+  const lastSeen = new Date(session.last_seen).getTime();
+  const now = Date.now();
+
+  return now - lastSeen < 90000;
+}
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
 }
 
 function AdminAuditLogs() {
-
   const [sessions, setSessions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [fromDate, setFromDate] = useState(todayISO());
+  const [toDate, setToDate] = useState(todayISO());
+
+  const loadSessions = () => {
+    fetch(
+      `${API_BASE_URL}/admin/sessions/history?from=${fromDate}&to=${toDate}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === "ok") {
+          setSessions(data.sessions);
+        }
+      });
+  };
 
   useEffect(() => {
+    loadSessions();
+  }, [fromDate, toDate]);
 
-    fetch(
-      "https://noctua-panic-backend-production.up.railway.app/admin/sessions/history"
-    )
-    .then(res => res.json())
-    .then(data => {
+  const filteredSessions = sessions.filter((session) => {
+    const activeNow = isReallyActive(session);
 
-      if(data.status === "ok"){
-        setSessions(data.sessions);
-      }
+    if (statusFilter === "active") return activeNow;
+    if (statusFilter === "closed") return !activeNow;
 
-    });
-
-  }, []);
-
-  const filtered = sessions.filter(item => {
-
-    if(statusFilter === "all") return true;
-
-    if(statusFilter === "active"){
-      return item.is_active;
-    }
-
-    return !item.is_active;
-
+    return true;
   });
 
+  const exportUrl =
+    `${API_BASE_URL}/admin/sessions/export?from=${fromDate}&to=${toDate}`;
+
   return (
-
-    <section>
-
-      <h1 style={{marginBottom:"20px"}}>
+    <section style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+      <h1 style={{ fontSize: "42px", marginBottom: "8px" }}>
         Admin Audit Logs
       </h1>
 
+      <p style={{ marginBottom: "24px", color: "#b8c2cc" }}>
+        View and monitor admin user sessions and activity.
+      </p>
+
       <div
-      style={{
-        display:"flex",
-        gap:"10px",
-        marginBottom:"20px"
-      }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+          padding: "18px",
+          marginBottom: "20px",
+          border: "1px solid rgba(255,255,255,0.12)",
+          borderRadius: "14px",
+          background: "rgba(255,255,255,0.04)",
+        }}
       >
+        <label>From</label>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          style={{
+            padding: "10px",
+            borderRadius: "8px",
+            background: "#111",
+            color: "#fff",
+            border: "1px solid #333",
+          }}
+        />
 
-        <button onClick={() => setStatusFilter("all")}>
-          All
-        </button>
+        <label>To</label>
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          style={{
+            padding: "10px",
+            borderRadius: "8px",
+            background: "#111",
+            color: "#fff",
+            border: "1px solid #333",
+          }}
+        />
 
-        <button onClick={() => setStatusFilter("active")}>
+        <button onClick={() => setStatusFilter("all")}>All</button>
+
+        <button
+          onClick={() => setStatusFilter("active")}
+          style={{
+            background: "#15803d",
+            color: "#fff",
+            padding: "10px 22px",
+            borderRadius: "8px",
+            border: "1px solid #22c55e",
+          }}
+        >
           Active
         </button>
 
-        <button onClick={() => setStatusFilter("closed")}>
+        <button
+          onClick={() => setStatusFilter("closed")}
+          style={{
+            background: "#b91c1c",
+            color: "#fff",
+            padding: "10px 22px",
+            borderRadius: "8px",
+            border: "1px solid #ef4444",
+          }}
+        >
           Closed
         </button>
 
         <a
-        href="https://noctua-panic-backend-production.up.railway.app/admin/sessions/export"
-        target="_blank"
+          href={exportUrl}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            marginLeft: "auto",
+            color: "#fff",
+            textDecoration: "none",
+            border: "1px solid #444",
+            padding: "10px 22px",
+            borderRadius: "8px",
+          }}
         >
           Export CSV
         </a>
-
       </div>
 
-      <table style={{width:"100%"}}>
-
-        <thead>
-
-          <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>Login</th>
-            <th>Logout</th>
-            <th>Duration</th>
-            <th>Status</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          {filtered.map(item => (
-
-            <tr key={item.id}>
-
-              <td>{item.username}</td>
-
-              <td>{item.role}</td>
-
-              <td>
-                {formatDate(item.login_time)}
-              </td>
-
-              <td>
-                {formatDate(item.logout_time)}
-              </td>
-
-              <td>
-                {item.session_duration_seconds || "-"}
-              </td>
-
-              <td>
-
-                {item.is_active
-                  ? "🟢 ACTIVE"
-                  : "⚪ CLOSED"}
-
-              </td>
-
+      <div
+        style={{
+          maxHeight: "520px",
+          overflowY: "auto",
+          border: "1px solid rgba(255,255,255,0.12)",
+          borderRadius: "14px",
+        }}
+      >
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead
+            style={{
+              position: "sticky",
+              top: 0,
+              background: "#111",
+              zIndex: 1,
+            }}
+          >
+            <tr>
+              <th>Date / Login</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Logout</th>
+              <th>Duration</th>
+              <th>Status</th>
             </tr>
+          </thead>
 
-          ))}
+          <tbody>
+            {filteredSessions.map((session) => {
+              const activeNow = isReallyActive(session);
 
-        </tbody>
+              return (
+                <tr
+                  key={session.id}
+                  style={{
+                    borderTop: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <td>{formatDate(session.login_time)}</td>
+                  <td>{session.username}</td>
+                  <td>{session.role}</td>
+                  <td>{formatDate(session.logout_time)}</td>
+                  <td>{session.session_duration_seconds || "-"}</td>
+                  <td>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        minWidth: "82px",
+                        textAlign: "center",
+                        padding: "6px 10px",
+                        borderRadius: "7px",
+                        background: activeNow ? "#166534" : "#991b1b",
+                        color: "#fff",
+                        fontSize: "13px",
+                        fontWeight: "700",
+                      }}
+                    >
+                      {activeNow ? "ACTIVE" : "CLOSED"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
-      </table>
-
+      <div style={{ marginTop: "14px", color: "#b8c2cc" }}>
+        Total: {filteredSessions.length}
+      </div>
     </section>
-
   );
-
 }
 
 export default AdminAuditLogs;
