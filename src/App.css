@@ -778,3 +778,31 @@
 .logout-button:hover{
   background:#252525;
 }
+.current-user-box {
+  margin-top: 14px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.current-user-box span {
+  display: block;
+  font-size: 11px;
+  color: #888;
+}
+
+.current-user-box strong {
+  display: block;
+  margin-top: 4px;
+  color: white;
+  font-size: 14px;
+}
+
+.current-user-box small {
+  display: block;
+  margin-top: 6px;
+  color: #00d26a;
+  font-size: 12px;
+}
