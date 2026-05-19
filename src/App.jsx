@@ -190,7 +190,7 @@ if (!currentUser) {
 </button>
           <div className="current-user-box">
   <span>Logged in as</span>
-  <strong>{currentUser?.username}</strong>
+  <strong>{currentUser?.username || currentUser?.user?.username}</strong>
   <small>● Active</small>
 </div>
   <img
