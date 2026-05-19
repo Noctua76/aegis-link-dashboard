@@ -1,88 +1,140 @@
 import { useEffect, useState } from "react";
 
-function AdminAuditLogs() {
+function formatDate(value) {
+  if (!value) return "-";
 
-const [sessions,setSessions] = useState([]);
-
-useEffect(()=>{
-
-fetch(
-"https://noctua-panic-backend-production.up.railway.app/admin/sessions/history"
-)
-.then(res=>res.json())
-.then(data=>{
-
-if(data.status==="ok"){
-setSessions(data.sessions);
+  return new Date(value).toLocaleString(
+    "el-GR",
+    { timeZone: "Europe/Athens" }
+  );
 }
 
-});
+function AdminAuditLogs() {
 
-},[]);
+  const [sessions, setSessions] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("all");
 
-return (
+  useEffect(() => {
 
-<div style={{padding:"20px"}}>
+    fetch(
+      "https://noctua-panic-backend-production.up.railway.app/admin/sessions/history"
+    )
+    .then(res => res.json())
+    .then(data => {
 
-<h2>Admin Audit Logs</h2>
+      if(data.status === "ok"){
+        setSessions(data.sessions);
+      }
 
-<table
-style={{
-width:"100%",
-borderCollapse:"collapse"
-}}
->
+    });
 
-<thead>
+  }, []);
 
-<tr>
+  const filtered = sessions.filter(item => {
 
-<th>User</th>
-<th>Role</th>
-<th>Login</th>
-<th>Logout</th>
-<th>Duration</th>
-<th>Status</th>
+    if(statusFilter === "all") return true;
 
-</tr>
+    if(statusFilter === "active"){
+      return item.is_active;
+    }
 
-</thead>
+    return !item.is_active;
 
-<tbody>
+  });
 
-{sessions.map(session=>(
+  return (
 
-<tr key={session.id}>
+    <section>
 
-<td>{session.username}</td>
+      <h1 style={{marginBottom:"20px"}}>
+        Admin Audit Logs
+      </h1>
 
-<td>{session.role}</td>
+      <div
+      style={{
+        display:"flex",
+        gap:"10px",
+        marginBottom:"20px"
+      }}
+      >
 
-<td>{session.login_time}</td>
+        <button onClick={() => setStatusFilter("all")}>
+          All
+        </button>
 
-<td>{session.logout_time || "-"}</td>
+        <button onClick={() => setStatusFilter("active")}>
+          Active
+        </button>
 
-<td>
-{session.session_duration_seconds || "-"}
-</td>
+        <button onClick={() => setStatusFilter("closed")}>
+          Closed
+        </button>
 
-<td>
-{session.is_active
-? "ACTIVE"
-: "CLOSED"}
-</td>
+        <a
+        href="https://noctua-panic-backend-production.up.railway.app/admin/sessions/export"
+        target="_blank"
+        >
+          Export CSV
+        </a>
 
-</tr>
+      </div>
 
-))}
+      <table style={{width:"100%"}}>
 
-</tbody>
+        <thead>
 
-</table>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Login</th>
+            <th>Logout</th>
+            <th>Duration</th>
+            <th>Status</th>
+          </tr>
 
-</div>
+        </thead>
 
-);
+        <tbody>
+
+          {filtered.map(item => (
+
+            <tr key={item.id}>
+
+              <td>{item.username}</td>
+
+              <td>{item.role}</td>
+
+              <td>
+                {formatDate(item.login_time)}
+              </td>
+
+              <td>
+                {formatDate(item.logout_time)}
+              </td>
+
+              <td>
+                {item.session_duration_seconds || "-"}
+              </td>
+
+              <td>
+
+                {item.is_active
+                  ? "🟢 ACTIVE"
+                  : "⚪ CLOSED"}
+
+              </td>
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
+    </section>
+
+  );
 
 }
 
