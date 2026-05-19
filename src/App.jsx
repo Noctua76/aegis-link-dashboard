@@ -7,7 +7,6 @@ import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
 import Sites from "./pages/Sites";
 import EventLogs from "./pages/EventLogs";
-const [onlineAdmins, setOnlineAdmins] = useState([]);
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -19,6 +18,7 @@ import {
 } from "./data/securityData";
 
 function App() {
+  const [onlineAdmins, setOnlineAdmins] = useState([]);
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 
 const [currentUser, setCurrentUser] = useState(() => {
