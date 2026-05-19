@@ -42,11 +42,17 @@ function AdminAuditLogs() {
   };
 
   useEffect(() => {
+  loadSessions();
+
+  const interval = setInterval(() => {
     loadSessions();
-  }, [fromDate, toDate]);
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, [fromDate, toDate]);
 
   const filteredSessions = sessions.filter((session) => {
-    const activeNow = isReallyActive(session);
+    const activeNow = session.is_currently_online;
 
     if (statusFilter === "active") return activeNow;
     if (statusFilter === "closed") return !activeNow;
