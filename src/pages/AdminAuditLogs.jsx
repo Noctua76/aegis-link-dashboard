@@ -52,13 +52,13 @@ function AdminAuditLogs() {
 }, [fromDate, toDate]);
 
   const filteredSessions = sessions.filter((session) => {
-    const activeNow = session.is_currently_online;
+  const activeNow = session.is_currently_online === true;
 
-    if (statusFilter === "active") return activeNow;
-    if (statusFilter === "closed") return !activeNow;
+  if (statusFilter === "active") return activeNow;
+  if (statusFilter === "closed") return !activeNow;
 
-    return true;
-  });
+  return true;
+});
 
   const exportUrl =
     `${API_BASE_URL}/admin/sessions/export?from=${fromDate}&to=${toDate}`;
@@ -116,30 +116,45 @@ function AdminAuditLogs() {
         <button onClick={() => setStatusFilter("all")}>All</button>
 
         <button
-          onClick={() => setStatusFilter("active")}
-          style={{
-            background: "#15803d",
-            color: "#fff",
-            padding: "10px 22px",
-            borderRadius: "8px",
-            border: "1px solid #22c55e",
-          }}
-        >
-          Active
-        </button>
+  onClick={() => setStatusFilter("all")}
+  style={{
+    cursor: "pointer",
+    opacity: statusFilter === "all" ? 1 : 0.65,
+    transform: statusFilter === "all" ? "scale(1.03)" : "scale(1)",
+  }}
+>
+  All
+</button>
 
-        <button
-          onClick={() => setStatusFilter("closed")}
-          style={{
-            background: "#b91c1c",
-            color: "#fff",
-            padding: "10px 22px",
-            borderRadius: "8px",
-            border: "1px solid #ef4444",
-          }}
-        >
-          Closed
-        </button>
+<button
+  onClick={() => setStatusFilter("active")}
+  style={{
+    cursor: "pointer",
+    background: statusFilter === "active" ? "#16a34a" : "#15803d",
+    color: "#fff",
+    padding: "10px 22px",
+    borderRadius: "8px",
+    border: "1px solid #22c55e",
+    opacity: statusFilter === "active" ? 1 : 0.75,
+  }}
+>
+  Active
+</button>
+
+<button
+  onClick={() => setStatusFilter("closed")}
+  style={{
+    cursor: "pointer",
+    background: statusFilter === "closed" ? "#dc2626" : "#b91c1c",
+    color: "#fff",
+    padding: "10px 22px",
+    borderRadius: "8px",
+    border: "1px solid #ef4444",
+    opacity: statusFilter === "closed" ? 1 : 0.75,
+  }}
+>
+  Closed
+</button>
 
         <a
           href={exportUrl}
@@ -187,8 +202,7 @@ function AdminAuditLogs() {
 
           <tbody>
             {filteredSessions.map((session) => {
-              const activeNow = isReallyActive(session);
-
+              const activeNow = session.is_currently_online === true;
               return (
                 <tr
                   key={session.id}
