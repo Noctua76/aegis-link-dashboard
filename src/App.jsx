@@ -7,6 +7,7 @@ import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
 import Sites from "./pages/Sites";
 import EventLogs from "./pages/EventLogs";
+import AdminAuditLogs from "./pages/AdminAuditLogs";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -91,6 +92,7 @@ const menuItems = [
   "Dashboard",
   "Live Incidents",
   "Event Logs",
+  "Admin Audit Logs",
   "Guards",
   "Sites",
   "System Status",
@@ -566,6 +568,9 @@ if (!currentUser) {
   </>
 )}
         {activeMenu === "Guards" && <Guards />}
+        {activeMenu==="Admin Audit Logs" &&
+<AdminAuditLogs/>
+}
         {activeMenu === "Event Logs" && <EventLogs />}
         {activeMenu === "Sites" && <Sites />}
         
