@@ -106,6 +106,7 @@ const menuItems = [
   return () => clearInterval(interval);
 
 }, []);
+  useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
     const fetchActiveGuards = async () => {
   try {
