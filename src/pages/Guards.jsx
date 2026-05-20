@@ -1,83 +1,88 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Guards.css";
 
-import {
-  sites,
-  activeSessions,
-  guardSessionsHistory,
-  getSiteById,
-  getGuardById,
-  getGuardsBySiteId,
-} from "../data/securityData";
+const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 
 function statusClass(status = "") {
-  return status.toLowerCase().replaceAll(" ", "-");
+  return status.toLowerCase().replaceAll(" ", "-").replaceAll("_", "-");
 }
 
-function formatShift(guard) {
-  if (guard.shift) return guard.shift;
-  if (guard.shiftStart && guard.shiftEnd) {
-    return `${guard.shiftStart} – ${guard.shiftEnd}`;
-  }
-  return "Not assigned";
+function formatDateTime(value) {
+  if (!value) return "—";
+
+  return new Date(value).toLocaleString("el-GR", {
+    timeZone: "Europe/Athens",
+  });
 }
 
 export default function Guards() {
+  const [guards, setGuards] = useState([]);
+  const [sites, setSites] = useState([]);
+  const [activeGuards, setActiveGuards] = useState([]);
   const [selectedGuard, setSelectedGuard] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
 
-  const activeGuardsNow = activeSessions
-    .map((session) => {
-      const guard = getGuardById(session.guardId);
-      const site = getSiteById(session.siteId);
+  const loadData = async () => {
+    try {
+      const [guardsRes, sitesRes, activeRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/guards`),
+        fetch(`${API_BASE_URL}/sites`),
+        fetch(`${API_BASE_URL}/guards/active`),
+      ]);
 
-      if (!guard || !site) return null;
+      const guardsData = await guardsRes.json();
+      const sitesData = await sitesRes.json();
+      const activeData = await activeRes.json();
 
-      return {
-        ...guard,
-        site,
-        session,
-        siteName: site.name,
-        lastCheckIn: session.loginAt,
-        status: session.status || "On Duty",
-      };
-    })
-    .filter(Boolean);
+      setGuards(guardsData.guards || []);
+      setSites(sitesData.sites || []);
+      setActiveGuards(activeData.guards || []);
+    } catch (err) {
+      console.error("Failed loading guards data:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+
+    const interval = setInterval(loadData, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const activeGuardsNow = activeGuards
+    .filter((item) => item.guard_id && item.is_currently_online)
+    .map((item) => ({
+      id: item.guard_id,
+      fullName: item.full_name,
+      username: item.username,
+      phone: item.phone,
+      role: "Guard",
+      siteName: item.site_name,
+      siteLocation: item.site_location,
+      status: item.status || "on_duty",
+      lastCheckIn: item.check_in_time,
+      lastSeen: item.last_seen,
+      online: item.is_currently_online,
+    }));
 
   const guardsByLocation = sites.map((site) => {
-  const siteGuards = getGuardsBySiteId(site.id);
+    const siteGuards = guards.filter((guard) => guard.site_id === site.id);
 
-  const currentSession = activeSessions.find(
-    (session) => session.siteId === site.id
-  );
+    const currentSession = activeGuards.find(
+      (session) => session.site_id === site.id && session.is_currently_online
+    );
 
-  const currentGuard = currentSession
-    ? getGuardById(currentSession.guardId)
-    : null;
-
-  const recentSessions = guardSessionsHistory
-  .filter((session) => session.siteId === site.id)
-  .sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.loginAt}`).getTime();
-    const dateB = new Date(`${b.date}T${b.loginAt}`).getTime();
-
-    return dateB - dateA;
-  })
-  .slice(0, 2)
-  .map((session) => ({
-    ...session,
-    guard: getGuardById(session.guardId),
-  }));
-
-  return {
-    ...site,
-    guards: siteGuards,
-    currentSession,
-    currentGuard,
-    recentSessions,
-    coverageStatus: currentGuard ? "Covered" : "Uncovered",
-  };
-});
+    return {
+      ...site,
+      guards: siteGuards,
+      currentSession,
+      currentGuard: currentSession?.guard_id ? currentSession : null,
+      coverageStatus: currentSession?.is_currently_online
+        ? "Covered"
+        : "Uncovered",
+    };
+  });
 
   return (
     <div className="guards-page">
@@ -94,46 +99,53 @@ export default function Guards() {
         <h2>Active Guards Now</h2>
 
         <div className="active-guards-grid">
-          {activeGuardsNow.map((guard) => (
-            <div
-              key={guard.id}
-              className="guard-card"
-              onClick={() => setSelectedGuard(guard)}
-            >
-              <div className="guard-card-header">
-                <div>
-                  <h3>{guard.fullName}</h3>
-                  <p>{guard.role}</p>
-                </div>
-
-                <span className={`status-pill ${statusClass(guard.status)}`}>
-                  {guard.status}
-                </span>
-              </div>
-
-              <div className="guard-info-grid">
-                <div>
-                  <span>Site</span>
-                  <strong>{guard.siteName}</strong>
-                </div>
-
-                <div>
-                  <span>Shift</span>
-                  <strong>{formatShift(guard)}</strong>
-                </div>
-
-                <div>
-                  <span>Logged in at</span>
-                  <strong>{guard.lastCheckIn}</strong>
-                </div>
-
-                <div>
-                  <span>Phone</span>
-                  <strong>{guard.phone}</strong>
-                </div>
-              </div>
+          {activeGuardsNow.length === 0 ? (
+            <div className="guard-card">
+              <h3>No active guard session</h3>
+              <p>No guard is currently checked in.</p>
             </div>
-          ))}
+          ) : (
+            activeGuardsNow.map((guard) => (
+              <div
+                key={guard.id}
+                className="guard-card"
+                onClick={() => setSelectedGuard(guard)}
+              >
+                <div className="guard-card-header">
+                  <div>
+                    <h3>{guard.fullName}</h3>
+                    <p>{guard.role}</p>
+                  </div>
+
+                  <span className={`status-pill ${statusClass(guard.status)}`}>
+                    {guard.online ? "Online" : "Offline"}
+                  </span>
+                </div>
+
+                <div className="guard-info-grid">
+                  <div>
+                    <span>Site</span>
+                    <strong>{guard.siteName}</strong>
+                  </div>
+
+                  <div>
+                    <span>Location</span>
+                    <strong>{guard.siteLocation || "—"}</strong>
+                  </div>
+
+                  <div>
+                    <span>Checked in at</span>
+                    <strong>{formatDateTime(guard.lastCheckIn)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Phone</span>
+                    <strong>{guard.phone || "—"}</strong>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -150,9 +162,7 @@ export default function Guards() {
               <div className="location-header">
                 <div>
                   <h3>{site.name}</h3>
-                  <p>
-                    {site.address} · {site.client}
-                  </p>
+                  <p>{site.location || "—"}</p>
                 </div>
 
                 <span
@@ -169,22 +179,22 @@ export default function Guards() {
                   <>
                     <div className="current-session-row">
                       <div>
-                        <strong>{site.currentGuard.fullName}</strong>
-                        <p>{site.currentGuard.role}</p>
+                        <strong>{site.currentGuard.full_name}</strong>
+                        <p>{site.currentGuard.username}</p>
                       </div>
 
-                      <span
-                        className={`status-pill ${statusClass(
-                          site.currentSession.status || "On Duty"
-                        )}`}
-                      >
-                        {site.currentSession.status || "On Duty"}
+                      <span className="status-pill on-duty">
+                        {site.currentGuard.is_currently_online
+                          ? "Online"
+                          : "Offline"}
                       </span>
                     </div>
 
                     <p className="login-line">
-                      Logged in at:{" "}
-                      <strong>{site.currentSession.loginAt}</strong>
+                      Checked in at:{" "}
+                      <strong>
+                        {formatDateTime(site.currentGuard.check_in_time)}
+                      </strong>
                     </p>
                   </>
                 ) : (
@@ -197,13 +207,19 @@ export default function Guards() {
               <div className="previous-session-list">
                 <span>Assigned Guards</span>
 
-                {site.guards.map((guard) => (
-                  <div key={guard.id} className="previous-session-row">
-                    <strong>{guard.fullName}</strong>
-                    <span>{guard.role}</span>
-                    <span>{guard.status || "Assigned"}</span>
+                {site.guards.length === 0 ? (
+                  <div className="previous-session-row">
+                    <strong>No assigned guards</strong>
                   </div>
-                ))}
+                ) : (
+                  site.guards.map((guard) => (
+                    <div key={guard.id} className="previous-session-row">
+                      <strong>{guard.full_name}</strong>
+                      <span>{guard.role}</span>
+                      <span>{guard.active ? "Active" : "Inactive"}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           ))}
@@ -213,16 +229,17 @@ export default function Guards() {
       <section className="backend-panel">
         <h2>Backend Logic</h2>
         <p>
-          This module is prepared for live connection with guards, locations,
-          shifts, site devices and guard login sessions.
+          This module is now connected with live guards, sites, shifts and guard
+          presence status.
         </p>
 
         <div className="backend-grid">
-          <code>GET /api/guards/active</code>
-          <code>GET /api/locations/:id/coverage</code>
-          <code>GET /api/guard-sessions/recent</code>
-          <code>POST /api/guard-sessions/login</code>
-          <code>POST /api/guard-sessions/logout</code>
+          <code>GET /guards</code>
+          <code>GET /sites</code>
+          <code>GET /guards/active</code>
+          <code>POST /guards/checkin</code>
+          <code>POST /guards/checkout</code>
+          <code>POST /guards/heartbeat</code>
         </div>
       </section>
 
@@ -237,41 +254,36 @@ export default function Guards() {
             <div className="modal-grid">
               <p>
                 <span>Phone</span>
-                {selectedGuard.phone}
+                {selectedGuard.phone || "—"}
               </p>
               <p>
-                <span>Email</span>
-                {selectedGuard.email}
+                <span>Username</span>
+                {selectedGuard.username || "—"}
               </p>
               <p>
                 <span>Assigned Site</span>
-                {selectedGuard.siteName}
+                {selectedGuard.siteName || "—"}
               </p>
               <p>
-                <span>Current Shift</span>
-                {formatShift(selectedGuard)}
+                <span>Location</span>
+                {selectedGuard.siteLocation || "—"}
               </p>
               <p>
                 <span>Role</span>
-                {selectedGuard.role}
+                {selectedGuard.role || "—"}
               </p>
               <p>
                 <span>Status</span>
-                {selectedGuard.status}
+                {selectedGuard.online ? "Online" : "Offline"}
               </p>
               <p>
-                <span>Shift Login Time</span>
-                {selectedGuard.lastCheckIn}
+                <span>Check-in Time</span>
+                {formatDateTime(selectedGuard.lastCheckIn)}
               </p>
               <p>
-                <span>Emergency Contact</span>
-                {selectedGuard.emergencyContact}
+                <span>Last Seen</span>
+                {formatDateTime(selectedGuard.lastSeen)}
               </p>
-            </div>
-
-            <div className="notes-box">
-              <span>Notes</span>
-              <p>{selectedGuard.notes}</p>
             </div>
           </div>
         </div>
@@ -289,27 +301,38 @@ export default function Guards() {
             </div>
 
             <div className="modal-grid">
-  <p>
-    <span>Site Phone</span>
-    {selectedLocation.companyPhone || "—"}
-  </p>
+              <p>
+                <span>Address</span>
+                {selectedLocation.location || "—"}
+              </p>
 
-  <p>
-    <span>Address</span>
-    {selectedLocation.location || "—"}
-  </p>
-</div>
+              <p>
+                <span>Status</span>
+                {selectedLocation.coverageStatus}
+              </p>
 
-<div className="notes-box">
-  <span>Previous Guards / Last Month</span>
+              <p>
+                <span>Current Guard</span>
+                {selectedLocation.currentGuard?.full_name ||
+                  "No active guard"}
+              </p>
 
-  {selectedLocation.recentSessions.map((session) => (
-    <p key={session.id}>
-      {session.guard?.fullName || "Unknown Guard"} · {session.loginAt} –{" "}
-      {session.logoutAt} · {session.status}
-    </p>
-  ))}
-</div>
+              <p>
+                <span>Assigned Guards</span>
+                {selectedLocation.guards.length}
+              </p>
+            </div>
+
+            <div className="notes-box">
+              <span>Assigned Guards</span>
+
+              {selectedLocation.guards.map((guard) => (
+                <p key={guard.id}>
+                  {guard.full_name} · {guard.username} ·{" "}
+                  {guard.active ? "Active" : "Inactive"}
+                </p>
+              ))}
+            </div>
           </div>
         </div>
       )}
