@@ -183,7 +183,7 @@ clearInterval(interval);
 
     const data = await response.json();
 
-    setLiveActiveGuards(data);
+    setLiveActiveGuards(data.guards || []);
   } catch (err) {
     console.error("Failed loading active guards:", err);
   }
