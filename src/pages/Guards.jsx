@@ -21,15 +21,19 @@ export default function Guards() {
   const [activeGuards, setActiveGuards] = useState([]);
   const [selectedGuard, setSelectedGuard] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
+  const [systemStatus, setSystemStatus] = useState(null);
 
   const loadData = async () => {
     try {
-      const [guardsRes, sitesRes, activeRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/guards`),
-        fetch(`${API_BASE_URL}/sites`),
-        fetch(`${API_BASE_URL}/guards/active`),
-      ]);
+      const [guardsRes, sitesRes, activeRes, statusRes] =
+  await Promise.all([
+    fetch(`${API_BASE_URL}/guards`),
+    fetch(`${API_BASE_URL}/sites`),
+    fetch(`${API_BASE_URL}/guards/active`),
+    fetch(`${API_BASE_URL}/system/status`)
+  ]);
 
+      const statusData = await statusRes.json();
       const guardsData = await guardsRes.json();
       const sitesData = await sitesRes.json();
       const activeData = await activeRes.json();
@@ -37,6 +41,7 @@ export default function Guards() {
       setGuards(guardsData.guards || []);
       setSites(sitesData.sites || []);
       setActiveGuards(activeData.guards || []);
+      setSystemStatus(statusData);
     } catch (err) {
       console.error("Failed loading guards data:", err);
     }
@@ -227,21 +232,55 @@ export default function Guards() {
       </section>
 
       <section className="backend-panel">
-        <h2>Backend Logic</h2>
-        <p>
-          This module is now connected with live guards, sites, shifts and guard
-          presence status.
-        </p>
+  <h2>System Connection Status</h2>
 
-        <div className="backend-grid">
-          <code>GET /guards</code>
-          <code>GET /sites</code>
-          <code>GET /guards/active</code>
-          <code>POST /guards/checkin</code>
-          <code>POST /guards/checkout</code>
-          <code>POST /guards/heartbeat</code>
-        </div>
-      </section>
+  {!systemStatus ? (
+    <p>Loading system status...</p>
+  ) : (
+    <>
+      <p>
+        Last Sync:{" "}
+        {new Date(systemStatus.timestamp).toLocaleString("el-GR")}
+      </p>
+
+      <div className="backend-grid">
+
+        <code>
+          Backend API · {systemStatus.backend}
+        </code>
+
+        <code>
+          Database · {systemStatus.database}
+        </code>
+
+        <code>
+          Guards API · {
+            systemStatus.services.guards_api.total_guards
+          } guards
+        </code>
+
+        <code>
+          Sites API · {
+            systemStatus.services.sites_api.total_sites
+          } sites
+        </code>
+
+        <code>
+          Attendance API · {
+            systemStatus.services.attendance_api.active_guards
+          } active guards
+        </code>
+
+        <code>
+          Heartbeat · {
+            systemStatus.services.heartbeat.status
+          }
+        </code>
+
+      </div>
+    </>
+  )}
+</section>
 
       {selectedGuard && (
         <div className="modal-backdrop" onClick={() => setSelectedGuard(null)}>
