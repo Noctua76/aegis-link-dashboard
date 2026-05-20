@@ -188,11 +188,13 @@ export default function Guards() {
                         <p>{site.currentGuard.username}</p>
                       </div>
 
-                      <span className="status-pill on-duty">
-                        {site.currentGuard.is_currently_online
-                          ? "Online"
-                          : "Offline"}
-                      </span>
+                      <span
+  className={`status-pill ${
+    site.currentGuard.is_currently_online ? "online" : "offline"
+  }`}
+>
+  {site.currentGuard.is_currently_online ? "Online" : "Offline"}
+</span>
                     </div>
 
                     <p className="login-line">
