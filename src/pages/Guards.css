@@ -398,3 +398,28 @@
   border: 1px solid #ef4444;
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.22);
 }
+.status-pill.covered {
+  background: #166534;
+  color: #fff;
+  border: 1px solid #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.25);
+}
+
+.status-pill.uncovered {
+  background: #991b1b;
+  color: #fff;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.22);
+}
+
+.status-pill.online {
+  background: #166534;
+  color: #fff;
+  border: 1px solid #22c55e;
+}
+
+.status-pill.offline {
+  background: #374151;
+  color: #fff;
+  border: 1px solid #6b7280;
+}
