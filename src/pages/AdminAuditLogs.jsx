@@ -117,8 +117,13 @@ function AdminAuditLogs() {
   onClick={() => setStatusFilter("all")}
   style={{
     cursor: "pointer",
-    opacity: statusFilter === "all" ? 1 : 0.65,
-    transform: statusFilter === "all" ? "scale(1.03)" : "scale(1)",
+    background: statusFilter === "all" ? "#4b5563" : "#2a2a2a",
+    color: "#fff",
+    border: "1px solid #6b7280",
+    padding: "10px 18px",
+    borderRadius: "8px",
+    opacity: statusFilter === "all" ? 1 : 0.8,
+    transition: "all .2s ease",
   }}
 >
   All
@@ -127,16 +132,25 @@ function AdminAuditLogs() {
 <button
   onClick={() => setStatusFilter("active")}
   style={{
-cursor: "pointer",
-opacity: statusFilter === "all" ? 1 : 0.65,
-transform: statusFilter === "all" ? "scale(1.03)" : "scale(1)",
-background: statusFilter === "all" ? "#4b5563" : "#374151",
-color: "#fff",
-border: "1px solid #6b7280",
-padding: "10px 18px",
-borderRadius: "8px",
-transition: "all 0.2s ease",
-}}
+    cursor: "pointer",
+    background:
+      statusFilter === "active"
+        ? "#166534"
+        : "rgba(22,101,52,.75)",
+
+    color: "#fff",
+    border: "1px solid #22c55e",
+    padding: "10px 22px",
+    borderRadius: "8px",
+
+    boxShadow:
+      statusFilter === "active"
+        ? "0 0 12px rgba(34,197,94,.35)"
+        : "none",
+
+    opacity: statusFilter === "active" ? 1 : 0.8,
+    transition: "all .2s ease",
+  }}
 >
   Active
 </button>
@@ -145,12 +159,18 @@ transition: "all 0.2s ease",
   onClick={() => setStatusFilter("closed")}
   style={{
     cursor: "pointer",
-    background: statusFilter === "closed" ? "#dc2626" : "#b91c1c",
+    background:
+      statusFilter === "closed"
+        ? "#991b1b"
+        : "#7f1d1d",
+
     color: "#fff",
+    border: "1px solid #ef4444",
     padding: "10px 22px",
     borderRadius: "8px",
-    border: "1px solid #ef4444",
-    opacity: statusFilter === "closed" ? 1 : 0.75,
+
+    opacity: statusFilter === "closed" ? 1 : 0.8,
+    transition: "all .2s ease",
   }}
 >
   Closed
