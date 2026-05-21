@@ -1,78 +1,86 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Sites.css";
 
-import {
-  sites,
-  incidents,
-  activeSessions,
-  guardSessionsHistory,
-  getGuardById,
-  getGuardsBySiteId,
-} from "../data/securityData";
+const API_BASE_URL =
+  "https://noctua-panic-backend-production.up.railway.app";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
 }
 
-function getLatestIncident(siteId) {
-  const siteIncidents = incidents.filter((incident) => incident.siteId === siteId);
-  return siteIncidents[0] || null;
-}
-
 export default function Sites() {
   const [selectedSite, setSelectedSite] = useState(null);
+  const [sites, setSites] = useState([]);
+  const [guards, setGuards] = useState([]);
+  const [activeGuards, setActiveGuards] = useState([]);
+  const [incidents] = useState([]);
+
+  const loadData = async () => {
+    try {
+      const [sitesRes, guardsRes, activeRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/sites`),
+        fetch(`${API_BASE_URL}/guards`),
+        fetch(`${API_BASE_URL}/guards/active`),
+      ]);
+
+      const sitesData = await sitesRes.json();
+      const guardsData = await guardsRes.json();
+      const activeData = await activeRes.json();
+
+      setSites(sitesData.sites || []);
+      setGuards(guardsData.guards || []);
+      setActiveGuards(activeData.guards || []);
+    } catch (err) {
+      console.error("Sites load error:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+
+    const interval = setInterval(loadData, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const siteOverview = sites.map((site) => {
-    const assignedGuards = getGuardsBySiteId(site.id);
-
-    const currentSession = activeSessions.find(
-      (session) => session.siteId === site.id
+    const assignedGuards = guards.filter(
+      (guard) => guard.site_id === site.id
     );
 
-    const currentGuard = currentSession
-      ? getGuardById(currentSession.guardId)
-      : null;
-
-    const activeIncidents = incidents.filter(
-      (incident) =>
-        incident.siteId === site.id && incident.status !== "Resolved"
+    const currentSession = activeGuards.find(
+      (session) =>
+        session.site_id === site.id &&
+        session.is_currently_online
     );
-
-    const lastIncident = getLatestIncident(site.id);
-
-    const recentSessions = guardSessionsHistory
-      .filter((session) => session.siteId === site.id)
-      .sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.loginAt}`).getTime();
-        const dateB = new Date(`${b.date}T${b.loginAt}`).getTime();
-        return dateB - dateA;
-      })
-      .slice(0, 2)
-      .map((session) => ({
-        ...session,
-        guard: getGuardById(session.guardId),
-      }));
 
     return {
       ...site,
       assignedGuards,
-      currentSession,
-      currentGuard,
-      coverageStatus: currentGuard ? "Covered" : "Uncovered",
-      activeIncidents,
-      lastIncident,
-      recentSessions,
+      currentSession: currentSession || null,
+      coverageStatus: currentSession?.is_currently_online
+        ? "Covered"
+        : "Uncovered",
+      activeIncidents: incidents.filter(
+        (incident) =>
+          incident.site_id === site.id &&
+          incident.status !== "Resolved"
+      ),
+      recentSessions: [],
     };
   });
 
   const totalSites = siteOverview.length;
+
   const coveredSites = siteOverview.filter(
     (site) => site.coverageStatus === "Covered"
   ).length;
+
   const activeAlerts = siteOverview.reduce(
     (total, site) => total + site.activeIncidents.length,
     0
   );
+
   const totalAssignedGuards = siteOverview.reduce(
     (total, site) => total + site.assignedGuards.length,
     0
@@ -122,9 +130,7 @@ export default function Sites() {
             <div className="site-card-header">
               <div>
                 <h2>{site.name}</h2>
-                <p>
-                  {site.location} · {site.clientType}
-                </p>
+                <p>{site.location || "—"}</p>
               </div>
 
               <span className={`status-pill ${statusClass(site.status)}`}>
@@ -135,7 +141,7 @@ export default function Sites() {
             <div className="site-card-grid">
               <div>
                 <span>Company Phone</span>
-                <strong>{site.companyPhone}</strong>
+                <strong>{site.phone || "—"}</strong>
               </div>
 
               <div>
@@ -146,22 +152,13 @@ export default function Sites() {
               <div>
                 <span>Current Guard</span>
                 <strong>
-                  {site.currentGuard ? site.currentGuard.fullName : "No guard"}
+                  {site.currentSession?.full_name || "No guard"}
                 </strong>
               </div>
 
               <div>
                 <span>Active Incidents</span>
                 <strong>{site.activeIncidents.length}</strong>
-              </div>
-            </div>
-
-            <div className="site-shifts">
-              <span>Shift Pattern</span>
-              <div>
-                {site.shiftPattern.map((shift) => (
-                  <small key={shift}>{shift}</small>
-                ))}
               </div>
             </div>
           </div>
@@ -179,103 +176,62 @@ export default function Sites() {
             <div className="site-modal-grid">
               <p>
                 <span>Location</span>
-                {selectedSite.location}
+                {selectedSite.location || "—"}
               </p>
+
               <p>
-                <span>Client Type</span>
-                {selectedSite.clientType}
+                <span>Status</span>
+                {selectedSite.status || "—"}
               </p>
-              <p>
-                <span>Company Phone</span>
-                {selectedSite.companyPhone}
-              </p>
-              <p>
-                <span>Site Status</span>
-                {selectedSite.status}
-              </p>
+
               <p>
                 <span>Coverage</span>
                 {selectedSite.coverageStatus}
               </p>
+
               <p>
                 <span>Current Guard</span>
-                {selectedSite.currentGuard
-                  ? selectedSite.currentGuard.fullName
-                  : "No active guard"}
+                {selectedSite.currentSession?.full_name || "No active guard"}
               </p>
+
+              <p>
+                <span>Check In Time</span>
+                {selectedSite.currentSession?.check_in_time || "—"}
+              </p>
+
+              <p>
+                <span>Assigned Guards</span>
+                {selectedSite.assignedGuards.length}
+              </p>
+            </div>
+
+            <div className="site-detail-box">
+              <span>Assigned Guards</span>
+
+              {selectedSite.assignedGuards.length === 0 ? (
+                <p>No guards assigned</p>
+              ) : (
+                selectedSite.assignedGuards.map((guard) => (
+                  <p key={guard.id}>
+                    {guard.full_name} · {guard.role} ·{" "}
+                    {guard.active ? "Active" : "Inactive"}
+                  </p>
+                ))
+              )}
             </div>
 
             <div className="site-detail-box">
               <span>Security Context</span>
+
               <p>
                 Active Incidents:{" "}
                 <strong>{selectedSite.activeIncidents.length}</strong>
               </p>
-              <p>
-                Last Incident:{" "}
-                <strong>
-                  {selectedSite.lastIncident
-                    ? `${selectedSite.lastIncident.title} · ${selectedSite.lastIncident.status}`
-                    : "No incident recorded"}
-                </strong>
-              </p>
-            </div>
-
-            <div className="site-detail-box">
-              <span>Shift Structure</span>
-              {selectedSite.shiftPattern.map((shift) => (
-                <p key={shift}>{shift}</p>
-              ))}
             </div>
 
             <div className="site-detail-box">
               <span>Recent Guard Sessions</span>
-              {selectedSite.recentSessions.map((session) => (
-                <p key={session.id}>
-                  {session.guard?.fullName || "Unknown Guard"} ·{" "}
-                  {session.loginAt} – {session.logoutAt} · {session.status}
-                </p>
-              ))}
-            </div>
-
-            <div className="site-detail-box">
-              <span>Notes Summary</span>
-              <p>{selectedSite.notes.summary}</p>
-            </div>
-
-            <div className="site-detail-box">
-              {selectedSite.sopFile && (
-  <div className="site-detail-box">
-    <span>SOP Document</span>
-
-    <a
-      href={selectedSite.sopFile}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="sop-button"
-    >
-      View SOP Document
-    </a>
-  </div>
-)}
-              <span>SOP</span>
-              {selectedSite.notes.sop.map((item) => (
-                <p key={item}>• {item}</p>
-              ))}
-            </div>
-
-            <div className="site-detail-box">
-              <span>Special Instructions</span>
-              {selectedSite.notes.specialInstructions.map((item) => (
-                <p key={item}>• {item}</p>
-              ))}
-            </div>
-
-            <div className="site-detail-box">
-              <span>Emergency Protocol</span>
-              {selectedSite.notes.emergencyProtocol.map((item) => (
-                <p key={item}>• {item}</p>
-              ))}
+              <p>No recent sessions</p>
             </div>
           </div>
         </div>
