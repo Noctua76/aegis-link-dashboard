@@ -218,7 +218,19 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
   check_in_time: guard.check_in_time,
 }));
 
-const dashboardIncidents = [];
+const dashboardIncidents = [
+  {
+    title: "Ekali Residence",
+    site: "Ekali Residence",
+    guard: "Waiting for guard check-in",
+    time: "Waiting for alert",
+    status: "normal",
+    priority: "Normal",
+    smsStatus: "Standby",
+    callStatus: "Standby",
+    aiStatus: "Standby",
+  },
+];
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
