@@ -226,6 +226,7 @@ const dashboardIncidents = [
     time: "Waiting for alert",
     status: "normal",
     priority: "Normal",
+    triggerStatus: "Standby",
     smsStatus: "Standby",
     callStatus: "Standby",
     aiStatus: "Standby",
@@ -555,7 +556,7 @@ if (!currentUser) {
           <div className="incident-card-header">
             <div>
               <h3>{incident.title}</h3>
-              <p>Incident ID: INC-2025-00{index + 1}</p>
+              <p>Site monitoring card</p>
             </div>
 
             <span className="incident-status">
@@ -572,16 +573,16 @@ if (!currentUser) {
           <div className="incident-meta-grid">
             <p><strong>Site:</strong> {incident.site}</p>
             <p><strong>Guard:</strong> {incident.guard}</p>
-            <p><strong>Triggered at:</strong> {incident.time}</p>
-            <p><strong>Priority:</strong> High</p>
+            <p><strong>Alert status:</strong> {incident.time}</p>
+            <p><strong>Priority:</strong> {incident.priority}</p>
           </div>
 
           <div className="incident-flow">
-            <span>🚨 Trigger Received</span>
-            <span>📩 SMS {incident.smsStatus}</span>
-            <span>📞 Call {incident.callStatus}</span>
-            <span>🤖 AI {incident.aiStatus}</span>
-          </div>
+  <span>🚨 Trigger {incident.triggerStatus}</span>
+  <span>📩 SMS {incident.smsStatus}</span>
+  <span>📞 Call {incident.callStatus}</span>
+  <span>🤖 AI {incident.aiStatus}</span>
+</div>
 
           <div className="incident-ai-box">
             <h4>AI Intake</h4>
