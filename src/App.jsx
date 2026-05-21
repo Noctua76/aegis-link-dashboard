@@ -585,11 +585,30 @@ if (!currentUser) {
 </div>
 
           <div className="incident-ai-box">
-            <h4>AI Intake</h4>
-            <p><strong>What happened?</strong> Suspicious movement reported.</p>
-            <p><strong>Where?</strong> {incident.site}</p>
-            <p><strong>Need support?</strong> Yes, supervisor review required.</p>
-          </div>
+  <h4>AI Intake</h4>
+
+  <p>
+    <strong>Status:</strong>
+    {" "}
+    {incident.status === "normal"
+      ? "Waiting for incident trigger"
+      : incident.aiSummary}
+  </p>
+
+  <p>
+    <strong>Site:</strong>
+    {" "}
+    {incident.site}
+  </p>
+
+  <p>
+    <strong>Escalation:</strong>
+    {" "}
+    {incident.status === "normal"
+      ? "Standby"
+      : incident.escalation}
+  </p>
+</div>
         </div>
       ))}
     </section>
