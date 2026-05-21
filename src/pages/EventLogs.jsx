@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 import "./EventLogs.css";
 
-import {
-  sites,
-  activeSessions,
-  guardSessionsHistory,
-  getGuardById,
-  getSiteById,
-} from "../data/securityData";
+const API_BASE_URL =
+  "https://noctua-panic-backend-production.up.railway.app";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
@@ -26,16 +21,14 @@ function formatDateTime(date) {
     .replace(",", " ·");
 }
 
-function calculateShiftDelay(shift, loginAt) {
-  if (!shift || !loginAt) return "—";
+function calculateShiftDelay(start, login) {
+  if (!start || !login) return "—";
 
-  const shiftStart = shift.split("–")[0].trim();
+  const [sH, sM] = start.split(":").map(Number);
+  const [lH, lM] = login.split(":").map(Number);
 
-  const [shiftHour, shiftMinute] = shiftStart.split(":").map(Number);
-  const [loginHour, loginMinute] = loginAt.split(":").map(Number);
-
-  const scheduled = shiftHour * 60 + shiftMinute;
-  const actual = loginHour * 60 + loginMinute;
+  const scheduled = sH * 60 + sM;
+  const actual = lH * 60 + lM;
 
   const diff = actual - scheduled;
 
@@ -47,243 +40,155 @@ function calculateShiftDelay(shift, loginAt) {
 export default function EventLogs() {
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [selectedLog, setSelectedLog] = useState(null);
+
+  const [sites, setSites] = useState([]);
+  const [logs, setLogs] = useState([]);
+
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
+    loadData();
+
     const timer = setInterval(() => {
       setNow(new Date());
-    }, 1000);
+      loadData();
+    }, 10000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const activeLogs = activeSessions.map((session) => {
-    const guard = getGuardById(session.guardId);
-    const site = getSiteById(session.siteId);
+  const loadData = async () => {
+    try {
+      const [sitesRes, logsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/sites`),
+        fetch(`${API_BASE_URL}/guards/shifts/history`)
+      ]);
 
-    return {
-      id: session.id,
-      guard,
-      site,
-      siteId: session.siteId,
-      date: "Today",
-      shift: session.shift,
-      loginAt: session.loginAt,
-      logoutAt: null,
-      shiftDelay: calculateShiftDelay(session.shift, session.loginAt),
-      status: session.status,
-      notes: "Guard is currently on duty.",
-    };
-  });
+      const sitesData = await sitesRes.json();
+      const logsData = await logsRes.json();
 
-  const historyLogs = guardSessionsHistory.map((session) => {
-    const guard = getGuardById(session.guardId);
-    const site = getSiteById(session.siteId);
-    const shift = `${session.loginAt} – ${session.logoutAt}`;
+      setSites(sitesData.sites || []);
 
-    return {
-      id: session.id,
-      guard,
-      site,
-      siteId: session.siteId,
-      date: session.date,
-      shift,
-      loginAt: session.loginAt,
-      logoutAt: session.logoutAt,
-      shiftDelay: calculateShiftDelay(shift, session.loginAt),
-      status: session.status,
-      notes: "Shift completed and logged out.",
-    };
-  });
+      const mappedLogs = (logsData.shifts || []).map((shift) => ({
+        id: shift.id,
 
-  const allLogs = [...activeLogs, ...historyLogs].sort((a, b) => {
-    if (a.date === "Today") return -1;
-    if (b.date === "Today") return 1;
+        guard: {
+          fullName: shift.full_name
+        },
 
-    const dateA = new Date(`${a.date}T${a.loginAt}`).getTime();
-    const dateB = new Date(`${b.date}T${b.loginAt}`).getTime();
+        site: {
+          name: shift.site_name,
+          location: shift.site_location
+        },
 
-    return dateB - dateA;
-  });
+        siteId: shift.site_id,
+
+        date: shift.check_in_time
+          ? new Date(shift.check_in_time)
+              .toISOString()
+              .split("T")[0]
+          : "—",
+
+        shift:
+          shift.shift_start && shift.shift_end
+            ? `${shift.shift_start} – ${shift.shift_end}`
+            : "—",
+
+        loginAt: shift.check_in_time
+          ? new Date(shift.check_in_time)
+              .toLocaleTimeString(
+                "en-GB",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }
+              )
+          : "—",
+
+        logoutAt:
+          shift.check_out_time
+            ? new Date(shift.check_out_time)
+                .toLocaleTimeString(
+                  "en-GB",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }
+                )
+            : null,
+
+        shiftDelay: calculateShiftDelay(
+          shift.shift_start,
+          shift.check_in_time
+            ? new Date(shift.check_in_time)
+                .toLocaleTimeString(
+                  "en-GB",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                  }
+                )
+            : null
+        ),
+
+        status:
+          shift.is_currently_online
+            ? "On Duty"
+            : "Logged Out",
+
+        notes:
+          shift.is_currently_online
+            ? "Guard is currently on duty."
+            : "Shift completed."
+      }));
+
+      setLogs(mappedLogs);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const filteredLogs =
     selectedSiteId === "all"
-      ? allLogs
-      : allLogs.filter((log) => log.siteId === selectedSiteId);
+      ? logs
+      : logs.filter(
+          (log) =>
+            String(log.siteId) === String(selectedSiteId)
+        );
 
-  const activeSessionsCount = filteredLogs.filter(
-    (log) => log.status === "On Duty"
-  ).length;
+  const activeSessionsCount =
+    filteredLogs.filter(
+      (l) => l.status === "On Duty"
+    ).length;
 
-  const completedShifts = filteredLogs.filter(
-    (log) => log.status === "Logged Out"
-  ).length;
+  const completedShifts =
+    filteredLogs.filter(
+      (l) => l.status === "Logged Out"
+    ).length;
 
-  const lateLogins = filteredLogs.filter(
-    (log) => log.shiftDelay !== "On Time" && log.shiftDelay !== "—"
-  ).length;
-
-  const missedLogouts = filteredLogs.filter(
-    (log) => log.status === "Missed Logout"
-  ).length;
+  const lateLogins =
+    filteredLogs.filter(
+      (l) =>
+        l.shiftDelay !== "On Time" &&
+        l.shiftDelay !== "—"
+    ).length;
 
   const selectedSite =
-    selectedSiteId === "all" ? null : sites.find((site) => site.id === selectedSiteId);
+    selectedSiteId === "all"
+      ? null
+      : sites.find(
+          (s) =>
+            String(s.id) ===
+            String(selectedSiteId)
+        );
 
   return (
     <div className="event-logs-page">
-      <header className="event-logs-header">
-        <div>
-          <h1>Event Logs</h1>
-          <p>Guard login, logout and shift attendance history by site.</p>
-        </div>
 
-        <div className="eventlogs-live-clock">
-          <span>Live Clock and Date</span>
-          <strong>{formatDateTime(now)}</strong>
-        </div>
-      </header>
+      {/* Κράτα από εδώ και κάτω ΟΛΟ το υπάρχον JSX */}
+      {/* ΜΗΝ αλλάξεις HTML / modal / table */}
 
-      <section className="event-site-tabs">
-        <button
-          className={selectedSiteId === "all" ? "active" : ""}
-          onClick={() => setSelectedSiteId("all")}
-        >
-          All Sites
-        </button>
-
-        {sites.map((site) => (
-          <button
-            key={site.id}
-            className={selectedSiteId === site.id ? "active" : ""}
-            onClick={() => setSelectedSiteId(site.id)}
-          >
-            {site.name}
-          </button>
-        ))}
-      </section>
-
-      <section className="event-logs-context">
-        <h2>{selectedSite ? selectedSite.name : "All Sites"}</h2>
-        <p>
-          {selectedSite
-            ? `${selectedSite.location} · ${selectedSite.clientType}`
-            : "Combined attendance view across all protected locations."}
-        </p>
-      </section>
-
-      <section className="event-logs-summary-grid">
-        <div className="event-summary-card">
-          <span>Active Sessions</span>
-          <strong>{activeSessionsCount}</strong>
-        </div>
-
-        <div className="event-summary-card">
-          <span>Completed Shifts</span>
-          <strong>{completedShifts}</strong>
-        </div>
-
-        <div className="event-summary-card">
-          <span>Late Logins</span>
-          <strong>{lateLogins}</strong>
-        </div>
-
-        <div className="event-summary-card">
-          <span>Missed Logouts</span>
-          <strong>{missedLogouts}</strong>
-        </div>
-      </section>
-
-      <section className="event-logs-table">
-        <div className="event-logs-table-header">
-          <span>Guard</span>
-          <span>Site</span>
-          <span>Date</span>
-          <span>Shift</span>
-          <span>Login</span>
-          <span>Logout</span>
-          <span>Shift Delay</span>
-          <span>Status</span>
-        </div>
-
-        {filteredLogs.map((log) => (
-          <div
-            key={log.id}
-            className="event-log-row"
-            onClick={() => setSelectedLog(log)}
-          >
-            <span>{log.guard?.fullName || "Unknown Guard"}</span>
-            <span>{log.site?.name || "Unknown Site"}</span>
-            <span>{log.date}</span>
-            <span>{log.shift}</span>
-            <span>{log.loginAt}</span>
-            <span>{log.logoutAt || "—"}</span>
-            <span
-              className={
-                log.shiftDelay === "On Time"
-                  ? "delay-pill on-time"
-                  : "delay-pill late"
-              }
-            >
-              {log.shiftDelay}
-            </span>
-            <span className={`status-pill ${statusClass(log.status)}`}>
-              {log.status}
-            </span>
-          </div>
-        ))}
-      </section>
-
-      {selectedLog && (
-        <div className="modal-backdrop" onClick={() => setSelectedLog(null)}>
-          <div className="event-log-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>{selectedLog.guard?.fullName || "Unknown Guard"}</h2>
-              <button onClick={() => setSelectedLog(null)}>×</button>
-            </div>
-
-            <div className="event-log-modal-grid">
-              <p>
-                <span>Site</span>
-                {selectedLog.site?.name || "Unknown Site"}
-              </p>
-              <p>
-                <span>Location</span>
-                {selectedLog.site?.location || "—"}
-              </p>
-              <p>
-                <span>Date</span>
-                {selectedLog.date}
-              </p>
-              <p>
-                <span>Scheduled Shift</span>
-                {selectedLog.shift}
-              </p>
-              <p>
-                <span>Login Time</span>
-                {selectedLog.loginAt}
-              </p>
-              <p>
-                <span>Logout Time</span>
-                {selectedLog.logoutAt || "Still active"}
-              </p>
-              <p>
-                <span>Shift Delay</span>
-                {selectedLog.shiftDelay}
-              </p>
-              <p>
-                <span>Status</span>
-                {selectedLog.status}
-              </p>
-            </div>
-
-            <div className="event-log-notes">
-              <span>Notes</span>
-              <p>{selectedLog.notes}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
