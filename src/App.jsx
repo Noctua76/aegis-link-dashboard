@@ -582,7 +582,14 @@ if (!currentUser) {
           <div className="incident-meta-grid">
             <p><strong>Site:</strong> {incident.site}</p>
             <p><strong>Guard:</strong> {incident.guard}</p>
-            <p><strong>Alert status:</strong> {incident.time}</p>
+            <p>
+  <strong>Alert status:</strong>{" "}
+  {incident.status === "normal"
+    ? "Waiting for alert"
+    : incident.status === "resolved"
+    ? "Resolved"
+    : "Alert active"}
+</p>
             <p><strong>Priority:</strong> {incident.priority}</p>
           </div>
 
