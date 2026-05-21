@@ -218,20 +218,70 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
   check_in_time: guard.check_in_time,
 }));
 
-const dashboardIncidents = [
-  {
-    title: "Ekali Residence",
-    site: "Ekali Residence",
-    guard: "Waiting for guard check-in",
-    time: "Waiting for alert",
-    status: "normal",
-    priority: "Normal",
-    triggerStatus: "Standby",
-    smsStatus: "Standby",
-    callStatus: "Standby",
-    aiStatus: "Standby",
-  },
-];
+const [dashboardIncidents, setDashboardIncidents] = useState([]);
+
+useEffect(() => {
+  const loadDashboard = async () => {
+    try {
+      const [sitesRes, incidentsRes] = await Promise.all([
+        fetch(
+          "https://noctua-panic-backend-production.up.railway.app/sites"
+        ),
+        fetch(
+          "https://noctua-panic-backend-production.up.railway.app/incidents/live"
+        ),
+      ]);
+
+      const sitesData = await sitesRes.json();
+      const incidentsData = await incidentsRes.json();
+
+      const sites = sitesData.data || [];
+      const incidents = incidentsData || [];
+
+      const merged = sites.map((site) => {
+        const activeIncident = incidents.find(
+          (i) => i.site_name === site.name
+        );
+
+        if (activeIncident) {
+          return {
+            title: site.name,
+            site: site.name,
+            status: activeIncident.status,
+            priority: activeIncident.priority,
+            guard: activeIncident.guard_name,
+            aiSummary: activeIncident.ai_summary,
+            escalation: activeIncident.needs_support
+              ? "Supervisor required"
+              : "Standby",
+          };
+        }
+
+        return {
+          title: site.name,
+          site: site.name,
+          status: "normal",
+          priority: "Normal",
+          guard: null,
+          aiSummary: null,
+          escalation: null,
+        };
+      });
+
+      setDashboardIncidents(merged);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadDashboard();
+
+  const interval = setInterval(loadDashboard, 5000);
+
+  return () => clearInterval(interval);
+
+}, []);
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
