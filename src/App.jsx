@@ -218,21 +218,7 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
   check_in_time: guard.check_in_time,
 }));
 
-const dashboardIncidents = securityIncidents.map((incident) => {
-  const site = getSiteById(incident.siteId);
-  const guard = getGuardById(incident.guardId);
-
-  return {
-    ...incident,
-    site: site.name,
-    guard: guard.fullName,
-
-    status:
-      incident.type === "alert"
-        ? "active"
-        : "in_progress",
-  };
-});
+const dashboardIncidents = [];
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
