@@ -88,6 +88,7 @@ const handleLogout = async () => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
 });
 const [liveActiveGuards, setLiveActiveGuards] = useState([]);
+  const [incidentFilter, setIncidentFilter] = useState("All");
 const menuItems = [
   "Dashboard",
   "Live Incidents",
@@ -225,8 +226,21 @@ const dashboardIncidents = securityIncidents.map((incident) => {
     ...incident,
     site: site.name,
     guard: guard.fullName,
+
+    status:
+      incident.type === "alert"
+        ? "active"
+        : "in_progress",
   };
 });
+  const filteredIncidents =
+  incidentFilter === "All"
+    ? dashboardIncidents
+    : dashboardIncidents.filter(
+        (incident) =>
+          incident.status?.toLowerCase() ===
+          incidentFilter.toLowerCase().replace(" ", "_")
+      );
 if (!currentUser) {
   return (
     <div className="login-screen">
@@ -521,16 +535,25 @@ if (!currentUser) {
     </header>
 
     <section style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
-      {["All", "Active", "In Progress", "Escalated", "Resolved"].map((filter) => (
-        <button key={filter} className="filter-button">
-          {filter}
-        </button>
-      ))}
+     {["All", "Normal", "Active", "In Progress", "Resolved"].map((filter) => (
+  <button
+    key={filter}
+    className={`filter-button ${
+      incidentFilter === filter ? "active-filter" : ""
+    }`}
+    onClick={() => setIncidentFilter(filter)}
+  >
+    {filter}
+  </button>
+))}
     </section>
 
     <section style={{ display: "grid", gap: "16px" }}>
-      {dashboardIncidents.map((incident, index) => (
-        <div key={index} className={`incident-detail-card ${incident.type}`}>
+      {filteredIncidents.map((incident, index) => (
+  <div
+    key={index}
+    className={`incident-detail-card ${incident.status}`}
+  >
           <div className="incident-card-header">
             <div>
               <h3>{incident.title}</h3>
@@ -538,7 +561,13 @@ if (!currentUser) {
             </div>
 
             <span className="incident-status">
-              {incident.type === "alert" ? "Active" : "In Progress"}
+              {incident.status === "normal"
+  ? "Normal"
+  : incident.status === "active"
+  ? "Active"
+  : incident.status === "resolved"
+  ? "Resolved"
+  : "In Progress"}
             </span>
           </div>
 
