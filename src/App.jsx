@@ -257,12 +257,39 @@ useEffect(() => {
     } catch (err) {
 
       console.error(
-        "Failed loading system status:",
-        err
-      );
+  "Failed loading system status:",
+  err
+);
 
+setSystemStatus({
+  overall_status: "offline",
+  services: {
+    backend_api: {
+      label: "Backend API",
+      status: "offline",
+      message: "Backend API is not responding"
+    },
+    sms_gateway: {
+      label: "SMS Gateway",
+      status: "unknown"
+    },
+    voice_calls: {
+      label: "Voice Calls",
+      status: "unknown"
+    },
+    database: {
+      label: "Database",
+      status: "unknown"
+    },
+    ai_intake: {
+      label: "AI Intake",
+      status: "unknown"
     }
-  };
+    }
+  });
+
+};
+};
 
   loadSystemStatus();
 
@@ -272,8 +299,9 @@ useEffect(() => {
       10000
     );
 
-  return () =>
-    clearInterval(interval);
+  return () => {
+  clearInterval(interval);
+};
 
 }, []);
   const filteredIncidents =
