@@ -275,7 +275,7 @@ export default function Guards() {
 
         <code>
           Heartbeat · {
-            systemStatus.services.heartbeat.status
+            systemStatus?.services?.heartbeat?.status || "unknown"
           }
         </code>
 
