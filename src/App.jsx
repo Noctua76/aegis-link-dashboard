@@ -125,29 +125,6 @@ const menuItems = [
     }
   };
 
-useEffect(() => {
-  async function loadDashboardMetrics() {
-    try {
-      const res = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/dashboard/metrics"
-      );
-
-      const data = await res.json();
-
-      setDashboardMetrics(data);
-
-    } catch (err) {
-      console.error("Dashboard metrics error:", err);
-    }
-  }
-
-  loadDashboardMetrics();
-
-  const interval = setInterval(loadDashboardMetrics, 15000);
-
-  return () => clearInterval(interval);
-
-}, []);
 
   loadAdmins();
 
@@ -251,6 +228,30 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
 
 const [dashboardIncidents, setDashboardIncidents] = useState([]);
 const [systemStatus, setSystemStatus] = useState(null);
+
+useEffect(() => {
+  async function loadDashboardMetrics() {
+    try {
+      const res = await fetch(
+        "https://noctua-panic-backend-production.up.railway.app/dashboard/metrics"
+      );
+
+      const data = await res.json();
+
+      setDashboardMetrics(data);
+
+    } catch (err) {
+      console.error("Dashboard metrics error:", err);
+    }
+  }
+
+  loadDashboardMetrics();
+
+  const interval = setInterval(loadDashboardMetrics, 15000);
+
+  return () => clearInterval(interval);
+
+}, []);
 
 useEffect(() => {
   const loadSiteMonitoring = async () => {
