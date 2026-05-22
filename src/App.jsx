@@ -836,9 +836,7 @@ systemStatus?.services?.backend_api?.status
     <section className="system-status-panel">
       <h2>Current Infrastructure State</h2>
       <p>
-        The dashboard currently operates as a live demo interface. In production,
-        this section will reflect real-time health checks from the web app,
-        backend, Vonage SMS/call services, AI intake flow, and database layer.
+        Operational overview of the Aegis Link environment. Service status indicators provide live visibility into communication channels, incident workflows, backend infrastructure, and escalation readiness.
       </p>
     </section>
   </>
