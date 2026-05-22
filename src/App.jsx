@@ -64,6 +64,13 @@ const handleLogin = async (event) => {
   }
 };
 
+const [dashboardMetrics, setDashboardMetrics] = useState({
+  activeIncidents: 0,
+  alertsToday: 0,
+  responseTime: "0s",
+  guardsOnDuty: 0,
+});
+
 const handleLogout = async () => {
   const username =
     currentUser?.user?.username ||
@@ -117,6 +124,30 @@ const menuItems = [
       console.error(err);
     }
   };
+
+useEffect(() => {
+  async function loadDashboardMetrics() {
+    try {
+      const res = await fetch(
+        "https://noctua-panic-backend-production.up.railway.app/dashboard/metrics"
+      );
+
+      const data = await res.json();
+
+      setDashboardMetrics(data);
+
+    } catch (err) {
+      console.error("Dashboard metrics error:", err);
+    }
+  }
+
+  loadDashboardMetrics();
+
+  const interval = setInterval(loadDashboardMetrics, 15000);
+
+  return () => clearInterval(interval);
+
+}, []);
 
   loadAdmins();
 
@@ -478,24 +509,30 @@ if (!currentUser) {
         >
           <div style={{ background: "#181818", padding: "20px", borderRadius: "12px" }}>
             <div>Active Incidents</div>
-            <div style={{ fontSize: "28px", marginTop: "10px", color: "#ff4d4f" }}>3</div>
+            <div style={{ fontSize: "28px", marginTop: "10px", color: "#ff4d4f" }}>
+            {dashboardMetrics.activeIncidents}
+           </div>
           </div>
 
           <div style={{ background: "#181818", padding: "20px", borderRadius: "12px" }}>
             <div>Alerts Today</div>
-            <div style={{ fontSize: "28px", marginTop: "10px" }}>128</div>
+            <div style={{ fontSize: "28px", marginTop: "10px" }}>
+            {dashboardMetrics.alertsToday}
+            </div>
           </div>
 
           <div style={{ background: "#181818", padding: "20px", borderRadius: "12px" }}>
             <div>Response Time</div>
-            <div style={{ fontSize: "28px", marginTop: "10px" }}>18s</div>
+            <div style={{ fontSize: "28px", marginTop: "10px" }}>
+            {dashboardMetrics.responseTime}
+            </div>
           </div>
 
           <div style={{ background: "#181818", padding: "20px", borderRadius: "12px" }}>
             <div>Guards On Duty</div>
             <div style={{ fontSize: "28px", marginTop: "10px", color: "#22c55e" }}>
-  {activeSessions.length}
-</div>
+            {dashboardMetrics.guardsOnDuty}
+            </div>
           </div>
         </section>
 
