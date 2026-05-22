@@ -219,6 +219,7 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
 }));
 
 const [dashboardIncidents, setDashboardIncidents] = useState([]);
+const [systemStatus, setSystemStatus] = useState(null);
 
 useEffect(() => {
   const loadSiteMonitoring = async () => {
@@ -240,6 +241,40 @@ useEffect(() => {
   const interval = setInterval(loadSiteMonitoring, 5000);
 
   return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
+  const loadSystemStatus = async () => {
+    try {
+      const response = await fetch(
+        "https://noctua-panic-backend-production.up.railway.app/system/status"
+      );
+
+      const data = await response.json();
+
+      setSystemStatus(data);
+
+    } catch (err) {
+
+      console.error(
+        "Failed loading system status:",
+        err
+      );
+
+    }
+  };
+
+  loadSystemStatus();
+
+  const interval =
+    setInterval(
+      loadSystemStatus,
+      10000
+    );
+
+  return () =>
+    clearInterval(interval);
+
 }, []);
   const filteredIncidents =
   incidentFilter === "All"
@@ -657,13 +692,35 @@ if (!currentUser) {
         <span>Online</span>
       </div>
 
-      <div className="system-status-card online">
-        <div>
-          <h3>Backend API</h3>
-          <p>Incident orchestration and event handling</p>
-        </div>
-        <span>Online</span>
-      </div>
+      <div
+className={`system-status-card ${
+systemStatus?.services?.backend_api?.status === "operational"
+? "online"
+: "warning"
+}`}
+>
+
+<div>
+
+<h3>Backend API</h3>
+
+<p>
+Incident orchestration and event handling
+</p>
+
+</div>
+
+<span>
+
+{
+systemStatus?.services?.backend_api?.status
+||
+"Loading"
+}
+
+</span>
+
+</div>
 
       <div className="system-status-card online">
         <div>
