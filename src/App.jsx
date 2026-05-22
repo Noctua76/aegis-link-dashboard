@@ -246,11 +246,34 @@ useEffect(() => {
 useEffect(() => {
   const loadSystemStatus = async () => {
     try {
+      let webAppStatus = "offline";
+
+try {
+  const webCheck = await fetch(
+    "https://noctua-panic-backend-production.up.railway.app/health",
+    {
+      cache: "no-store"
+    }
+  );
+
+  const webData = await webCheck.json();
+
+  if (webData.status === "ok") {
+    webAppStatus = "online";
+  }
+} catch {
+  webAppStatus = "offline";
+}
+
       const response = await fetch(
         "https://noctua-panic-backend-production.up.railway.app/system/status"
       );
 
       const data = await response.json();
+
+      data.services.web_app = {
+  status: webAppStatus
+};
 
       setSystemStatus(data);
 
@@ -717,7 +740,7 @@ if (!currentUser) {
           <h3>Web App</h3>
           <p>Guard interface and alert trigger</p>
         </div>
-        <span>Online</span>
+        <span>{webAppStatus}</span>
       </div>
 
       <div
