@@ -722,21 +722,37 @@ systemStatus?.services?.backend_api?.status
 
 </div>
 
-      <div className="system-status-card online">
-        <div>
-          <h3>SMS Gateway</h3>
-          <p>Vonage SMS delivery channel</p>
-        </div>
-        <span>Operational</span>
-      </div>
+      <div
+  className={`system-status-card ${
+    systemStatus?.services?.sms_gateway?.status === "operational"
+      ? "online"
+      : "warning"
+  }`}
+>
+  <div>
+    <h3>SMS Gateway</h3>
+    <p>Vonage SMS delivery channel</p>
+  </div>
+  <span>
+    {systemStatus?.services?.sms_gateway?.status || "Loading"}
+  </span>
+</div>
 
-      <div className="system-status-card online">
-        <div>
-          <h3>Voice Calls</h3>
-          <p>Automated outbound emergency calls</p>
-        </div>
-        <span>Operational</span>
-      </div>
+      <div
+  className={`system-status-card ${
+    systemStatus?.services?.voice_calls?.status === "operational"
+      ? "online"
+      : "warning"
+  }`}
+>
+  <div>
+    <h3>Voice Calls</h3>
+    <p>Automated outbound emergency calls</p>
+  </div>
+  <span>
+    {systemStatus?.services?.voice_calls?.status || "Loading"}
+  </span>
+</div>
 
       <div className="system-status-card warning">
         <div>
