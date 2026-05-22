@@ -288,7 +288,7 @@ setSystemStatus({
     }
   });
 
-};
+}
 };
 
   loadSystemStatus();
