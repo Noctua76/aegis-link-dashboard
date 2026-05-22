@@ -740,7 +740,9 @@ if (!currentUser) {
           <h3>Web App</h3>
           <p>Guard interface and alert trigger</p>
         </div>
-        <span>{webAppStatus}</span>
+        <span>
+  {systemStatus?.services?.web_app?.status || "Loading"}
+</span>
       </div>
 
       <div
