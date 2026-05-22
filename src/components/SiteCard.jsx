@@ -16,6 +16,7 @@ function SiteCard({ site }) {
     <div className="site-card">
       <div className="site-card-header">
         <h3>{site.name}</h3>
+
         <span className={getStatusClass(site.status)}>
           {site.status === "alert"
             ? "Alert Active"
@@ -26,10 +27,22 @@ function SiteCard({ site }) {
       </div>
 
       <div className="site-card-body">
-        <p><strong>Location:</strong> {site.location}</p>
-        <p><strong>Guards Assigned:</strong> {site.guardsAssigned}</p>
-        <p><strong>On Duty:</strong> {site.guardsOnDuty}</p>
-        <p><strong>Active Guard:</strong> {site.activeGuard}</p>
+        <p>
+          <strong>Location:</strong> {site.location}
+        </p>
+
+        <p>
+          <strong>Guards Assigned:</strong> {site.guards_assigned || 0}
+        </p>
+
+        <p>
+          <strong>On Duty:</strong> {site.on_duty || 0}
+        </p>
+
+        <p>
+          <strong>Active Guard:</strong>{" "}
+          {site.active_guard || "No active guard"}
+        </p>
       </div>
     </div>
   );
