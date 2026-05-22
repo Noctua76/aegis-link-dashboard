@@ -257,19 +257,19 @@ export default function Guards() {
 
         <code>
           Guards API · {
-            systemStatus.services.guards_api.total_guards
+            systemStatus?.services?.guard_sessions?.active_guards || 0
           } guards
         </code>
 
         <code>
           Sites API · {
-            systemStatus.services.sites_api.total_sites
+            systemStatus?.services?.sites_api?.total_sites || 0
           } sites
         </code>
 
         <code>
           Attendance API · {
-            systemStatus.services.attendance_api.active_guards
+            systemStatus?.services?.guard_sessions?.active_guards || 0
           } active guards
         </code>
 
