@@ -790,13 +790,22 @@ systemStatus?.services?.backend_api?.status
         <span>Demo Mode</span>
       </div>
 
-      <div className="system-status-card warning">
-        <div>
-          <h3>Database</h3>
-          <p>Incident history and audit persistence</p>
-        </div>
-        <span>Pending</span>
-      </div>
+      <div
+  className={`system-status-card ${
+    systemStatus?.services?.database?.status === "operational"
+      ? "online"
+      : "warning"
+  }`}
+>
+  <div>
+    <h3>Database</h3>
+    <p>Incident history and audit persistence</p>
+  </div>
+
+  <span>
+    {systemStatus?.services?.database?.status || "Loading"}
+  </span>
+</div>
     </section>
 
     <section className="system-status-panel">
