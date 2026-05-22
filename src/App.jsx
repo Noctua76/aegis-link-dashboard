@@ -71,6 +71,8 @@ const [dashboardMetrics, setDashboardMetrics] = useState({
   guardsOnDuty: 0,
 });
 
+const [liveSites, setLiveSites] = useState([]);
+
 const handleLogout = async () => {
   const username =
     currentUser?.user?.username ||
@@ -251,6 +253,28 @@ useEffect(() => {
 
   return () => clearInterval(interval);
 
+}, []);
+
+useEffect(() => {
+  async function loadSites() {
+    try {
+      const res = await fetch(
+        "https://noctua-panic-backend-production.up.railway.app/sites"
+      );
+
+      const data = await res.json();
+
+      setLiveSites(data.sites || []);
+    } catch (err) {
+      console.error("Sites load error:", err);
+    }
+  }
+
+  loadSites();
+
+  const interval = setInterval(loadSites, 15000);
+
+  return () => clearInterval(interval);
 }, []);
 
 useEffect(() => {
@@ -556,7 +580,7 @@ if (!currentUser) {
               gap: "16px",
             }}
           >
-            {dashboardSites.map((site, index) => (
+            {liveSites.map((site, index) => (
   <SiteCard key={index} site={site} />
 ))}
           </div>
