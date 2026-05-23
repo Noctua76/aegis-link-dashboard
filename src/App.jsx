@@ -605,9 +605,13 @@ if (!currentUser) {
               gap: "16px",
             }}
           >
-            {liveActiveGuards.map((guard, index) => (
-  <GuardStatus key={index} guard={guard} />
-))}
+            {liveActiveGuards.length > 0 ? (
+              liveActiveGuards.map((guard, index) => (
+                <GuardStatus key={index} guard={guard} />
+              ))
+            ) : (
+              <GuardStatus guard={null} />
+            )}
           </div>
         </section>
 
