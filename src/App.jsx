@@ -635,9 +635,10 @@ if (!currentUser) {
           </h3>
 
           <div
-            style={{
-              marginTop: "16px",
-              background: "#0d1117",
+  className="live-incident-panel"
+  style={{
+    marginTop: "16px",
+    background: "#0d1117",
               borderRadius: "14px",
               padding: "18px",
               border: "1px solid #1f2937",
