@@ -631,7 +631,7 @@ if (!currentUser) {
               color: "#ffffff",
             }}
           >
-            Live Incident Feed
+            Live Incident Timeline
           </h3>
 
           <div
@@ -669,7 +669,7 @@ if (!currentUser) {
              style={{
                position: "relative",
                background: "#101010",
-               padding: "16px",
+               padding: "14px",
                borderRadius: "10px",
                borderLeft: "4px solid #ff4d4f",
             }}
@@ -715,7 +715,7 @@ if (!currentUser) {
         style={{
           position: "relative",
           background: "#101010",
-          padding: "16px",
+          padding: "14px",
           borderRadius: "10px",
           borderLeft: "4px solid #ffac15",
         }}
@@ -752,7 +752,7 @@ if (!currentUser) {
       style={{
         position: "relative",
         background: "#101010",
-        padding: "16px",
+        padding: "14px",
         borderRadius: "10px",
         borderLeft: "4px solid #3b82f6",
       }}
@@ -789,7 +789,7 @@ if (!currentUser) {
       style={{
         position: "relative",
         background: "#101010",
-        padding: "16px",
+        padding: "14px",
         borderRadius: "10px",
         borderLeft: "4px solid #22c55e",
       }}
