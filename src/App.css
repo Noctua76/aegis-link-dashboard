@@ -836,3 +836,64 @@
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.08);
 }
+
+.live-incident-panel {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 18px rgba(255, 77, 79, 0.12);
+  animation: livePanelPulse 2.4s ease-in-out infinite;
+}
+
+.live-incident-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 77, 79, 0.35);
+  pointer-events: none;
+  animation: liveBorderPulse 1.8s ease-in-out infinite;
+}
+
+.live-incident-panel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 77, 79, 0.08),
+    transparent
+  );
+  animation: liveSweep 3.5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes livePanelPulse {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(255, 77, 79, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(255, 77, 79, 0.18);
+  }
+}
+
+@keyframes liveBorderPulse {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes liveSweep {
+  0% {
+    left: -40%;
+  }
+  100% {
+    left: 120%;
+  }
+}
