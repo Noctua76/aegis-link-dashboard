@@ -634,53 +634,194 @@ if (!currentUser) {
             Live Incident Feed
           </h3>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
+          <div
+            style={{
+              marginTop: "16px",
+              background: "#0d1117",
+              borderRadius: "14px",
+              padding: "18px",
+              border: "1px solid #1f2937",
+            }}
+         >
             <div
               style={{
-                background: "#101010",
-                padding: "16px",
-                borderRadius: "10px",
-                borderLeft: "4px solid #ff4d4f",
-              }}
-            >
-              <strong>🚨 Alert Triggered</strong>
-              <div style={{ fontSize: "14px", color: "#aaaaaa", marginTop: "6px" }}>
-                Location: Ekali
-              </div>
-              <div style={{ fontSize: "14px", color: "#aaaaaa" }}>
-                Time: 14:32:18
-              </div>
-            </div>
+                display: "flex",
+                flexDirection: "column",
+                gap: "18px",
+                position: "relative",
+                paddingLeft: "26px",
+             }}
+          >
+             <div
+               style={{
+                 position: "absolute",
+                 left: "8px",
+                 top: "12px",
+                 bottom: "12px",
+                 width: "2px",
+                 background: "#242424",
+             }}
+           />
 
-            <div
-              style={{
-                background: "#101010",
-                padding: "16px",
-                borderRadius: "10px",
-                borderLeft: "4px solid #facc15",
-              }}
-            >
-              <strong>📞 Call in Progress</strong>
-              <div style={{ fontSize: "14px", color: "#aaaaaa", marginTop: "6px" }}>
-                Contacting: Supervisor
-              </div>
-            </div>
+           {/* Alert Triggered */}
 
+           <div
+             style={{
+               position: "relative",
+               background: "#101010",
+               padding: "16px",
+               borderRadius: "10px",
+               borderLeft: "4px solid #ff4d4f",
+            }}
+           >
             <div
               style={{
-                background: "#101010",
-                padding: "16px",
-                borderRadius: "10px",
-                borderLeft: "4px solid #22c55e",
-              }}
-            >
-              <strong>✅ Incident Resolved</strong>
-              <div style={{ fontSize: "14px", color: "#aaaaaa", marginTop: "6px" }}>
-                Duration: 2m 14s
-              </div>
-            </div>
-          </div>
-        </section>
+                position: "absolute",
+                left: "-26px",
+                top: "18px",
+                width: "14px",
+                height: "14px",
+                borderRadius: "50%",
+                background: "#ff4d4f",
+                border: "3px solid #0d1117",
+             }}
+           />
+
+          <strong>🚨 Alert Triggered</strong>
+
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#aaaaaa",
+              marginTop: "6px",
+           }}
+         >
+           Location: Ekali
+         </div>
+
+         <div
+           style={{
+             fontSize: "14px",
+             color: "#aaaaaa",
+          }}  
+         >
+          Time: 14:32:18
+        </div>
+      </div>
+
+      {/* Call */}
+
+      <div
+        style={{
+          position: "relative",
+          background: "#101010",
+          padding: "16px",
+          borderRadius: "10px",
+          borderLeft: "4px solid #ffac15",
+        }}
+       >
+        <div
+          style={{
+            position: "absolute",
+            left: "-26px",
+            top: "18px",
+            width: "14px",
+            height: "14px",
+            borderRadius: "50%",
+            background: "#ffac15",
+            border: "3px solid #0d1117",
+          }}
+        />
+
+       <strong>📞 Call In Progress</strong>
+
+       <div
+         style={{
+          fontSize: "14px",
+          color: "#aaaaaa",
+          marginTop: "6px",
+        }}
+      >
+        Contacting supervisors
+      </div>
+    </div>
+
+    {/* SMS */}
+
+    <div
+      style={{
+        position: "relative",
+        background: "#101010",
+        padding: "16px",
+        borderRadius: "10px",
+        borderLeft: "4px solid #3b82f6",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: "-26px",
+          top: "18px",
+          width: "14px",
+          height: "14px",
+          borderRadius: "50%",
+          background: "#3b82f6",
+          border: "3px solid #0d1117",
+        }}
+      />
+
+      <strong>💬 SMS In Progress</strong>
+
+      <div
+        style={{
+          fontSize: "14px",
+          color: "#aaaaaa",
+          marginTop: "6px",
+        }}
+      >
+        Sending SMS notifications
+      </div>
+    </div>
+
+    {/* Resolved */}
+
+    <div
+      style={{
+        position: "relative",
+        background: "#101010",
+        padding: "16px",
+        borderRadius: "10px",
+        borderLeft: "4px solid #22c55e",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: "-26px",
+          top: "18px",
+          width: "14px",
+          height: "14px",
+          borderRadius: "50%",
+          background: "#22c55e",
+          border: "3px solid #0d1117",
+        }}
+      />
+
+      <strong>✅ Incident Resolved</strong>
+
+      <div
+        style={{
+          fontSize: "14px",
+          color: "#aaaaaa",
+          marginTop: "6px",
+        }}
+      >
+        Duration: 2m 14s
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
     </>
 )}
         {activeMenu === "Live Incidents" && (
