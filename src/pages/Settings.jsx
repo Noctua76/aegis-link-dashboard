@@ -1,6 +1,41 @@
+import { useEffect, useState } from "react";
 import "./Settings.css";
 
 function Settings() {
+  const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+
+  const [systemStatus, setSystemStatus] = useState(null);
+
+  useEffect(() => {
+    async function loadSystemStatus() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/system/status`);
+        const data = await response.json();
+
+        setSystemStatus(data);
+      } catch (err) {
+        console.error("Settings system status error:", err);
+
+        setSystemStatus({
+          overall_status: "offline",
+          services: {
+            web_app: { status: "offline" },
+            backend_api: { status: "offline" },
+            sms_gateway: { status: "unknown" },
+            voice_calls: { status: "unknown" },
+            database: { status: "unknown" },
+          },
+        });
+      }
+    }
+
+    loadSystemStatus();
+
+    const interval = setInterval(loadSystemStatus, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <header style={{ marginBottom: "28px" }}>
@@ -20,7 +55,6 @@ function Settings() {
       </header>
 
       <section className="settings-grid">
-
         <div className="settings-card">
           <h3>Alert Configuration</h3>
 
@@ -83,11 +117,28 @@ function Settings() {
         <div className="settings-card">
           <h3>System Integrations</h3>
 
-          <div className="integration-status">Web App — Online</div>
-          <div className="integration-status">Backend API — Online</div>
-          <div className="integration-status">SMS Gateway — Online</div>
-          <div className="integration-status">Voice Calls — Online</div>
-          <div className="integration-status">Database — Online</div>
+          <div className="integration-status">
+            Web App — {systemStatus?.services?.web_app?.status || "Loading"}
+          </div>
+
+          <div className="integration-status">
+            Backend API —{" "}
+            {systemStatus?.services?.backend_api?.status || "Loading"}
+          </div>
+
+          <div className="integration-status">
+            SMS Gateway —{" "}
+            {systemStatus?.services?.sms_gateway?.status || "Loading"}
+          </div>
+
+          <div className="integration-status">
+            Voice Calls —{" "}
+            {systemStatus?.services?.voice_calls?.status || "Loading"}
+          </div>
+
+          <div className="integration-status">
+            Database — {systemStatus?.services?.database?.status || "Loading"}
+          </div>
         </div>
 
         <div className="settings-card">
@@ -127,7 +178,6 @@ function Settings() {
             <strong>Enabled</strong>
           </div>
         </div>
-
       </section>
     </>
   );
