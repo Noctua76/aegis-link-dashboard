@@ -73,6 +73,17 @@ const [dashboardMetrics, setDashboardMetrics] = useState({
 
 const [liveSites, setLiveSites] = useState([]);
 
+const [incidentTimeline, setIncidentTimeline] = useState({
+  status: "normal",
+  location: "Normal",
+  alertTime: null,
+  alertStatus: "normal",
+  callStatus: "normal",
+  smsStatus: "normal",
+  incidentStatus: "normal",
+  duration: null,
+});
+
 const handleLogout = async () => {
   const username =
     currentUser?.user?.username ||
@@ -256,6 +267,39 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
+  async function loadIncidentTimeline() {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/dashboard/incident-timeline`
+      );
+
+      const data = await res.json();
+
+      setIncidentTimeline(data);
+    } catch (err) {
+      console.error("Incident timeline load error:", err);
+
+      setIncidentTimeline({
+        status: "normal",
+        location: "Normal",
+        alertTime: null,
+        alertStatus: "normal",
+        callStatus: "normal",
+        smsStatus: "normal",
+        incidentStatus: "normal",
+        duration: null,
+      });
+    }
+  }
+
+  loadIncidentTimeline();
+
+  const interval = setInterval(loadIncidentTimeline, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
   async function loadSites() {
     try {
       const res = await fetch(
@@ -391,6 +435,45 @@ setSystemStatus({
           incident.status?.toLowerCase() ===
           incidentFilter.toLowerCase().replace(" ", "_")
       );
+
+const formatTimelineTime = (value) => {
+  if (!value) return "-";
+
+  return new Date(value).toLocaleTimeString("el-GR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+const timelineText = {
+  alert:
+    incidentTimeline.alertStatus === "normal"
+      ? "Normal"
+      : "Alert Triggered",
+
+  call:
+    incidentTimeline.callStatus === "normal"
+      ? "Normal"
+      : incidentTimeline.callStatus === "completed"
+      ? "Call Completed"
+      : "Call In Progress",
+
+  sms:
+    incidentTimeline.smsStatus === "normal"
+      ? "Normal"
+      : incidentTimeline.smsStatus === "completed"
+      ? "SMS Sent"
+      : "SMS In Progress",
+
+  incident:
+    incidentTimeline.incidentStatus === "normal"
+      ? "Normal"
+      : incidentTimeline.incidentStatus === "resolved"
+      ? "Incident Resolved"
+      : "Incident Active",
+};
+
 if (!currentUser) {
   return (
     <div className="login-screen">
@@ -688,7 +771,7 @@ if (!currentUser) {
              }}
            />
 
-          <strong>🚨 Alert Triggered</strong>
+          <strong>🚨 {timelineText.alert}</strong>
 
           <div
             style={{
@@ -697,7 +780,7 @@ if (!currentUser) {
               marginTop: "6px",
            }}
          >
-           Location: Ekali
+           Location: {incidentTimeline.location || "Normal"}
          </div>
 
          <div
@@ -706,7 +789,7 @@ if (!currentUser) {
              color: "#aaaaaa",
           }}  
          >
-          Time: 14:32:18
+          Time: {formatTimelineTime(incidentTimeline.alertTime)}
         </div>
       </div>
 
@@ -734,7 +817,7 @@ if (!currentUser) {
           }}
         />
 
-       <strong>📞 Call In Progress</strong>
+       <strong>📞 {timelineText.call}</strong>
 
        <div
          style={{
@@ -743,7 +826,11 @@ if (!currentUser) {
           marginTop: "6px",
         }}
       >
-        Contacting supervisors
+        {incidentTimeline.callStatus === "normal"
+  ? "System standing by"
+  : incidentTimeline.callStatus === "completed"
+  ? "Supervisor calls completed"
+  : "Contacting supervisors"}
       </div>
     </div>
 
@@ -771,7 +858,7 @@ if (!currentUser) {
         }}
       />
 
-      <strong>💬 SMS In Progress</strong>
+      <strong>💬 {timelineText.sms}</strong>
 
       <div
         style={{
@@ -780,7 +867,11 @@ if (!currentUser) {
           marginTop: "6px",
         }}
       >
-        Sending SMS notifications
+        {incidentTimeline.smsStatus === "normal"
+  ? "System standing by"
+  : incidentTimeline.smsStatus === "completed"
+  ? "SMS notifications sent"
+  : "Sending SMS notifications"}
       </div>
     </div>
 
@@ -808,7 +899,7 @@ if (!currentUser) {
         }}
       />
 
-      <strong>✅ Incident Resolved</strong>
+      <strong>✅ {timelineText.incident}</strong>
 
       <div
         style={{
@@ -817,7 +908,7 @@ if (!currentUser) {
           marginTop: "6px",
         }}
       >
-        Duration: 2m 14s
+        Duration: {incidentTimeline.duration || "-"}
       </div>
     </div>
   </div>
