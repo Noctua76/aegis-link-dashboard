@@ -7,6 +7,7 @@ import IncidentCard from "./components/IncidentCard";
 import Guards from "./pages/Guards";
 import Sites from "./pages/Sites";
 import EventLogs from "./pages/EventLogs";
+import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import {
   sites as securitySites,
@@ -1021,6 +1022,9 @@ if (!currentUser) {
 }
         {activeMenu === "Event Logs" && <EventLogs />}
         {activeMenu === "Sites" && <Sites />}
+        {activeMenu === "Settings" && (
+<Settings/>
+)}
         
         {activeMenu === "System Status" && (
   <>
