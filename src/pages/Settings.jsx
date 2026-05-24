@@ -115,38 +115,105 @@ function Settings() {
         </div>
 
         <div className="settings-card">
-          <h3>System Integrations</h3>
+  <h3>System Integrations</h3>
 
-          <div className="integration-status">
-            Web App — {systemStatus?.services?.web_app?.status || "Loading"}
-          </div>
+  <div className="integration-status">
+    <strong>Web App</strong>
 
-          <div className="integration-status">
-            Backend API —{" "}
-            {systemStatus?.services?.backend_api?.status || "Loading"}
-          </div>
-
-          <div className="integration-status">
-  SMS Gateway — {systemStatus?.services?.sms_gateway?.status || "Loading"}
-
-  <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-    Configured: {systemStatus?.services?.sms_gateway?.configured ? "Yes" : "No"}
+    <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+      Status:
+      {" "}
+      {systemStatus?.services?.web_app?.status || "Loading"}
+    </div>
   </div>
-</div>
 
-<div className="integration-status">
-  Voice Calls — {systemStatus?.services?.voice_calls?.status || "Loading"}
+  <div className="integration-status">
+    <strong>Backend API</strong>
 
-  <div style={{ fontSize: "12px", color: "#9ca3af" }}>
-    Configured: {systemStatus?.services?.voice_calls?.configured ? "Yes" : "No"}
+    <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+      Status:
+      {" "}
+      {systemStatus?.services?.backend_api?.status || "Loading"}
+    </div>
+
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      {systemStatus?.services?.backend_api?.message}
+    </div>
   </div>
+
+  <div className="integration-status">
+    <strong>SMS Gateway</strong>
+
+    <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+      Status:
+      {" "}
+      {systemStatus?.services?.sms_gateway?.status || "Loading"}
+    </div>
+
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Configured:
+      {" "}
+      {systemStatus?.services?.sms_gateway?.configured
+        ? "Yes"
+        : "No"}
+    </div>
+  </div>
+
+  <div className="integration-status">
+    <strong>Voice Calls</strong>
+
+    <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+      Status:
+      {" "}
+      {systemStatus?.services?.voice_calls?.status || "Loading"}
+    </div>
+
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Configured:
+      {" "}
+      {systemStatus?.services?.voice_calls?.configured
+        ? "Yes"
+        : "No"}
+    </div>
+  </div>
+
+  <div className="integration-status">
+    <strong>Database</strong>
+
+    <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+      Status:
+      {" "}
+      {systemStatus?.services?.database?.status || "Loading"}
+    </div>
+
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Server:
+      {" "}
+      {systemStatus?.services?.database?.server_time || "-"}
+    </div>
+  </div>
+
+  <div
+    style={{
+      marginTop: "16px",
+      paddingTop: "12px",
+      borderTop: "1px solid #242424",
+      fontSize: "12px",
+      color: "#9ca3af",
+    }}
+  >
+    Last checked:
+    {" "}
+    {systemStatus?.checked_at || "-"}
+
+    <br />
+
+    Response:
+    {" "}
+    {systemStatus?.response_time_ms || "-"} ms
+  </div>
+
 </div>
-
-          <div className="integration-status">
-            Database — {systemStatus?.services?.database?.status || "Loading"}
-          </div>
-        </div>
-
         <div className="settings-card">
           <h3>Notifications</h3>
 
