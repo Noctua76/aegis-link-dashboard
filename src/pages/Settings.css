@@ -1,0 +1,41 @@
+.settings-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:18px;
+}
+
+.settings-card{
+background:#181818;
+padding:20px;
+border-radius:14px;
+border:1px solid #242424;
+}
+
+.settings-card h3{
+margin-top:0;
+margin-bottom:18px;
+font-size:20px;
+}
+
+.settings-item{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #222;
+}
+
+.integration-status{
+padding:10px 0;
+color:#22c55e;
+}
+
+.settings-card button{
+margin-top:16px;
+width:100%;
+padding:12px;
+background:#0f172a;
+border:none;
+color:white;
+border-radius:10px;
+cursor:pointer;
+}
