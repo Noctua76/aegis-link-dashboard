@@ -127,14 +127,20 @@ function Settings() {
           </div>
 
           <div className="integration-status">
-            SMS Gateway —{" "}
-            {systemStatus?.services?.sms_gateway?.status || "Loading"}
-          </div>
+  SMS Gateway — {systemStatus?.services?.sms_gateway?.status || "Loading"}
 
-          <div className="integration-status">
-            Voice Calls —{" "}
-            {systemStatus?.services?.voice_calls?.status || "Loading"}
-          </div>
+  <div style={{ fontSize: "12px", color: "#9ca3af" }}>
+    Configured: {systemStatus?.services?.sms_gateway?.configured ? "Yes" : "No"}
+  </div>
+</div>
+
+<div className="integration-status">
+  Voice Calls — {systemStatus?.services?.voice_calls?.status || "Loading"}
+
+  <div style={{ fontSize: "12px", color: "#9ca3af" }}>
+    Configured: {systemStatus?.services?.voice_calls?.configured ? "Yes" : "No"}
+  </div>
+</div>
 
           <div className="integration-status">
             Database — {systemStatus?.services?.database?.status || "Loading"}
@@ -164,9 +170,14 @@ function Settings() {
           <h3>AI Configuration</h3>
 
           <div className="settings-item">
-            <span>Assistant</span>
-            <strong>Enabled</strong>
-          </div>
+  <span>Assistant</span>
+
+  <strong>
+    {systemStatus?.services?.ai_intake?.configured
+      ? "Enabled"
+      : "Disabled"}
+  </strong>
+</div>
 
           <div className="settings-item">
             <span>Model</span>
