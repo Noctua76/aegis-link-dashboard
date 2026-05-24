@@ -448,27 +448,27 @@ const formatTimelineTime = (value) => {
 
 const timelineText = {
   alert:
-    incidentTimeline.alertStatus === "normal"
-      ? "Normal"
-      : "Alert Triggered",
+incidentTimeline.alertStatus === "normal"
+? "No Alert"
+: "Alert Triggered",
 
   call:
-    incidentTimeline.callStatus === "normal"
-      ? "Normal"
+incidentTimeline.callStatus === "normal"
+? "No Call"
       : incidentTimeline.callStatus === "completed"
       ? "Call Completed"
       : "Call In Progress",
 
   sms:
-    incidentTimeline.smsStatus === "normal"
-      ? "Normal"
+incidentTimeline.smsStatus === "normal"
+? "No Message"
       : incidentTimeline.smsStatus === "completed"
       ? "SMS Sent"
       : "SMS In Progress",
 
   incident:
-    incidentTimeline.incidentStatus === "normal"
-      ? "Normal"
+incidentTimeline.incidentStatus === "normal"
+? "No Incident"
       : incidentTimeline.incidentStatus === "resolved"
       ? "Incident Resolved"
       : "Incident Active",
