@@ -5,8 +5,25 @@ function Settings() {
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 
   const [systemStatus, setSystemStatus] = useState(null);
+  const [alertConfig, setAlertConfig] = useState(null);
 
   useEffect(() => {
+    const loadAlertConfiguration = async () => {
+  try {
+    const response = await fetch(
+      "https://noctua-panic-backend-production.up.railway.app/settings/alert-configuration"
+    );
+
+    const data = await response.json();
+
+    setAlertConfig(data);
+
+  } catch (err) {
+    console.error("Alert configuration error", err);
+  }
+};
+
+loadAlertConfiguration();
     async function loadSystemStatus() {
       try {
         const response = await fetch(`${API_BASE_URL}/system/status`);
@@ -56,25 +73,40 @@ function Settings() {
 
       <section className="settings-grid">
         <div className="settings-card">
-          <h3>Alert Configuration</h3>
+  <h3>Alert Configuration</h3>
 
-          <div className="settings-item">
-            <span>SMS Recipients</span>
-            <strong>2 configured</strong>
-          </div>
+  <div className="settings-item">
+    <span>SMS Recipients</span>
+    <strong>{alertConfig?.sms?.recipients_count ?? "-"}</strong>
+  </div>
 
-          <div className="settings-item">
-            <span>Voice Call Recipients</span>
-            <strong>1 configured</strong>
-          </div>
+  <div className="settings-item">
+    <span>Voice Call Recipients</span>
+    <strong>{alertConfig?.voice?.recipients_count ?? "-"}</strong>
+  </div>
 
-          <div className="settings-item">
-            <span>Escalation Order</span>
-            <strong>Supervisor → Client</strong>
-          </div>
+  <div className="settings-item">
+    <span>Escalation Order</span>
+    <strong>{alertConfig?.escalation?.order ?? "-"}</strong>
+  </div>
 
-          <button>Send Test Alert</button>
-        </div>
+  <div className="settings-item">
+    <span>SMS Status</span>
+    <strong>{alertConfig?.last_test?.sms?.status || "error"}</strong>
+  </div>
+
+  <div className="settings-item">
+    <span>Voice Status</span>
+    <strong>{alertConfig?.last_test?.voice?.status || "error"}</strong>
+  </div>
+
+  <div className="settings-item">
+    <span>Last Test</span>
+    <strong>{alertConfig?.last_test?.tested_at || "-"}</strong>
+  </div>
+
+  <button>Send Test Alert</button>
+</div>
 
         <div className="settings-card">
           <h3>Incident Rules</h3>
