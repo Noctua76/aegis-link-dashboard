@@ -6,22 +6,24 @@ function Settings() {
 
   const [systemStatus, setSystemStatus] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
-
-  useEffect(() => {
-    const loadAlertConfiguration = async () => {
+  const [isTestingAlert, setIsTestingAlert] = useState(false);
+  const loadAlertConfiguration = async () => {
   try {
     const response = await fetch(
-      "https://noctua-panic-backend-production.up.railway.app/settings/alert-configuration"
+      `${API_BASE_URL}/settings/alert-configuration`
     );
 
     const data = await response.json();
 
     setAlertConfig(data);
-
   } catch (err) {
     console.error("Alert configuration error", err);
   }
 };
+
+
+  useEffect(() => {
+    
 
 loadAlertConfiguration();
     async function loadSystemStatus() {
@@ -50,8 +52,32 @@ loadAlertConfiguration();
 
     const interval = setInterval(loadSystemStatus, 10000);
 
+    
     return () => clearInterval(interval);
   }, []);
+
+  const handleTestAlert = async () => {
+  setIsTestingAlert(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/alerts/test`, {
+      method: "POST",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Test alert failed");
+    }
+
+    await loadAlertConfiguration();
+  } catch (err) {
+    console.error("Test alert error", err);
+    alert(err.message || "Test alert failed");
+  } finally {
+    setIsTestingAlert(false);
+  }
+};
 
   return (
     <>
@@ -92,12 +118,12 @@ loadAlertConfiguration();
 
   <div className="settings-item">
     <span>SMS Status</span>
-    <strong>{alertConfig?.last_test?.sms?.status || "error"}</strong>
+    <strong>{alertConfig?.last_test?.sms?.status || "-"}</strong>
   </div>
 
   <div className="settings-item">
     <span>Voice Status</span>
-    <strong>{alertConfig?.last_test?.voice?.status || "error"}</strong>
+    <strong>{alertConfig?.last_test?.voice?.status || "-"}</strong>
   </div>
 
   <div className="settings-item">
@@ -105,7 +131,12 @@ loadAlertConfiguration();
     <strong>{alertConfig?.last_test?.tested_at || "-"}</strong>
   </div>
 
-  <button>Send Test Alert</button>
+  <button
+  onClick={handleTestAlert}
+  disabled={isTestingAlert}
+>
+  {isTestingAlert ? "Sending..." : "Send Test Alert"}
+</button>
 </div>
 
         <div className="settings-card">
