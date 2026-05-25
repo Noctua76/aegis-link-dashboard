@@ -1014,8 +1014,50 @@ if (!currentUser) {
         </div>
       ))}
     </section>
-  </>
+ 
+
+<section
+  style={{
+    marginTop: "24px",
+    background: "#111",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: "18px",
+    padding: "20px",
+  }}
+>
+  <h3 style={{ marginTop: 0 }}>Recent Alert Activity</h3>
+
+  <p style={{ color: "#9ca3af" }}>
+    Dashboard test alerts and escalation activity
+  </p>
+
+  <div
+    style={{
+      marginTop: "16px",
+      display: "grid",
+      gap: "12px",
+    }}
+  >
+    <div
+      style={{
+        padding: "14px",
+        borderRadius: "12px",
+        background: "#0f172a",
+      }}
+    >
+      <strong>TEST ALERT</strong>
+
+      <p>Source: Dashboard Settings</p>
+      <p>Status: Completed</p>
+      <p>SMS: 1 sent / 0 failed</p>
+      <p>Voice: 1 attempted / online</p>
+    </div>
+  </div>
+</section>
+
+</>
 )}
+
         {activeMenu === "Guards" && <Guards />}
         {activeMenu==="Admin Audit Logs" &&
 <AdminAuditLogs/>
