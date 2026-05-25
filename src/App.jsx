@@ -35,6 +35,30 @@ const [loginForm, setLoginForm] = useState({
 
 const [loginError, setLoginError] = useState("");
 const [isLoggingIn, setIsLoggingIn] = useState(false);
+const [recentAlerts, setRecentAlerts] = useState([]);
+
+useEffect(() => {
+  const loadRecentAlerts = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/event-logs`
+      );
+
+      const data = await response.json();
+
+      if (data.status === "ok") {
+        setRecentAlerts(data.logs);
+      }
+    } catch (err) {
+      console.error(
+        "Recent alert activity error:",
+        err
+      );
+    }
+  };
+
+  loadRecentAlerts();
+}, []);
 
 const handleLogin = async (event) => {
   event.preventDefault();
@@ -1038,20 +1062,39 @@ if (!currentUser) {
       gap: "12px",
     }}
   >
-    <div
-      style={{
-        padding: "14px",
-        borderRadius: "12px",
-        background: "#0f172a",
-      }}
-    >
-      <strong>TEST ALERT</strong>
+    {recentAlerts.slice(0, 5).map((alert, index) => (
+  <div
+    key={index}
+    style={{
+      padding: "14px",
+      borderRadius: "12px",
+      background: "#0f172a",
+    }}
+  >
+    <strong>
+      {alert.event_type.toUpperCase()}
+    </strong>
 
-      <p>Source: Dashboard Settings</p>
-      <p>Status: Completed</p>
-      <p>SMS: 1 sent / 0 failed</p>
-      <p>Voice: 1 attempted / online</p>
-    </div>
+    <p>
+      Source: {alert.source}
+    </p>
+
+    <p>
+      Status: {alert.status}
+    </p>
+
+    <p>
+      SMS: {alert.sms_sent} sent /
+      {alert.sms_failed} failed
+    </p>
+
+    <p>
+      Voice: {alert.voice_attempted}
+      attempted /
+      {alert.voice_status}
+    </p>
+  </div>
+))}
   </div>
 </section>
 
