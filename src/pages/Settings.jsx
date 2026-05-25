@@ -79,6 +79,21 @@ loadAlertConfiguration();
   }
 };
 
+const formatGreekDateTime = (value) => {
+  if (!value) return "-";
+
+  return new Date(value).toLocaleString("el-GR", {
+    timeZone: "Europe/Athens",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
+
+
   return (
     <>
       <header style={{ marginBottom: "28px" }}>
@@ -128,7 +143,7 @@ loadAlertConfiguration();
 
   <div className="settings-item">
     <span>Last Test</span>
-    <strong>{alertConfig?.last_test?.tested_at || "-"}</strong>
+    <strong>{formatGreekDateTime(alertConfig?.last_test?.tested_at)}</strong>
   </div>
 
   <button
