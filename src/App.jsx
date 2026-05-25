@@ -1084,14 +1084,18 @@ if (!currentUser) {
     </p>
 
     <p>
+  Time: {new Date(alert.created_at).toLocaleString("el-GR", {
+    timeZone: "Europe/Athens",
+  })}
+</p>
+
+    <p>
       SMS: {alert.sms_sent} sent /
       {alert.sms_failed} failed
     </p>
 
     <p>
-      Voice: {alert.voice_attempted}
-      attempted /
-      {alert.voice_status}
+      Voice: {alert.voice_attempted} attempted / {alert.voice_status}
     </p>
   </div>
 ))}
