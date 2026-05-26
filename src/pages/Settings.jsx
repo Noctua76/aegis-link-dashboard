@@ -6,6 +6,14 @@ function Settings() {
 
   const [systemStatus, setSystemStatus] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
+  const [recipients, setRecipients] = useState([]);
+
+const [newRecipient, setNewRecipient] = useState({
+full_name:"",
+phone:"",
+sms_enabled:true,
+voice_enabled:true,
+});
   const [isTestingAlert, setIsTestingAlert] = useState(false);
   const loadAlertConfiguration = async () => {
   try {
@@ -21,11 +29,68 @@ function Settings() {
   }
 };
 
+const loadRecipients = async () => {
+try{
+
+const response = await fetch(
+`${API_BASE_URL}/settings/alert-recipients`
+);
+
+const data = await response.json();
+
+setRecipients(data.recipients || []);
+
+}catch(err){
+
+console.error(
+"Recipients load error",
+err
+);
+
+}
+};
+
+const addRecipient = async () => {
+
+try{
+
+await fetch(
+`${API_BASE_URL}/settings/alert-recipients`,
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+},
+body:JSON.stringify(newRecipient),
+}
+);
+
+setNewRecipient({
+full_name:"",
+phone:"",
+sms_enabled:true,
+voice_enabled:true,
+});
+
+await loadRecipients();
+
+}catch(err){
+
+console.error(
+"Add recipient error",
+err
+);
+
+}
+
+};
+
 
   useEffect(() => {
     
 
 loadAlertConfiguration();
+loadRecipients();
     async function loadSystemStatus() {
       try {
         const response = await fetch(`${API_BASE_URL}/system/status`);
@@ -146,6 +211,53 @@ const formatGreekDateTime = (value) => {
     <strong>{formatGreekDateTime(alertConfig?.last_test?.tested_at)}</strong>
   </div>
 
+  <hr />
+
+<h4>Recipients</h4>
+
+<input
+placeholder="Name"
+value={newRecipient.full_name}
+onChange={(e)=>
+setNewRecipient({
+...newRecipient,
+full_name:e.target.value
+})
+}
+/>
+
+<input
+placeholder="+3069..."
+value={newRecipient.phone}
+onChange={(e)=>
+setNewRecipient({
+...newRecipient,
+phone:e.target.value
+})
+}
+/>
+
+<button onClick={addRecipient}>
+Add Recipient
+</button>
+
+{recipients.map((item)=>(
+<div
+key={item.id}
+className="settings-item"
+>
+
+<span>
+{item.full_name}
+</span>
+
+<strong>
+{item.phone}
+</strong>
+
+</div>
+))}
+  
   <button
   onClick={handleTestAlert}
   disabled={isTestingAlert}
