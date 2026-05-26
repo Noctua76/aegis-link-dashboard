@@ -241,21 +241,38 @@ phone:e.target.value
 Add Recipient
 </button>
 
-{recipients.map((item)=>(
-<div
-key={item.id}
-className="settings-item"
->
+{recipients.map((item) => (
+  <div
+    key={item.id}
+    className="settings-item"
+  >
+    <div>
+      <span>{item.full_name}</span>
+      <strong>{item.phone}</strong>
+    </div>
 
-<span>
-{item.full_name}
-</span>
+    <button
+      className="danger-btn"
+      onClick={async () => {
+        try {
+          await fetch(
+`${API_BASE_URL}/settings/alert-recipients/${item.id}`,
+            {
+              method: "DELETE",
+            }
+          );
 
-<strong>
-{item.phone}
-</strong>
+          loadRecipients();
 
-</div>
+        } catch (err) {
+          console.error(err);
+        }
+      }}
+    >
+      Delete
+    </button>
+
+  </div>
 ))}
   
   <button
