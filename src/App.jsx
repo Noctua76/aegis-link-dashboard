@@ -36,6 +36,7 @@ const [loginForm, setLoginForm] = useState({
 const [loginError, setLoginError] = useState("");
 const [isLoggingIn, setIsLoggingIn] = useState(false);
 const [recentAlerts, setRecentAlerts] = useState([]);
+const [recentAlertsCheckedAt, setRecentAlertsCheckedAt] = useState(null);
 
 useEffect(() => {
   const loadRecentAlerts = async () => {
@@ -47,8 +48,9 @@ useEffect(() => {
       const data = await response.json();
 
       if (data.status === "ok") {
-        setRecentAlerts(data.logs);
-      }
+  setRecentAlerts(data.logs);
+  setRecentAlertsCheckedAt(new Date());
+}
     } catch (err) {
       console.error(
         "Recent alert activity error:",
@@ -1061,6 +1063,13 @@ if (!currentUser) {
   <p style={{ color: "#9ca3af" }}>
     Dashboard test alerts and escalation activity
   </p>
+  <p style={{ color: "#22c55e", fontSize: "13px" }}>
+  Auto-refresh: every 5 sec
+  {recentAlertsCheckedAt &&
+    ` • Last checked: ${recentAlertsCheckedAt.toLocaleTimeString("el-GR", {
+      timeZone: "Europe/Athens",
+    })}`}
+</p>
 
   <div
     style={{
