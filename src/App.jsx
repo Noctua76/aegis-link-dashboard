@@ -55,11 +55,18 @@ useEffect(() => {
         err
       );
     }
-  };
+    };
 
+loadRecentAlerts();
+
+const interval = setInterval(() => {
   loadRecentAlerts();
+}, 5000);
+
+return () => clearInterval(interval);
 }, []);
 
+  
 const handleLogin = async (event) => {
   event.preventDefault();
   setLoginError("");
