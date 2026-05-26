@@ -115,7 +115,11 @@ loadRecipients();
 
     loadSystemStatus();
 
-    const interval = setInterval(loadSystemStatus, 10000);
+    const interval = setInterval(() => {
+  loadSystemStatus();
+  loadAlertConfiguration();
+  loadRecipients();
+}, 5000);
 
     
     return () => clearInterval(interval);
