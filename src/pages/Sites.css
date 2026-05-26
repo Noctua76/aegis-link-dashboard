@@ -286,3 +286,12 @@
     align-items: flex-start;
   }
 }
+.danger-btn{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#b91c1c;
+color:white;
+font-weight:600;
+}
