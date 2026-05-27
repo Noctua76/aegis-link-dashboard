@@ -4,14 +4,13 @@ import './index.css'
 import App from './App.jsx'
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    registrations.forEach((registration) => registration.unregister())
-  })
-}
+  window.addEventListener('load', () => {
+    const swUrl = `${import.meta.env.BASE_URL}service-worker.js`
 
-if ('caches' in window) {
-  caches.keys().then((keys) => {
-    keys.forEach((key) => caches.delete(key))
+    navigator.serviceWorker
+      .register(swUrl, { scope: import.meta.env.BASE_URL })
+      .then(() => console.log('Aegis PWA ready'))
+      .catch((err) => console.error('SW error', err))
   })
 }
 

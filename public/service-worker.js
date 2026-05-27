@@ -1,21 +1,21 @@
-const CACHE_NAME = "aegis-dashboard-v4";
+const CACHE_NAME = "aegis-dashboard-v5";
+
+const BASE_PATH = new URL(self.registration.scope).pathname;
 
 const STATIC_ASSETS = [
-  "/aegis-link-dashboard/",
-  "/aegis-link-dashboard/site.webmanifest",
-  "/aegis-link-dashboard/favicon.ico",
-  "/aegis-link-dashboard/apple-touch-icon.png",
-  "/aegis-link-dashboard/android-chrome-192x192.png",
-  "/aegis-link-dashboard/android-chrome-512x512.png"
+  BASE_PATH,
+  `${BASE_PATH}site.webmanifest`,
+  `${BASE_PATH}favicon.ico`,
+  `${BASE_PATH}apple-touch-icon.png`,
+  `${BASE_PATH}android-chrome-192x192.png`,
+  `${BASE_PATH}android-chrome-512x512.png`
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      await Promise.allSettled(
-        STATIC_ASSETS.map((asset) => cache.add(asset))
-      );
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      Promise.allSettled(STATIC_ASSETS.map((asset) => cache.add(asset)))
+    )
   );
 
   self.skipWaiting();
