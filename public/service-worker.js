@@ -1,4 +1,4 @@
-const CACHE_NAME = "aegis-dashboard-v2";
+const CACHE_NAME = "aegis-dashboard-v3";
 
 const STATIC_ASSETS = [
   "/aegis-link-dashboard/",
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then((cache) => cache.addAll(STATIC_ASSETS))
   );
 
   self.skipWaiting();
@@ -20,11 +20,11 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
+    caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       )
     )
   );
@@ -35,31 +35,13 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
-  // Ignore browser-extension and chrome internal requests
-  if (
-    event.request.url.startsWith("chrome-extension://") ||
-    event.request.url.includes("extension")
-  ) {
-    return;
-  }
-
-  // Navigation requests
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request).catch(() =>
-        caches.match("/aegis-link-dashboard/")
-      )
-    );
-    return;
-  }
-
-  // Static assets
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return (
-        cachedResponse ||
-        fetch(event.request).catch(() => null)
-      );
-    })
+    fetch(event.request)
+      .then((response) => {
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });
