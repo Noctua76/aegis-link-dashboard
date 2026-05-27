@@ -1,4 +1,4 @@
-const CACHE_NAME = "aegis-dashboard-v3";
+const CACHE_NAME = "aegis-dashboard-v4";
 
 const STATIC_ASSETS = [
   "/aegis-link-dashboard/",
@@ -11,8 +11,11 @@ const STATIC_ASSETS = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(
+        STATIC_ASSETS.map((asset) => cache.add(asset))
+      );
+    })
   );
 
   self.skipWaiting();
@@ -36,12 +39,6 @@ self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
