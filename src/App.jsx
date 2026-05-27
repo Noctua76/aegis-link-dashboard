@@ -1,3 +1,4 @@
+import { APP_VERSION } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -590,6 +591,18 @@ if (!currentUser) {
     alt="Aegis Link Logo"
     className="sidebar-brand-logo"
   />
+
+  <div
+  style={{
+    marginTop: "12px",
+    textAlign: "center",
+    fontSize: "12px",
+    color: "#6b7280",
+    letterSpacing: "1px",
+  }}
+>
+  Dashboard {APP_VERSION}
+</div>
 
   </div>
 
