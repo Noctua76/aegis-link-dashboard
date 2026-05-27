@@ -4,11 +4,14 @@ import './index.css'
 import App from './App.jsx'
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/aegis-link-dashboard/service-worker.js')
-      .then(() => console.log('Aegis PWA ready'))
-      .catch((err) => console.error('SW error', err))
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister())
+  })
+}
+
+if ('caches' in window) {
+  caches.keys().then((keys) => {
+    keys.forEach((key) => caches.delete(key))
   })
 }
 
