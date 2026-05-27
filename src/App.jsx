@@ -9,6 +9,7 @@ import Sites from "./pages/Sites";
 import EventLogs from "./pages/EventLogs";
 import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
+import Analytics from "./pages/Analytics";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -1129,6 +1130,10 @@ if (!currentUser) {
         {activeMenu === "Sites" && <Sites />}
         {activeMenu === "Settings" && (
 <Settings/>
+)}
+
+{activeMenu === "Analytics" && (
+<Analytics/>
 )}
         
         {activeMenu === "System Status" && (
