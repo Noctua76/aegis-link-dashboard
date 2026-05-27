@@ -1,32 +1,44 @@
 {
+  "id": "/aegis-link-dashboard/",
   "name": "Aegis Link Admin Dashboard",
   "short_name": "Aegis Admin",
   "description": "Admin dashboard for Aegis Link security operations.",
+  "start_url": "/aegis-link-dashboard/",
+  "scope": "/aegis-link-dashboard/",
+  "display": "standalone",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "orientation": "portrait-primary",
+  "theme_color": "#050816",
+  "background_color": "#050816",
+  "prefer_related_applications": false,
+  "categories": [
+    "business",
+    "security",
+    "productivity"
+  ],
   "icons": [
     {
       "src": "/aegis-link-dashboard/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/aegis-link-dashboard/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#050816",
-  "background_color": "#050816",
-  "display": "standalone",
-  "orientation": "portrait-primary",
-  "start_url": "/aegis-link-dashboard/",
-  "scope": "/aegis-link-dashboard/"
-  ,
-"screenshots": [
-  {
-    "src": "/aegis-link-dashboard/android-chrome-512x512.png",
-    "sizes": "512x512",
-    "type": "image/png",
-    "form_factor": "narrow"
-  }
-]
+  "screenshots": [
+    {
+      "src": "/aegis-link-dashboard/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
 }
