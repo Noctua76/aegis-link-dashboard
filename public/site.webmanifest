@@ -1,22 +1,21 @@
 {
-  "id": "/aegis-link-dashboard-admin/",
   "name": "Aegis Link Admin Dashboard",
   "short_name": "Aegis Admin",
   "description": "Admin dashboard for Aegis Link security operations.",
-  "start_url": "/aegis-link-dashboard/",
-  "scope": "/aegis-link-dashboard/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
   "theme_color": "#050816",
   "background_color": "#050816",
   "icons": [
     {
-      "src": "/aegis-link-dashboard/android-chrome-192x192.png",
+      "src": "android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/aegis-link-dashboard/android-chrome-512x512.png",
+      "src": "android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
