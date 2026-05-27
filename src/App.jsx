@@ -1,4 +1,4 @@
-import { APP_VERSION } from "./config/version";
+import { APP_VERSION, APP_BUILD } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -601,7 +601,7 @@ if (!currentUser) {
     letterSpacing: "1px",
   }}
 >
-  Dashboard {APP_VERSION}
+  Dashboard {APP_VERSION} · build {APP_BUILD}
 </div>
 
   </div>
