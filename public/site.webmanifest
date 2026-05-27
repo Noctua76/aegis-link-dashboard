@@ -1,5 +1,5 @@
 {
-  "id": "/aegis-link-dashboard/",
+  "id": "/aegis-link-dashboard-admin/",
   "name": "Aegis Link Admin Dashboard",
   "short_name": "Aegis Admin",
   "description": "Admin dashboard for Aegis Link security operations.",
@@ -13,14 +13,12 @@
     {
       "src": "/aegis-link-dashboard/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     },
     {
       "src": "/aegis-link-dashboard/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
