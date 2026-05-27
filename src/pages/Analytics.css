@@ -55,7 +55,7 @@
 
 .analytics-row {
   display: grid;
-  grid-template-columns: 1.6fr .7fr .7fr .7fr .9fr .9fr .9fr;
+  grid-template-columns: 1.6fr .7fr .7fr .7fr .9fr .9fr .9fr .9fr;
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
