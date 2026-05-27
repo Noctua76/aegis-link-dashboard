@@ -7,6 +7,7 @@ function Settings() {
   const [systemStatus, setSystemStatus] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
   const [recipients, setRecipients] = useState([]);
+  const [showRecipientsModal, setShowRecipientsModal] = useState(false);
 
 const [newRecipient, setNewRecipient] = useState({
 full_name:"",
@@ -245,39 +246,14 @@ phone:e.target.value
 Add Recipient
 </button>
 
-{recipients.map((item) => (
-  <div
-    key={item.id}
-    className="settings-item"
-  >
-    <div>
-      <span>{item.full_name}</span>
-      <strong>{item.phone}</strong>
-    </div>
-
-    <button
-      className="danger-btn"
-      onClick={async () => {
-        try {
-          await fetch(
-`${API_BASE_URL}/settings/alert-recipients/${item.id}`,
-            {
-              method: "DELETE",
-            }
-          );
-
-          loadRecipients();
-
-        } catch (err) {
-          console.error(err);
-        }
-      }}
-    >
-      Delete
-    </button>
-
-  </div>
-))}
+<button
+className="secondary-button"
+onClick={()=>
+setShowRecipientsModal(true)
+}
+>
+Manage Recipients
+</button>
   
   <button
   onClick={handleTestAlert}
@@ -468,6 +444,104 @@ Add Recipient
           </div>
         </div>
       </section>
+      {showRecipientsModal && (
+
+<div className="modal-overlay">
+
+<div className="recipients-modal">
+
+<div className="modal-header">
+
+<h3>
+Alert Recipients
+</h3>
+
+<button
+className="modal-close"
+
+onClick={()=>
+setShowRecipientsModal(
+false
+)
+}
+>
+
+×
+
+</button>
+
+</div>
+
+<div className="recipients-list-modal">
+
+{recipients.map(
+(item)=>(
+
+<div
+key={item.id}
+
+className="
+recipient-row-modal
+"
+>
+
+<div>
+
+<strong>
+{item.full_name}
+</strong>
+
+<span>
+{item.phone}
+</span>
+
+</div>
+
+<button
+className="danger-btn"
+
+onClick={async()=>{
+
+try{
+
+await fetch(
+`${API_BASE_URL}/settings/alert-recipients/${item.id}`,
+{
+method:
+"DELETE"
+}
+);
+
+loadRecipients();
+
+}catch(err){
+
+console.error(
+err
+);
+
+}
+
+}}
+>
+
+Delete
+
+</button>
+
+</div>
+
+)
+
+)}
+
+</div>
+
+</div>
+
+</div>
+
+)}
     </>
   );
 }
