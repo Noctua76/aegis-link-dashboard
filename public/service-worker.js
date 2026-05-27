@@ -35,8 +35,31 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
+  // Ignore browser-extension and chrome internal requests
+  if (
+    event.request.url.startsWith("chrome-extension://") ||
+    event.request.url.includes("extension")
+  ) {
+    return;
+  }
+
+  // Navigation requests
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match("/aegis-link-dashboard/")
+      )
+    );
+    return;
+  }
+
+  // Static assets
   event.respondWith(
-    fetch(event.request)
-      .catch(() => caches.match(event.request))
+    caches.match(event.request).then((cachedResponse) => {
+      return (
+        cachedResponse ||
+        fetch(event.request).catch(() => null)
+      );
+    })
   );
 });
