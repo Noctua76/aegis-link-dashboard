@@ -20,4 +20,13 @@
   "orientation": "portrait-primary",
   "start_url": "/aegis-link-dashboard/",
   "scope": "/aegis-link-dashboard/"
+  ,
+"screenshots": [
+  {
+    "src": "/aegis-link-dashboard/android-chrome-512x512.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "form_factor": "narrow"
+  }
+]
 }
