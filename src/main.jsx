@@ -6,7 +6,7 @@ import App from './App.jsx'
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/service-worker.js')
+      .register('/aegis-link-dashboard/service-worker.js')
       .then(() => console.log('Aegis PWA ready'))
       .catch((err) => console.error('SW error', err))
   })
