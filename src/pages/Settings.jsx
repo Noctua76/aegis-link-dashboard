@@ -376,7 +376,7 @@ Manage Recipients
     <div style={{ fontSize: "12px", color: "#6b7280" }}>
       Server:
       {" "}
-      {systemStatus?.services?.database?.server_time || "-"}
+      {formatGreekDateTime(systemStatus?.services?.database?.server_time)}
     </div>
   </div>
 
@@ -391,7 +391,7 @@ Manage Recipients
   >
     Last checked:
     {" "}
-    {systemStatus?.checked_at || "-"}
+    {formatGreekDateTime(systemStatus?.checked_at)}
 
     <br />
 
