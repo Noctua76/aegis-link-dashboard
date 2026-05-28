@@ -897,3 +897,51 @@
     left: 120%;
   }
 }
+/* ======================================================
+   LIVE INCIDENTS MOBILE FIX
+====================================================== */
+
+@media (max-width: 768px) {
+  .incident-flow {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .incident-flow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .incident-flow span {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .filter-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .incident-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .incident-status {
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+
+  .incident-detail-card {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .incident-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
