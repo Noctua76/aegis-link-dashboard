@@ -945,6 +945,13 @@
     grid-template-columns: 1fr;
   }
 }
+.live-incident-filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
 @media (max-width: 768px) {
   .live-incident-filters {
     display: flex;
