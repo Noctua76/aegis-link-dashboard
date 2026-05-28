@@ -975,7 +975,7 @@ if (!currentUser) {
       </p>
     </header>
 
-    <section style={{ display: "flex", gap: "10px", marginBottom: "24px" }}>
+    <section className="live-incident-filters">
      {["All", "Normal", "Active", "In Progress", "Resolved"].map((filter) => (
   <button
     key={filter}

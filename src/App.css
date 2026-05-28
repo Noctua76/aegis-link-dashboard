@@ -945,3 +945,24 @@
     grid-template-columns: 1fr;
   }
 }
+@media (max-width: 768px) {
+  .live-incident-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .live-incident-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .live-incident-filters .filter-button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
