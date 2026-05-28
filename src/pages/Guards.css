@@ -440,3 +440,25 @@
     margin: 6px 0 0 0;
   }
 }
+@media (max-width: 768px) {
+  .guards-header.centered-guards-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .guards-title-block {
+    text-align: center;
+  }
+
+  .guards-title-block p {
+    margin-bottom: 0;
+  }
+
+  .live-badge {
+    position: static !important;
+    margin-top: 0 !important;
+    align-self: center;
+  }
+}
