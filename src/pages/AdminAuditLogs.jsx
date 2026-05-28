@@ -73,18 +73,7 @@ function AdminAuditLogs() {
         View and monitor admin user sessions and activity.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          padding: "18px",
-          marginBottom: "20px",
-          border: "1px solid rgba(255,255,255,0.12)",
-          borderRadius: "14px",
-          background: "rgba(255,255,255,0.04)",
-        }}
-      >
+      <div className="audit-toolbar">
         <label>From</label>
         <input
           type="date"
