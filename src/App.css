@@ -945,35 +945,3 @@
     grid-template-columns: 1fr;
   }
 }
-/* ======================================================
-   LIVE INCIDENTS FILTER TABS MOBILE FIX
-====================================================== */
-
-@media (max-width: 768px) {
-  .filter-tabs,
-  .incident-filters,
-  .status-filters {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    gap: 8px;
-    width: 100%;
-    max-width: 100%;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-
-  .filter-tabs::-webkit-scrollbar,
-  .incident-filters::-webkit-scrollbar,
-  .status-filters::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filter-tabs .filter-button,
-  .incident-filters .filter-button,
-  .status-filters .filter-button {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-  }
-}
