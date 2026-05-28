@@ -973,3 +973,38 @@
     white-space: nowrap;
   }
 }
+/* ======================================================
+   ADMIN AUDIT LOGS TOOLBAR
+====================================================== */
+
+.audit-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+}
+
+@media (max-width: 768px) {
+  .audit-toolbar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .audit-toolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .audit-toolbar label,
+  .audit-toolbar input,
+  .audit-toolbar button,
+  .audit-toolbar a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
