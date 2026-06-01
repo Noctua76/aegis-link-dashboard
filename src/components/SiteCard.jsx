@@ -17,13 +17,15 @@ function SiteCard({ site }) {
       <div className="site-card-header">
         <h3>{site.name}</h3>
 
-        <span className={getStatusClass(site.status)}>
-          {site.status === "alert"
-            ? "Alert Active"
-            : site.status === "normal"
-            ? "Normal"
-            : "No Guard"}
-        </span>
+        <span
+  className={
+    site.on_duty > 0
+      ? "site-status normal"
+      : "site-status no-guard"
+  }
+>
+  {site.on_duty > 0 ? "Covered" : "No Guard"}
+</span>
       </div>
 
       <div className="site-card-body">
