@@ -634,6 +634,107 @@ const updateResolutionForm = (incidentDbId, field, value) => {
   }));
 };
 
+const handlePrintIncidentReport = (incident) => {
+  const reportWindow = window.open("", "_blank");
+
+  if (!reportWindow) return;
+
+  reportWindow.document.write(`
+    <html>
+      <head>
+        <title>Aegis Link Incident Report - ${incident.incident_ref}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            color: #111;
+          }
+
+          h1 {
+            margin-bottom: 4px;
+          }
+
+          .subtitle {
+            color: #555;
+            margin-bottom: 30px;
+          }
+
+          .section {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #ddd;
+          }
+
+          .row {
+            margin: 8px 0;
+          }
+
+          strong {
+            display: inline-block;
+            min-width: 180px;
+          }
+        </style>
+      </head>
+
+      <body>
+        <h1>Aegis Link Incident Report</h1>
+        <div class="subtitle">Official resolved incident record</div>
+
+        <div class="section">
+          <div class="row"><strong>Incident Ref:</strong> ${incident.incident_ref || "-"}</div>
+          <div class="row"><strong>Status:</strong> ${incident.status || "-"}</div>
+          <div class="row"><strong>Priority:</strong> ${incident.priority || "-"}</div>
+          <div class="row"><strong>Site:</strong> ${incident.site_name || "-"}</div>
+          <div class="row"><strong>Location:</strong> ${incident.site_location || "-"}</div>
+          <div class="row"><strong>Guard:</strong> ${incident.guard_name || "-"}</div>
+        </div>
+
+        <div class="section">
+          <div class="row"><strong>Triggered:</strong> ${
+            incident.trigger_time
+              ? new Date(incident.trigger_time).toLocaleString("el-GR")
+              : "-"
+          }</div>
+
+          <div class="row"><strong>Resolved:</strong> ${
+            incident.resolved_time
+              ? new Date(incident.resolved_time).toLocaleString("el-GR")
+              : "-"
+          }</div>
+
+          <div class="row"><strong>Approved By:</strong> ${incident.approved_by || "-"}</div>
+          <div class="row"><strong>Approved At:</strong> ${
+            incident.approved_at
+              ? new Date(incident.approved_at).toLocaleString("el-GR")
+              : "-"
+          }</div>
+        </div>
+
+        <div class="section">
+          <div class="row"><strong>Supervisor:</strong> ${incident.supervisor_name || "-"}</div>
+          <div class="row"><strong>Supervisor Notes:</strong> ${incident.supervisor_notes || "-"}</div>
+          <div class="row"><strong>Guard Contact:</strong> ${incident.guard_contacted_name || "-"}</div>
+          <div class="row"><strong>Guard Notes:</strong> ${incident.guard_notes || "-"}</div>
+          <div class="row"><strong>Residence Contact:</strong> ${incident.residence_contacted_name || "-"}</div>
+          <div class="row"><strong>Residence Notes:</strong> ${incident.residence_notes || "-"}</div>
+        </div>
+
+        <div class="section">
+          <div class="row"><strong>AI Summary:</strong> ${incident.ai_summary || "-"}</div>
+          <div class="row"><strong>Admin Notes:</strong> ${incident.admin_notes || "-"}</div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+    </html>
+  `);
+
+  reportWindow.document.close();
+};
 const handleResolveIncident = async (incident) => {
   const form = resolutionForms[incident.incidentDbId] || {};
 
@@ -1287,6 +1388,12 @@ const handleResolveIncident = async (incident) => {
         <p><strong>Guard Contact:</strong> {incident.guard_contacted_name || "-"}</p>
         <p><strong>Residence Contact:</strong> {incident.residence_contacted_name || "-"}</p>
         <p><strong>Admin Notes:</strong> {incident.admin_notes || "-"}</p>
+        <button
+  type="button"
+  onClick={() => handlePrintIncidentReport(incident)}
+>
+  🖨 Print / Export PDF
+</button>
       </div>
     ))
 : filteredIncidents.map((incident, index) => (
