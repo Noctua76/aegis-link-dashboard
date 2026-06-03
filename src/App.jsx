@@ -745,24 +745,37 @@ const handleResolveIncident = async (incident) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        supervisor_notified: form.supervisor_notified || false,
-        supervisor_name: form.supervisor_name || "",
-        supervisor_notes: form.supervisor_notes || "",
+  supervisor_notified: true,
+  supervisor_name:
+    form.supervisor_name ||
+    currentUser?.user?.username ||
+    currentUser?.username ||
+    "",
 
-        guard_contacted: form.guard_contacted || false,
-        guard_contacted_name: form.guard_contacted_name || "",
-        guard_notes: form.guard_notes || "",
+  supervisor_notes: form.supervisor_notes || "",
 
-        residence_contacted: form.residence_contacted || false,
-        residence_contacted_name: form.residence_contacted_name || "",
-        residence_notes: form.residence_notes || "",
+  guard_contacted: true,
+  guard_contacted_name:
+    form.guard_contacted_name ||
+    incident.guard ||
+    "",
 
-        admin_notes: form.admin_notes || "",
-        approved_by:
-          currentUser?.user?.username ||
-          currentUser?.username ||
-          "Unknown admin",
-      }),
+  guard_notes: form.guard_notes || "",
+
+  residence_contacted: true,
+  residence_contacted_name:
+    form.residence_contacted_name ||
+    incident.site ||
+    "",
+
+  residence_notes: form.residence_notes || "",
+
+  admin_notes: form.admin_notes || "",
+  approved_by:
+    currentUser?.user?.username ||
+    currentUser?.username ||
+    "Unknown admin",
+}),
     });
 
     setDashboardIncidents((prev) =>
@@ -1299,21 +1312,26 @@ const handleResolveIncident = async (incident) => {
 <label>
   Supervisor Name
   <input
-    type="text"
-    onChange={(e) => {
-      updateResolutionForm(
-        incident.incidentDbId,
-        "supervisor_notified",
-        true
-      );
+  type="text"
+  defaultValue={
+    currentUser?.user?.username ||
+    currentUser?.username ||
+    ""
+  }
+  onBlur={(e) => {
+    updateResolutionForm(
+      incident.incidentDbId,
+      "supervisor_notified",
+      true
+    );
 
-      updateResolutionForm(
-        incident.incidentDbId,
-        "supervisor_name",
-        e.target.value
-      );
-    }}
-  />
+    updateResolutionForm(
+      incident.incidentDbId,
+      "supervisor_name",
+      e.target.value
+    );
+  }}
+/>
 </label>
 
 <label>
@@ -1337,15 +1355,16 @@ const handleResolveIncident = async (incident) => {
 <label>
   Guard Contact Name
   <input
-    type="text"
-    onChange={(e) =>
-      updateResolutionForm(
-        incident.incidentDbId,
-        "guard_contacted_name",
-        e.target.value
-      )
-    }
-  />
+  type="text"
+  defaultValue={incident.guard || ""}
+  onBlur={(e) =>
+    updateResolutionForm(
+      incident.incidentDbId,
+      "guard_contacted_name",
+      e.target.value
+    )
+  }
+/>
 </label>
 
 <label>
@@ -1370,15 +1389,16 @@ const handleResolveIncident = async (incident) => {
 <label>
   Residence Contact Name
   <input
-    type="text"
-    onChange={(e) =>
-      updateResolutionForm(
-        incident.incidentDbId,
-        "residence_contacted_name",
-        e.target.value
-      )
-    }
-  />
+  type="text"
+  defaultValue={incident.site || ""}
+  onBlur={(e) =>
+    updateResolutionForm(
+      incident.incidentDbId,
+      "residence_contacted_name",
+      e.target.value
+    )
+  }
+/>
 </label>
 
 <label>
