@@ -1127,17 +1127,25 @@ const handleResolveIncident = async (incident) => {
       }
     />
 
-    <input
-      type="text"
-      placeholder="Filter by site"
-      value={resolvedFilters.site}
-      onChange={(e) =>
-        setResolvedFilters({
-          ...resolvedFilters,
-          site: e.target.value,
-        })
-      }
-    />
+    <select
+  value={resolvedFilters.site}
+  onChange={(e) =>
+    setResolvedFilters({
+      ...resolvedFilters,
+      site: e.target.value,
+    })
+  }
+>
+  <option value="">All Sites</option>
+
+  {[...new Set(resolvedIncidents.map((incident) => incident.site_name))]
+    .filter(Boolean)
+    .map((siteName) => (
+      <option key={siteName} value={siteName}>
+        {siteName}
+      </option>
+    ))}
+</select>
 
     <button
       type="button"
