@@ -1104,3 +1104,37 @@
   margin: 0 0 14px 0;
   color: #fca5a5;
 }
+.resolved-filters {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 18px 0 26px;
+  flex-wrap: wrap;
+}
+
+.resolved-filters input,
+.resolved-filters select {
+  height: 38px;
+  min-width: 170px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: #111827;
+  color: #e5e7eb;
+  outline: none;
+}
+
+.resolved-filters button {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: #1f2937;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.resolved-filters button:hover {
+  background: #374151;
+}
