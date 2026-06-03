@@ -1264,15 +1264,15 @@ const handleResolveIncident = async (incident) => {
 
       const siteMatch =
         !resolvedFilters.site ||
-        incident.site?.toLowerCase().includes(resolvedFilters.site.toLowerCase());
+        incident.site_name?.toLowerCase().includes(resolvedFilters.site.toLowerCase());
 
       return dateMatch && siteMatch;
     })
     .map((incident, index) => (
       <div key={index} className="incident-detail-card resolved">
-        <h3>✅ {incident.incident_id}</h3>
-        <p><strong>Site:</strong> {incident.site}</p>
-        <p><strong>Guard:</strong> {incident.guard}</p>
+        <h3>✅ {incident.incident_ref}</h3>
+        <p><strong>Site:</strong> {incident.site_name}</p>
+        <p><strong>Guard:</strong> {incident.guard_name}</p>
         <p><strong>Resolved:</strong> {incident.resolved_time ? new Date(incident.resolved_time).toLocaleString("el-GR") : "-"}</p>
         <p><strong>Approved By:</strong> {incident.approved_by || "-"}</p>
         <p><strong>Supervisor:</strong> {incident.supervisor_name || "-"}</p>
