@@ -549,6 +549,33 @@ if (!currentUser) {
   );
 }
   
+const getFlowStatusClass = (status) => {
+  const value = status?.toLowerCase();
+
+  if (
+    value === "received" ||
+    value === "sending" ||
+    value === "dialing" ||
+    value === "processing" ||
+    value === "pending"
+  ) {
+    return "flow-active";
+  }
+
+  if (
+    value === "completed" ||
+    value === "delivered"
+  ) {
+    return "flow-completed";
+  }
+
+  if (value === "failed") {
+    return "flow-failed";
+  }
+
+  return "flow-ready";
+};
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", margin: 0 }}>
       <aside
@@ -1027,10 +1054,21 @@ if (!currentUser) {
           </div>
 
           <div className="incident-flow">
-  <span>🚨 Trigger {incident.triggerStatus}</span>
-  <span>📩 SMS {incident.smsStatus}</span>
-  <span>📞 Call {incident.callStatus}</span>
-  <span>🤖 AI {incident.aiStatus}</span>
+  <span className={`flow-step trigger ${getFlowStatusClass(incident.triggerStatus)}`}>
+    🚨 Trigger {incident.triggerStatus}
+  </span>
+
+  <span className={`flow-step sms ${getFlowStatusClass(incident.smsStatus)}`}>
+    📩 SMS {incident.smsStatus}
+  </span>
+
+  <span className={`flow-step call ${getFlowStatusClass(incident.callStatus)}`}>
+    📞 Call {incident.callStatus}
+  </span>
+
+  <span className={`flow-step ai ${getFlowStatusClass(incident.aiStatus)}`}>
+    🤖 AI {incident.aiStatus}
+  </span>
 </div>
 
           <div className="incident-ai-box">
