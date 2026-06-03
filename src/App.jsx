@@ -1288,79 +1288,137 @@ const handleResolveIncident = async (incident) => {
     >
       <h3>🚨 Incident Investigation</h3>
 
-      <p><strong>Site:</strong> {incident.site}</p>
-      <p><strong>Guard:</strong> {incident.guard}</p>
-      <p><strong>Incident:</strong> {incident.incidentId}</p>
+<p><strong>Site:</strong> {incident.site}</p>
+<p><strong>Guard:</strong> {incident.guard}</p>
+<p><strong>Incident:</strong> {incident.incidentId}</p>
 
-      <hr />
+<hr />
 
-      <label>
-        Supervisor Name
-        <input
-          type="text"
-          onChange={(e) => {
-  updateResolutionForm(
-    incident.incidentDbId,
-    "supervisor_notified",
-    true
-  );
+<h4>Supervisor</h4>
 
-  updateResolutionForm(
-    incident.incidentDbId,
-    "supervisor_name",
-    e.target.value
-  );
-}}
-        />
-      </label>
+<label>
+  Supervisor Name
+  <input
+    type="text"
+    onChange={(e) => {
+      updateResolutionForm(
+        incident.incidentDbId,
+        "supervisor_notified",
+        true
+      );
 
-      <label>
-        Guard Contact Name
-        <input
-          type="text"
-          onChange={(e) =>
-            updateResolutionForm(
-              incident.incidentDbId,
-              "guard_contacted_name",
-              e.target.value
-            )
-          }
-        />
-      </label>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "supervisor_name",
+        e.target.value
+      );
+    }}
+  />
+</label>
 
-      <label>
-        Residence Contact Name
-        <input
-          type="text"
-          onChange={(e) =>
-            updateResolutionForm(
-              incident.incidentDbId,
-              "residence_contacted_name",
-              e.target.value
-            )
-          }
-        />
-      </label>
+<label>
+  Supervisor Notes
+  <textarea
+    rows="3"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "supervisor_notes",
+        e.target.value
+      )
+    }
+  />
+</label>
 
-      <label>
-        Admin Notes
-        <textarea
-          rows="4"
-          onChange={(e) =>
-            updateResolutionForm(
-              incident.incidentDbId,
-              "admin_notes",
-              e.target.value
-            )
-          }
-        />
-      </label>
+<hr />
 
-      <button
-        onClick={() => handleResolveIncident(incident)}
-      >
-        Approve & Resolve
-      </button>
+<h4>Guard Contact</h4>
+
+<label>
+  Guard Contact Name
+  <input
+    type="text"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "guard_contacted_name",
+        e.target.value
+      )
+    }
+  />
+</label>
+
+<label>
+  Guard Notes
+  <textarea
+    rows="4"
+    placeholder="Guard report / incident description"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "guard_notes",
+        e.target.value
+      )
+    }
+  />
+</label>
+
+<hr />
+
+<h4>Residence Contact</h4>
+
+<label>
+  Residence Contact Name
+  <input
+    type="text"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "residence_contacted_name",
+        e.target.value
+      )
+    }
+  />
+</label>
+
+<label>
+  Residence Notes
+  <textarea
+    rows="3"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "residence_notes",
+        e.target.value
+      )
+    }
+  />
+</label>
+
+<hr />
+
+<h4>Admin Review</h4>
+
+<label>
+  Admin Notes
+  <textarea
+    rows="6"
+    onChange={(e) =>
+      updateResolutionForm(
+        incident.incidentDbId,
+        "admin_notes",
+        e.target.value
+      )
+    }
+  />
+</label>
+
+<button
+  className="resolve-button"
+  onClick={() => handleResolveIncident(incident)}
+>
+  Approve & Resolve
+</button>
     </div>
   ))
 
