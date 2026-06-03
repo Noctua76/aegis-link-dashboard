@@ -145,6 +145,7 @@ const handleLogout = async () => {
 });
 const [liveActiveGuards, setLiveActiveGuards] = useState([]);
   const [incidentFilter, setIncidentFilter] = useState("All");
+  const [resolutionForms, setResolutionForms] = useState({});
 const menuItems = [
   "Dashboard",
   "Live Incidents",
@@ -594,6 +595,54 @@ const getFlowStatusClass = (status) => {
   }
 
   return "flow-ready";
+};
+
+const updateResolutionForm = (incidentDbId, field, value) => {
+  setResolutionForms((prev) => ({
+    ...prev,
+    [incidentDbId]: {
+      ...prev[incidentDbId],
+      [field]: value,
+    },
+  }));
+};
+
+const handleResolveIncident = async (incident) => {
+  const form = resolutionForms[incident.incidentDbId] || {};
+
+  try {
+    await fetch(`${API_BASE_URL}/incidents/${incident.incidentDbId}/resolve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        supervisor_notified: form.supervisor_notified || false,
+        supervisor_name: form.supervisor_name || "",
+        supervisor_notes: form.supervisor_notes || "",
+
+        guard_contacted: form.guard_contacted || false,
+        guard_contacted_name: form.guard_contacted_name || "",
+        guard_notes: form.guard_notes || "",
+
+        residence_contacted: form.residence_contacted || false,
+        residence_contacted_name: form.residence_contacted_name || "",
+        residence_notes: form.residence_notes || "",
+
+        admin_notes: form.admin_notes || "",
+        approved_by:
+          currentUser?.user?.username ||
+          currentUser?.username ||
+          "Unknown admin",
+      }),
+    });
+
+    setDashboardIncidents((prev) =>
+      prev.filter((item) => item.incidentDbId !== incident.incidentDbId)
+    );
+  } catch (err) {
+    console.error("Resolve incident failed:", err);
+  }
 };
 
   return (
@@ -1056,6 +1105,90 @@ const getFlowStatusClass = (status) => {
           <p>Guard: {incident.guard}</p>
         </div>
       ))
+      : incidentFilter === "In Progress"
+? filteredIncidents.map((incident, index) => (
+    <div
+      key={index}
+      className="incident-detail-card in-progress"
+    >
+      <h3>🚨 Incident Investigation</h3>
+
+      <p><strong>Site:</strong> {incident.site}</p>
+      <p><strong>Guard:</strong> {incident.guard}</p>
+      <p><strong>Incident:</strong> {incident.incidentId}</p>
+
+      <hr />
+
+      <label>
+        Supervisor Name
+        <input
+          type="text"
+          onChange={(e) => {
+  updateResolutionForm(
+    incident.incidentDbId,
+    "supervisor_notified",
+    true
+  );
+
+  updateResolutionForm(
+    incident.incidentDbId,
+    "supervisor_name",
+    e.target.value
+  );
+}}
+        />
+      </label>
+
+      <label>
+        Guard Contact Name
+        <input
+          type="text"
+          onChange={(e) =>
+            updateResolutionForm(
+              incident.incidentDbId,
+              "guard_contacted_name",
+              e.target.value
+            )
+          }
+        />
+      </label>
+
+      <label>
+        Residence Contact Name
+        <input
+          type="text"
+          onChange={(e) =>
+            updateResolutionForm(
+              incident.incidentDbId,
+              "residence_contacted_name",
+              e.target.value
+            )
+          }
+        />
+      </label>
+
+      <label>
+        Admin Notes
+        <textarea
+          rows="4"
+          onChange={(e) =>
+            updateResolutionForm(
+              incident.incidentDbId,
+              "admin_notes",
+              e.target.value
+            )
+          }
+        />
+      </label>
+
+      <button
+        onClick={() => handleResolveIncident(incident)}
+      >
+        Approve & Resolve
+      </button>
+    </div>
+  ))
+
     : filteredIncidents.map((incident, index) => (
         <div
           key={index}
