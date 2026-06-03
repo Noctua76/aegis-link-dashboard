@@ -1102,7 +1102,7 @@ const getFlowStatusClass = (status) => {
       ))}
     </section>
  
-
+{incidentFilter === "All" && (        
 <section
   style={{
     marginTop: "24px",
@@ -1171,6 +1171,7 @@ const getFlowStatusClass = (status) => {
 ))}
   </div>
 </section>
+)}
 
 </>
 )}
