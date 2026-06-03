@@ -486,6 +486,10 @@ setSystemStatus({
           incidentFilter.toLowerCase().replace(" ", "_")
       );
 
+      const hasActiveIncident = dashboardIncidents.some(
+  (incident) => incident.status === "active"
+);
+
 const formatTimelineTime = (value) => {
   if (!value) return "-";
 
@@ -1023,8 +1027,10 @@ const getFlowStatusClass = (status) => {
   <button
     key={filter}
     className={`filter-button ${
-      incidentFilter === filter ? "active-filter" : ""
-    }`}
+  incidentFilter === filter ? "active-filter" : ""
+} ${
+  filter === "Active" && hasActiveIncident ? "active-alert-button" : ""
+}`}
     onClick={() => setIncidentFilter(filter)}
   >
     {filter}
@@ -1033,11 +1039,28 @@ const getFlowStatusClass = (status) => {
     </section>
 
     <section style={{ display: "grid", gap: "16px" }}>
-      {filteredIncidents.map((incident, index) => (
-  <div
-    key={index}
-    className={`incident-detail-card ${incident.status}`}
-  >
+  {incidentFilter === "Active"
+    ? filteredIncidents.map((incident, index) => (
+        <div key={index} className="active-alert-panel">
+          <h2>🚨 ALERT ON {incident.site}</h2>
+
+          <p>
+            Triggered:{" "}
+            {incident.triggerTime
+              ? new Date(incident.triggerTime).toLocaleTimeString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </p>
+
+          <p>Guard: {incident.guard}</p>
+        </div>
+      ))
+    : filteredIncidents.map((incident, index) => (
+        <div
+          key={index}
+          className={`incident-detail-card ${incident.status}`}
+        >
           <div className="incident-card-header">
             <div>
               <h3>{incident.title}</h3>
@@ -1046,12 +1069,12 @@ const getFlowStatusClass = (status) => {
 
             <span className="incident-status">
               {incident.status === "normal"
-  ? "Normal"
-  : incident.status === "active"
-  ? "Active"
-  : incident.status === "resolved"
-  ? "Resolved"
-  : "In Progress"}
+                ? "Normal"
+                : incident.status === "active"
+                ? "Active"
+                : incident.status === "resolved"
+                ? "Resolved"
+                : "In Progress"}
             </span>
           </div>
 
@@ -1059,62 +1082,58 @@ const getFlowStatusClass = (status) => {
             <p><strong>Site:</strong> {incident.site}</p>
             <p><strong>Guard:</strong> {incident.guard}</p>
             <p>
-  <strong>Alert status:</strong>{" "}
-  {incident.status === "normal"
-    ? "Waiting for alert"
-    : incident.status === "resolved"
-    ? "Resolved"
-    : "Alert active"}
-</p>
+              <strong>Alert status:</strong>{" "}
+              {incident.status === "normal"
+                ? "Waiting for alert"
+                : incident.status === "resolved"
+                ? "Resolved"
+                : "Alert active"}
+            </p>
             <p><strong>Priority:</strong> {incident.priority}</p>
           </div>
 
           <div className="incident-flow">
-  <span className={`flow-step trigger ${getFlowStatusClass(incident.triggerStatus)}`}>
-    🚨 Trigger {incident.triggerStatus}
-  </span>
+            <span className={`flow-step trigger ${getFlowStatusClass(incident.triggerStatus)}`}>
+              🚨 Trigger {incident.triggerStatus}
+            </span>
 
-  <span className={`flow-step sms ${getFlowStatusClass(incident.smsStatus)}`}>
-    📩 SMS {incident.smsStatus}
-  </span>
+            <span className={`flow-step sms ${getFlowStatusClass(incident.smsStatus)}`}>
+              📩 SMS {incident.smsStatus}
+            </span>
 
-  <span className={`flow-step call ${getFlowStatusClass(incident.callStatus)}`}>
-    📞 Call {incident.callStatus}
-  </span>
+            <span className={`flow-step call ${getFlowStatusClass(incident.callStatus)}`}>
+              📞 Call {incident.callStatus}
+            </span>
 
-  <span className={`flow-step ai ${getFlowStatusClass(incident.aiStatus)}`}>
-    🤖 AI {incident.aiStatus}
-  </span>
-</div>
+            <span className={`flow-step ai ${getFlowStatusClass(incident.aiStatus)}`}>
+              🤖 AI {incident.aiStatus}
+            </span>
+          </div>
 
           <div className="incident-ai-box">
-  <h4>AI Intake</h4>
+            <h4>AI Intake</h4>
 
-  <p>
-    <strong>Status:</strong>
-    {" "}
-    {incident.status === "normal"
-      ? "Waiting for incident trigger"
-      : incident.aiSummary}
-  </p>
+            <p>
+              <strong>Status:</strong>{" "}
+              {incident.status === "normal"
+                ? "Waiting for incident trigger"
+                : incident.aiSummary}
+            </p>
 
-  <p>
-    <strong>Site:</strong>
-    {" "}
-    {incident.site}
-  </p>
+            <p>
+              <strong>Site:</strong> {incident.site}
+            </p>
 
-  <p>
-    <strong>Escalation:</strong>
-    {" "}
-    {incident.status === "normal"
-      ? "Standby"
-      : incident.escalation}
-  </p>
-</div>
+            <p>
+              <strong>Escalation:</strong>{" "}
+              {incident.status === "normal"
+                ? "Standby"
+                : incident.escalation}
+            </p>
+          </div>
         </div>
       ))}
-    </section>
+</section>
  
 {incidentFilter === "All" && (        
 <section
