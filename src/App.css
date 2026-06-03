@@ -1138,3 +1138,15 @@
 .resolved-filters button:hover {
   background: #374151;
 }
+.active-filter {
+  background: #22c55e;
+  color: #ffffff;
+  border: 1px solid #22c55e;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
+  font-weight: 700;
+}
+
+.active-filter:hover {
+  background: #16a34a;
+  color: #ffffff;
+}
