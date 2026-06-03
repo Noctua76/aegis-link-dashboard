@@ -1150,3 +1150,64 @@
   background: #16a34a;
   color: #ffffff;
 }
+
+.in-progress label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+.in-progress input,
+.in-progress textarea {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  background: #111827;
+  color: #ffffff;
+
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+
+  padding: 10px 12px;
+}
+
+.in-progress textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.in-progress h4 {
+  margin-top: 24px;
+  margin-bottom: 18px;
+  text-align: center;
+  font-size: 22px;
+}
+
+.in-progress hr {
+  margin: 24px 0;
+  border-color: rgba(255,255,255,0.1);
+}
+
+.resolve-button {
+  width: 100%;
+  margin-top: 24px;
+
+  padding: 14px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #22c55e;
+  color: white;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.resolve-button:hover {
+  background: #16a34a;
+}
