@@ -563,11 +563,13 @@ const getFlowStatusClass = (status) => {
   }
 
   if (
-    value === "completed" ||
-    value === "delivered"
-  ) {
-    return "flow-completed";
-  }
+  value === "completed" ||
+  value === "delivered" ||
+  value === "sent"
+)
+{
+  return "flow-completed";
+}
 
   if (value === "failed") {
     return "flow-failed";
