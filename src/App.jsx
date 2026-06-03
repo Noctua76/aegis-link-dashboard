@@ -1277,7 +1277,13 @@ const handleResolveIncident = async (incident) => {
 
     <section style={{ display: "grid", gap: "16px" }}>
   {incidentFilter === "Active"
-    ? filteredIncidents.map((incident, index) => (
+  ? filteredIncidents.length === 0 ? (
+      <div className="empty-incident-state">
+        <img src={aegisLogo} alt="Aegis Link" />
+        <h2>No Active Alert</h2>
+        <p>All monitored sites are operating normally.</p>
+      </div>
+    ) : filteredIncidents.map((incident, index) => (
         <div key={index} className="active-alert-panel">
           <h2>🚨 ALERT ON {incident.site}</h2>
 
@@ -1294,7 +1300,13 @@ const handleResolveIncident = async (incident) => {
         </div>
       ))
       : incidentFilter === "In Progress"
-? filteredIncidents.map((incident, index) => (
+? filteredIncidents.length === 0 ? (
+    <div className="empty-incident-state">
+      <img src={aegisLogo} alt="Aegis Link" />
+      <h2>No Alert In Progress</h2>
+      <p>No incidents are currently under investigation.</p>
+    </div>
+  ) : filteredIncidents.map((incident, index) => (
     <div
       key={index}
       className="incident-detail-card in-progress"
