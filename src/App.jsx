@@ -278,6 +278,12 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
 
 const [dashboardIncidents, setDashboardIncidents] = useState([]);
 const [systemStatus, setSystemStatus] = useState(null);
+const [resolvedIncidents, setResolvedIncidents] = useState([]);
+
+const [resolvedFilters, setResolvedFilters] = useState({
+  date: "",
+  site: "",
+});
 
 useEffect(() => {
   async function loadDashboardMetrics() {
@@ -354,6 +360,27 @@ useEffect(() => {
   loadSites();
 
   const interval = setInterval(loadSites, 15000);
+
+  return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
+  const loadResolvedIncidents = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/incidents/resolved`);
+      const data = await response.json();
+
+      if (data.status === "ok") {
+        setResolvedIncidents(data.incidents || []);
+      }
+    } catch (err) {
+      console.error("Failed loading resolved incidents:", err);
+    }
+  };
+
+  loadResolvedIncidents();
+
+  const interval = setInterval(loadResolvedIncidents, 15000);
 
   return () => clearInterval(interval);
 }, []);
@@ -1087,6 +1114,45 @@ const handleResolveIncident = async (incident) => {
 ))}
     </section>
 
+    {incidentFilter === "Resolved" && (
+  <section className="resolved-filters">
+    <input
+      type="date"
+      value={resolvedFilters.date}
+      onChange={(e) =>
+        setResolvedFilters({
+          ...resolvedFilters,
+          date: e.target.value,
+        })
+      }
+    />
+
+    <input
+      type="text"
+      placeholder="Filter by site"
+      value={resolvedFilters.site}
+      onChange={(e) =>
+        setResolvedFilters({
+          ...resolvedFilters,
+          site: e.target.value,
+        })
+      }
+    />
+
+    <button
+      type="button"
+      onClick={() =>
+        setResolvedFilters({
+          date: "",
+          site: "",
+        })
+      }
+    >
+      Clear Filters
+    </button>
+  </section>
+)}
+
     <section style={{ display: "grid", gap: "16px" }}>
   {incidentFilter === "Active"
     ? filteredIncidents.map((incident, index) => (
@@ -1189,7 +1255,33 @@ const handleResolveIncident = async (incident) => {
     </div>
   ))
 
-    : filteredIncidents.map((incident, index) => (
+    : incidentFilter === "Resolved"
+? resolvedIncidents
+    .filter((incident) => {
+      const dateMatch =
+        !resolvedFilters.date ||
+        incident.resolved_time?.startsWith(resolvedFilters.date);
+
+      const siteMatch =
+        !resolvedFilters.site ||
+        incident.site?.toLowerCase().includes(resolvedFilters.site.toLowerCase());
+
+      return dateMatch && siteMatch;
+    })
+    .map((incident, index) => (
+      <div key={index} className="incident-detail-card resolved">
+        <h3>✅ {incident.incident_id}</h3>
+        <p><strong>Site:</strong> {incident.site}</p>
+        <p><strong>Guard:</strong> {incident.guard}</p>
+        <p><strong>Resolved:</strong> {incident.resolved_time ? new Date(incident.resolved_time).toLocaleString("el-GR") : "-"}</p>
+        <p><strong>Approved By:</strong> {incident.approved_by || "-"}</p>
+        <p><strong>Supervisor:</strong> {incident.supervisor_name || "-"}</p>
+        <p><strong>Guard Contact:</strong> {incident.guard_contacted_name || "-"}</p>
+        <p><strong>Residence Contact:</strong> {incident.residence_contacted_name || "-"}</p>
+        <p><strong>Admin Notes:</strong> {incident.admin_notes || "-"}</p>
+      </div>
+    ))
+: filteredIncidents.map((incident, index) => (
         <div
           key={index}
           className={`incident-detail-card ${incident.status}`}
