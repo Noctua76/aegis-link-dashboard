@@ -466,6 +466,20 @@ setSystemStatus({
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
+    : incidentFilter === "Normal"
+    ? [...dashboardIncidents].sort((a, b) => {
+        const priority = {
+          active: 1,
+          in_progress: 2,
+          normal: 3,
+          resolved: 4,
+        };
+
+        return (
+          (priority[a.status] || 99) -
+          (priority[b.status] || 99)
+        );
+      })
     : dashboardIncidents.filter(
         (incident) =>
           incident.status?.toLowerCase() ===
