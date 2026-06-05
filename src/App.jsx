@@ -1407,16 +1407,36 @@ const handleResolveIncident = async (incident) => {
 <label>
   Guard Notes
   <textarea
-    rows="4"
-    placeholder="Guard report / incident description"
-    onChange={(e) =>
+  rows="4"
+  placeholder="Guard report / incident description"
+  value={
+    resolutionForms[incident.incidentDbId]?.guard_notes || ""
+  }
+  onFocus={async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/incidents/${incident.incidentDbId}/guard-responses`
+      );
+
+      const data = await response.json();
+
       updateResolutionForm(
         incident.incidentDbId,
         "guard_notes",
-        e.target.value
-      )
+        data.guard_notes || ""
+      );
+    } catch (err) {
+      console.error("Failed loading guard responses:", err);
     }
-  />
+  }}
+  onChange={(e) =>
+    updateResolutionForm(
+      incident.incidentDbId,
+      "guard_notes",
+      e.target.value
+    )
+  }
+/>
 </label>
 
 <hr />
