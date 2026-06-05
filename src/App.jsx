@@ -1371,14 +1371,11 @@ const handleResolveIncident = async (incident) => {
 <label>
   Supervisor Notes
   <textarea
-  rows="4"
-  placeholder="Guard report / incident description"
-  value={resolutionForms[incident.incidentDbId]?.guard_notes || ""}
-  onFocus={() => loadGuardNotesForIncident(incident.incidentDbId)}
+  rows="3"
   onChange={(e) =>
     updateResolutionForm(
       incident.incidentDbId,
-      "guard_notes",
+      "supervisor_notes",
       e.target.value
     )
   }
