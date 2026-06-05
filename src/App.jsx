@@ -634,6 +634,28 @@ const updateResolutionForm = (incidentDbId, field, value) => {
   }));
 };
 
+const loadGuardNotesForIncident = async (incidentDbId) => {
+  if (!incidentDbId) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/incidents/${incidentDbId}/guard-responses`
+    );
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      updateResolutionForm(
+        incidentDbId,
+        "guard_notes",
+        data.guard_notes || ""
+      );
+    }
+  } catch (err) {
+    console.error("Failed loading guard notes:", err);
+  }
+};
+
 const handlePrintIncidentReport = (incident) => {
   const reportWindow = window.open("", "_blank");
 
@@ -1349,15 +1371,18 @@ const handleResolveIncident = async (incident) => {
 <label>
   Supervisor Notes
   <textarea
-    rows="3"
-    onChange={(e) =>
-      updateResolutionForm(
-        incident.incidentDbId,
-        "supervisor_notes",
-        e.target.value
-      )
-    }
-  />
+  rows="4"
+  placeholder="Guard report / incident description"
+  value={resolutionForms[incident.incidentDbId]?.guard_notes || ""}
+  onFocus={() => loadGuardNotesForIncident(incident.incidentDbId)}
+  onChange={(e) =>
+    updateResolutionForm(
+      incident.incidentDbId,
+      "guard_notes",
+      e.target.value
+    )
+  }
+/>
 </label>
 
 <hr />
