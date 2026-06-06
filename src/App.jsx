@@ -713,11 +713,12 @@ const handlePrintIncidentReport = async (incident) => {
       }
 
       body {
-        font-family: Arial, sans-serif;
-        color: #111;
-        margin: 0;
-        padding: 0;
-      }
+  font-family: Arial, sans-serif;
+  color: #111;
+  margin: 0;
+  padding: 28px 34px;
+  box-sizing: border-box;
+}
 
       .report-header {
         display: flex;
@@ -823,6 +824,7 @@ const handlePrintIncidentReport = async (incident) => {
         body {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
+          padding: 0;
         }
       }
     </style>
