@@ -672,6 +672,8 @@ const handlePrintIncidentReport = async (incident) => {
 
     if (!reportWindow) return;
 
+    const logoUrl = new URL(aegisLogo, window.location.href).href;
+
     const timelineHtml = data.timeline
       .map(
         (item) => `
@@ -829,6 +831,7 @@ const handlePrintIncidentReport = async (incident) => {
   <body>
     <div class="report-header">
       <div class="brand">
+      <img src="${logoUrl}" alt="Aegis Link Logo" />
         <div class="brand-title">
           <h1>AEGIS LINK</h1>
           <p>Security Operations Platform</p>
