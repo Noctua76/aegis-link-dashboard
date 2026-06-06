@@ -656,106 +656,167 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
   }
 };
 
-const handlePrintIncidentReport = (incident) => {
-  const reportWindow = window.open("", "_blank");
+const handlePrintIncidentReport = async (incident) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/incidents/${incident.id}/report`
+    );
 
-  if (!reportWindow) return;
+    const data = await response.json();
 
-  reportWindow.document.write(`
-    <html>
-      <head>
-        <title>Aegis Link Incident Report - ${incident.incident_ref}</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-            color: #111;
-          }
+    if (data.status !== "ok") {
+      throw new Error("Report generation failed");
+    }
 
-          h1 {
-            margin-bottom: 4px;
-          }
+    const reportWindow = window.open("", "_blank");
 
-          .subtitle {
-            color: #555;
-            margin-bottom: 30px;
-          }
+    if (!reportWindow) return;
 
-          .section {
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #ddd;
-          }
+    const timelineHtml = data.timeline
+      .map(
+        (item) => `
+          <tr>
+            <td>${item.display_time}</td>
+            <td>${item.event}</td>
+          </tr>
+        `
+      )
+      .join("");
 
-          .row {
-            margin: 8px 0;
-          }
+    const responsesHtml = data.guard_responses
+      .map(
+        (item) => `
+          <div style="margin-bottom:12px">
+            <strong>${item.question_text}</strong><br/>
+            ${item.answer}
+          </div>
+        `
+      )
+      .join("");
 
-          strong {
-            display: inline-block;
-            min-width: 180px;
-          }
-        </style>
-      </head>
+    reportWindow.document.write(`
+      <html>
+        <head>
+          <title>${data.report_title}</title>
 
-      <body>
-        <h1>Aegis Link Incident Report</h1>
-        <div class="subtitle">Official resolved incident record</div>
+          <style>
 
-        <div class="section">
-          <div class="row"><strong>Incident Ref:</strong> ${incident.incident_ref || "-"}</div>
-          <div class="row"><strong>Status:</strong> ${incident.status || "-"}</div>
-          <div class="row"><strong>Priority:</strong> ${incident.priority || "-"}</div>
-          <div class="row"><strong>Site:</strong> ${incident.site_name || "-"}</div>
-          <div class="row"><strong>Location:</strong> ${incident.site_location || "-"}</div>
-          <div class="row"><strong>Guard:</strong> ${incident.guard_name || "-"}</div>
-        </div>
+            body{
+              font-family:Arial,sans-serif;
+              padding:40px;
+              color:#111;
+            }
 
-        <div class="section">
-          <div class="row"><strong>Triggered:</strong> ${
-            incident.trigger_time
-              ? new Date(incident.trigger_time).toLocaleString("el-GR")
-              : "-"
-          }</div>
+            h1{
+              margin-bottom:4px;
+            }
 
-          <div class="row"><strong>Resolved:</strong> ${
-            incident.resolved_time
-              ? new Date(incident.resolved_time).toLocaleString("el-GR")
-              : "-"
-          }</div>
+            h2{
+              margin-top:30px;
+              border-bottom:1px solid #ddd;
+              padding-bottom:8px;
+            }
 
-          <div class="row"><strong>Approved By:</strong> ${incident.approved_by || "-"}</div>
-          <div class="row"><strong>Approved At:</strong> ${
-            incident.approved_at
-              ? new Date(incident.approved_at).toLocaleString("el-GR")
-              : "-"
-          }</div>
-        </div>
+            table{
+              width:100%;
+              border-collapse:collapse;
+            }
 
-        <div class="section">
-          <div class="row"><strong>Supervisor:</strong> ${incident.supervisor_name || "-"}</div>
-          <div class="row"><strong>Supervisor Notes:</strong> ${incident.supervisor_notes || "-"}</div>
-          <div class="row"><strong>Guard Contact:</strong> ${incident.guard_contacted_name || "-"}</div>
-          <div class="row"><strong>Guard Notes:</strong> ${incident.guard_notes || "-"}</div>
-          <div class="row"><strong>Residence Contact:</strong> ${incident.residence_contacted_name || "-"}</div>
-          <div class="row"><strong>Residence Notes:</strong> ${incident.residence_notes || "-"}</div>
-        </div>
+            td{
+              border-bottom:1px solid #eee;
+              padding:8px;
+            }
 
-        <div class="section">
-          <div class="row"><strong>AI Summary:</strong> ${incident.ai_summary || "-"}</div>
-          <div class="row"><strong>Admin Notes:</strong> ${incident.admin_notes || "-"}</div>
-        </div>
+          </style>
+        </head>
 
-        <script>
-          window.onload = function() {
-            window.print();
-          };
-        </script>
-      </body>
-    </html>
-  `);
+        <body>
 
-  reportWindow.document.close();
+          <h1>AEGIS LINK</h1>
+          <p>Security Incident Report</p>
+
+          <hr />
+
+          <p><strong>Incident Ref:</strong> ${data.incident.incident_ref}</p>
+
+          <p><strong>Site:</strong> ${data.incident.site}</p>
+
+          <p><strong>Guard:</strong> ${data.incident.guard}</p>
+
+          <p><strong>Status:</strong> ${data.incident.status}</p>
+
+          <p><strong>Priority:</strong> ${data.incident.priority}</p>
+
+          <p><strong>Generated:</strong> ${data.generated_at_display}</p>
+
+          <p><strong>Duration:</strong> ${data.incident.duration_display}</p>
+
+          <h2>Incident Timeline</h2>
+
+          <table>
+            ${timelineHtml}
+          </table>
+
+          <h2>Guard Responses</h2>
+
+          ${responsesHtml}
+
+          <h2>Investigation Notes</h2>
+
+          <p>
+            <strong>Supervisor:</strong>
+            ${data.investigation?.supervisor_name || "-"}
+          </p>
+
+          <p>
+            <strong>Supervisor Notes:</strong><br/>
+            ${data.investigation?.supervisor_notes || "-"}
+          </p>
+
+          <p>
+            <strong>Guard Notes:</strong><br/>
+            ${data.investigation?.guard_notes || "-"}
+          </p>
+
+          <p>
+            <strong>Residence Notes:</strong><br/>
+            ${data.investigation?.residence_notes || "-"}
+          </p>
+
+          <p>
+            <strong>Admin Notes:</strong><br/>
+            ${data.investigation?.admin_notes || "-"}
+          </p>
+
+          <h2>Resolution Summary</h2>
+
+          <p>
+            <strong>Approved By:</strong>
+            ${data.investigation?.approved_by || "-"}
+          </p>
+
+          <p>
+            <strong>Approved At:</strong>
+            ${data.investigation?.approved_at_display || "-"}
+          </p>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+
+        </body>
+      </html>
+    `);
+
+    reportWindow.document.close();
+
+  } catch (err) {
+    console.error(err);
+
+    alert("Failed to generate report");
+  }
 };
 const handleResolveIncident = async (incident) => {
   const form = resolutionForms[incident.incidentDbId] || {};
