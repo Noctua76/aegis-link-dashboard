@@ -677,7 +677,13 @@ const handlePrintIncidentReport = async (incident) => {
         (item) => `
           <tr>
             <td>${item.display_time}</td>
-            <td>${item.event}</td>
+            <td>
+  ${
+    item.event === "Voice Call online"
+      ? "Voice Call Completed"
+      : item.event
+  }
+</td>
           </tr>
         `
       )
@@ -701,33 +707,49 @@ const handlePrintIncidentReport = async (incident) => {
 
           <style>
 
-            body{
-              font-family:Arial,sans-serif;
-              padding:40px;
-              color:#111;
-            }
+  body{
+    font-family:Arial,sans-serif;
+    padding:40px;
+    color:#111;
+  }
 
-            h1{
-              margin-bottom:4px;
-            }
+  h1{
+    margin-bottom:4px;
+  }
 
-            h2{
-              margin-top:30px;
-              border-bottom:1px solid #ddd;
-              padding-bottom:8px;
-            }
+  h2{
+    margin-top:30px;
+    border-bottom:1px solid #ddd;
+    padding-bottom:8px;
+  }
 
-            table{
-              width:100%;
-              border-collapse:collapse;
-            }
+  table{
+    width:100%;
+    border-collapse:collapse;
+  }
 
-            td{
-              border-bottom:1px solid #eee;
-              padding:8px;
-            }
+  td{
+    border-bottom:1px solid #eee;
+    padding:8px;
+  }
 
-          </style>
+  @page {
+    margin: 18mm;
+  }
+
+  @media print {
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  }
+
+  .notes {
+    white-space: pre-line;
+    line-height: 1.5;
+  }
+
+</style>
         </head>
 
         <body>
@@ -770,22 +792,22 @@ const handlePrintIncidentReport = async (incident) => {
 
           <p>
             <strong>Supervisor Notes:</strong><br/>
-            ${data.investigation?.supervisor_notes || "-"}
+            <span class="notes">${data.investigation?.supervisor_notes || "-"}</span>
           </p>
 
           <p>
             <strong>Guard Notes:</strong><br/>
-            ${data.investigation?.guard_notes || "-"}
+            <span class="notes">${data.investigation?.guard_notes || "-"}</span>
           </p>
 
           <p>
             <strong>Residence Notes:</strong><br/>
-            ${data.investigation?.residence_notes || "-"}
+            <span class="notes">${data.investigation?.residence_notes || "-"}</span>
           </p>
 
           <p>
             <strong>Admin Notes:</strong><br/>
-            ${data.investigation?.admin_notes || "-"}
+            <span class="notes">${data.investigation?.admin_notes || "-"}</span>
           </p>
 
           <h2>Resolution Summary</h2>
