@@ -820,7 +820,30 @@ const handlePreviewIncidentReport = async (incident) => {
         justify-content: space-between;
       }
 
+      .preview-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #111827;
+  padding: 12px;
+  text-align: right;
+  margin: -28px -34px 24px;
+}
+
+.preview-toolbar button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
       @media print {
+      .preview-toolbar {
+  display: none;
+}
         body {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
@@ -831,6 +854,9 @@ const handlePreviewIncidentReport = async (incident) => {
   </head>
 
   <body>
+  <div class="preview-toolbar">
+  <button onclick="window.print()">Print / Save as PDF</button>
+</div>
     <div class="report-header">
       <div class="brand">
       <img src="${logoUrl}" alt="Aegis Link Logo" />
@@ -933,10 +959,10 @@ const handlePreviewIncidentReport = async (incident) => {
     </div>
 
     <script>
-      window.onload = function() {
-        window.print();
-      };
-    </script>
+  window.onload = function() {
+    document.title = "${data.report_title}";
+  };
+</script>
   </body>
 </html>
     `);
