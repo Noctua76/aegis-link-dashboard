@@ -279,6 +279,7 @@ const guardsOnDuty = liveActiveGuards.map((guard) => ({
 const [dashboardIncidents, setDashboardIncidents] = useState([]);
 const [systemStatus, setSystemStatus] = useState(null);
 const [resolvedIncidents, setResolvedIncidents] = useState([]);
+const [reportPreviewHtml, setReportPreviewHtml] = useState(null);
 
 const [resolvedFilters, setResolvedFilters] = useState({
   date: "",
@@ -668,10 +669,7 @@ const handlePreviewIncidentReport = async (incident) => {
       throw new Error("Report generation failed");
     }
 
-    const reportWindow = window.open("", "_blank");
-
-    if (!reportWindow) return;
-
+    
     const logoUrl = new URL(aegisLogo, window.location.href).href;
 
     const timelineHtml = data.timeline
@@ -702,7 +700,7 @@ const handlePreviewIncidentReport = async (incident) => {
       )
       .join("");
 
-    reportWindow.document.write(`
+    const reportHtml = `
       <html>
   <head>
     <title>${data.report_title}</title>
@@ -965,9 +963,9 @@ const handlePreviewIncidentReport = async (incident) => {
 </script>
   </body>
 </html>
-    `);
+        `;
 
-    reportWindow.document.close();
+    setReportPreviewHtml(reportHtml);
 
   } catch (err) {
     console.error(err);
@@ -2041,6 +2039,30 @@ systemStatus?.services?.backend_api?.status
     </section>
   </>
 )}
+
+{reportPreviewHtml && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>Incident Report Preview</h2>
+
+        <button
+          type="button"
+          onClick={() => setReportPreviewHtml(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <iframe
+        title="Incident Report Preview"
+        className="report-preview-frame"
+        srcDoc={reportPreviewHtml}
+      />
+    </div>
+  </div>
+)}
+
       </main>
     </div>
   );
