@@ -656,7 +656,7 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
   }
 };
 
-const handlePrintIncidentReport = async (incident) => {
+const handlePreviewIncidentReport = async (incident) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/incidents/${incident.id}/report`
@@ -1712,12 +1712,22 @@ const handleResolveIncident = async (incident) => {
         <p><strong>Guard Contact:</strong> {incident.guard_contacted_name || "-"}</p>
         <p><strong>Residence Contact:</strong> {incident.residence_contacted_name || "-"}</p>
         <p><strong>Admin Notes:</strong> {incident.admin_notes || "-"}</p>
-        <button
-  type="button"
-  onClick={() => handlePrintIncidentReport(incident)}
->
-  🖨 Print / Export PDF
-</button>
+        <div className="report-actions">
+  <button
+    type="button"
+    onClick={() => handlePreviewIncidentReport(incident)}
+  >
+    👁 Preview Report
+  </button>
+
+  <button
+    type="button"
+    disabled
+    title="Backend PDF download will be added next"
+  >
+    ⬇ Download PDF
+  </button>
+</div>
       </div>
     ))
 : filteredIncidents.map((incident, index) => (
