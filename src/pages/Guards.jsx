@@ -226,7 +226,13 @@ export default function Guards() {
                     <div key={guard.id} className="previous-session-row">
                       <strong>{guard.full_name}</strong>
                       <span>{guard.role}</span>
-                      <span>{guard.active ? "Active" : "Inactive"}</span>
+                      <span>
+  {site.status === "inactive"
+    ? "Site Inactive"
+    : guard.active
+    ? "Active"
+    : "Inactive"}
+</span>
                     </div>
                   ))
                 )}
@@ -373,7 +379,11 @@ export default function Guards() {
               {selectedLocation.guards.map((guard) => (
                 <p key={guard.id}>
                   {guard.full_name} · {guard.username} ·{" "}
-                  {guard.active ? "Active" : "Inactive"}
+                  {selectedLocation.status === "inactive"
+  ? "Site Inactive"
+  : guard.active
+  ? "Active"
+  : "Inactive"}
                 </p>
               ))}
             </div>
