@@ -19,12 +19,18 @@ function SiteCard({ site }) {
 
         <span
   className={
-    site.on_duty > 0
+    site.status === "inactive"
+      ? "site-status inactive"
+      : site.on_duty > 0
       ? "site-status normal"
       : "site-status no-guard"
   }
 >
-  {site.on_duty > 0 ? "Covered" : "No Guard"}
+  {site.status === "inactive"
+    ? "Inactive"
+    : site.on_duty > 0
+    ? "Covered"
+    : "No Guard"}
 </span>
       </div>
 
