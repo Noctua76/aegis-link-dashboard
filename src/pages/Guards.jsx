@@ -79,14 +79,17 @@ export default function Guards() {
     );
 
     return {
-      ...site,
-      guards: siteGuards,
-      currentSession,
-      currentGuard: currentSession?.guard_id ? currentSession : null,
-      coverageStatus: currentSession?.is_currently_online
-        ? "Covered"
-        : "Uncovered",
-    };
+  ...site,
+  guards: siteGuards,
+  currentSession,
+  currentGuard: currentSession?.guard_id ? currentSession : null,
+  coverageStatus:
+    site.status === "inactive"
+      ? "Inactive"
+      : currentSession?.is_currently_online
+      ? "Covered"
+      : "Uncovered",
+};
   });
 
   return (
