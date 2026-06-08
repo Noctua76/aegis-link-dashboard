@@ -1245,42 +1245,62 @@ const handleResolveIncident = async (incident) => {
   style={{
     marginTop: "16px",
     background: "#0d1117",
-              borderRadius: "14px",
-              padding: "18px",
-              border: "1px solid #1f2937",
+    borderRadius: "14px",
+    padding: "18px",
+    border: "1px solid #1f2937",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: "18px",
+      position: "relative",
+      paddingLeft: "26px",
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        left: "8px",
+        top: "12px",
+        bottom: "12px",
+        width: "2px",
+        background: "#242424",
+      }}
+    />
+
+    {incidentTimeline.events && incidentTimeline.events.length > 0 ? (
+      incidentTimeline.events.map((event) => {
+        const eventIcon =
+          event.type === "alert"
+            ? "🚨"
+            : event.type === "call"
+            ? "📞"
+            : event.type === "sms"
+            ? "💬"
+            : "●";
+
+        const eventColor =
+          event.type === "alert"
+            ? "#ff4d4f"
+            : event.type === "call"
+            ? "#ffac15"
+            : event.type === "sms"
+            ? "#3b82f6"
+            : "#22c55e";
+
+        return (
+          <div
+            key={event.id}
+            style={{
+              position: "relative",
+              background: "#101010",
+              padding: "14px",
+              borderRadius: "10px",
+              borderLeft: `4px solid ${eventColor}`,
             }}
-         >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "18px",
-                position: "relative",
-                paddingLeft: "26px",
-             }}
           >
-             <div
-               style={{
-                 position: "absolute",
-                 left: "8px",
-                 top: "12px",
-                 bottom: "12px",
-                 width: "2px",
-                 background: "#242424",
-             }}
-           />
-
-           {/* Alert Triggered */}
-
-           <div
-             style={{
-               position: "relative",
-               background: "#101010",
-               padding: "14px",
-               borderRadius: "10px",
-               borderLeft: "4px solid #ff4d4f",
-            }}
-           >
             <div
               style={{
                 position: "absolute",
@@ -1289,44 +1309,47 @@ const handleResolveIncident = async (incident) => {
                 width: "14px",
                 height: "14px",
                 borderRadius: "50%",
-                background: "#ff4d4f",
+                background: eventColor,
                 border: "3px solid #0d1117",
-             }}
-           />
+              }}
+            />
 
-          <strong>🚨 {timelineText.alert}</strong>
+            <strong>
+              {eventIcon} {event.label}
+            </strong>
 
-          <div
-            style={{
-              fontSize: "14px",
-              color: "#aaaaaa",
-              marginTop: "6px",
-           }}
-         >
-           Location: {incidentTimeline.location || "Normal"}
-         </div>
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#aaaaaa",
+                marginTop: "6px",
+              }}
+            >
+              {event.detail}
+            </div>
 
-         <div
-           style={{
-             fontSize: "14px",
-             color: "#aaaaaa",
-          }}  
-         >
-          Time: {formatTimelineTime(incidentTimeline.alertTime)}
-        </div>
-      </div>
-
-      {/* Call */}
-
+            <div
+              style={{
+                fontSize: "14px",
+                color: "#aaaaaa",
+                marginTop: "4px",
+              }}
+            >
+              Time: {formatTimelineTime(event.time)}
+            </div>
+          </div>
+        );
+      })
+    ) : (
       <div
         style={{
           position: "relative",
           background: "#101010",
           padding: "14px",
           borderRadius: "10px",
-          borderLeft: "4px solid #ffac15",
+          borderLeft: "4px solid #22c55e",
         }}
-       >
+      >
         <div
           style={{
             position: "absolute",
@@ -1335,107 +1358,26 @@ const handleResolveIncident = async (incident) => {
             width: "14px",
             height: "14px",
             borderRadius: "50%",
-            background: "#ffac15",
+            background: "#22c55e",
             border: "3px solid #0d1117",
           }}
         />
 
-       <strong>📞 {timelineText.call}</strong>
+        <strong>✅ System Normal</strong>
 
-       <div
-         style={{
-          fontSize: "14px",
-          color: "#aaaaaa",
-          marginTop: "6px",
-        }}
-      >
-        {incidentTimeline.callStatus === "normal"
-  ? "System standing by"
-  : incidentTimeline.callStatus === "completed"
-  ? "Supervisor calls completed"
-  : "Contacting supervisors"}
+        <div
+          style={{
+            fontSize: "14px",
+            color: "#aaaaaa",
+            marginTop: "6px",
+          }}
+        >
+          No active incident timeline available.
+        </div>
       </div>
-    </div>
-
-    {/* SMS */}
-
-    <div
-      style={{
-        position: "relative",
-        background: "#101010",
-        padding: "14px",
-        borderRadius: "10px",
-        borderLeft: "4px solid #3b82f6",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: "-26px",
-          top: "18px",
-          width: "14px",
-          height: "14px",
-          borderRadius: "50%",
-          background: "#3b82f6",
-          border: "3px solid #0d1117",
-        }}
-      />
-
-      <strong>💬 {timelineText.sms}</strong>
-
-      <div
-        style={{
-          fontSize: "14px",
-          color: "#aaaaaa",
-          marginTop: "6px",
-        }}
-      >
-        {incidentTimeline.smsStatus === "normal"
-  ? "System standing by"
-  : incidentTimeline.smsStatus === "completed"
-  ? "SMS notifications sent"
-  : "Sending SMS notifications"}
-      </div>
-    </div>
-
-    {/* Resolved */}
-
-    <div
-      style={{
-        position: "relative",
-        background: "#101010",
-        padding: "14px",
-        borderRadius: "10px",
-        borderLeft: "4px solid #22c55e",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: "-26px",
-          top: "18px",
-          width: "14px",
-          height: "14px",
-          borderRadius: "50%",
-          background: "#22c55e",
-          border: "3px solid #0d1117",
-        }}
-      />
-
-      <strong>✅ {timelineText.incident}</strong>
-
-      <div
-        style={{
-          fontSize: "14px",
-          color: "#aaaaaa",
-          marginTop: "6px",
-        }}
-      >
-        Duration: {incidentTimeline.duration || "-"}
-      </div>
-    </div>
+    )}
   </div>
-  </div>
+</div>
 </section>
     </>
 )}
