@@ -1745,12 +1745,16 @@ const handleResolveIncident = async (incident) => {
   </button>
 
   <button
-    type="button"
-    disabled
-    title="Backend PDF download will be added next"
-  >
-    ⬇ Download PDF
-  </button>
+  type="button"
+  onClick={() =>
+    window.open(
+      `${API_BASE_URL}/incidents/${incident.id}/report/pdf`,
+      "_blank"
+    )
+  }
+>
+  ⬇ Download PDF
+</button>
 </div>
       </div>
     ))
