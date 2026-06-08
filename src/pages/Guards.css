@@ -462,3 +462,9 @@
     align-self: center;
   }
 }
+
+.status-pill.inactive {
+  background: rgba(107,114,128,0.18);
+  color: #9ca3af;
+  border: 1px solid rgba(156,163,175,0.35);
+}
