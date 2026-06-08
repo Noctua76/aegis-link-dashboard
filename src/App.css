@@ -242,6 +242,12 @@
   background: rgba(156, 163, 175, 0.16);
   color: #d1d5db;
 }
+
+.site-status.inactive {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
 /* Sidebar */
 .sidebar-menu {
   list-style: none;
