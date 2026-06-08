@@ -401,9 +401,36 @@ Manage Recipients
         <small>{site.location}</small>
       </span>
 
-      <strong>
-        {site.required_shifts || 1} shifts
-      </strong>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+  <strong>
+    {site.status === "active" ? "Active" : "Inactive"}
+  </strong>
+
+  <small>
+    {site.required_shifts || 1} shifts
+  </small>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={async () => {
+      try {
+        await fetch(
+          `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
+          {
+            method: "PUT",
+          }
+        );
+
+        await loadSites();
+      } catch (err) {
+        console.error("Toggle site active error", err);
+      }
+    }}
+  >
+    {site.status === "active" ? "Deactivate" : "Activate"}
+  </button>
+</div>
     </div>
   ))}
 </div>
