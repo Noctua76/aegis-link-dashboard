@@ -488,9 +488,32 @@ Manage Recipients
         </small>
       </span>
 
-      <strong>
-        {guard.active ? "Active" : "Inactive"}
-      </strong>
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+  <strong>
+    {guard.active ? "Active" : "Inactive"}
+  </strong>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={async () => {
+      try {
+        await fetch(
+          `${API_BASE_URL}/settings/guards/${guard.id}/toggle-active`,
+          {
+            method: "PUT",
+          }
+        );
+
+        await loadGuards();
+      } catch (err) {
+        console.error("Toggle guard active error", err);
+      }
+    }}
+  >
+    {guard.active ? "Deactivate" : "Activate"}
+  </button>
+</div>
     </div>
   ))}
 </div>
