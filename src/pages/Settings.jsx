@@ -8,6 +8,22 @@ function Settings() {
   const [alertConfig, setAlertConfig] = useState(null);
   const [recipients, setRecipients] = useState([]);
   const [showRecipientsModal, setShowRecipientsModal] = useState(false);
+  const [sites, setSites] = useState([]);
+const [guards, setGuards] = useState([]);
+
+const [newSite, setNewSite] = useState({
+  name: "",
+  location: "",
+  required_shifts: 1,
+});
+
+const [newGuard, setNewGuard] = useState({
+  full_name: "",
+  username: "",
+  phone: "",
+  password: "",
+  site_id: "",
+});
 
 const [newRecipient, setNewRecipient] = useState({
 full_name:"",
@@ -51,6 +67,28 @@ err
 }
 };
 
+const loadSites = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/settings/sites`);
+    const data = await response.json();
+
+    setSites(data.sites || []);
+  } catch (err) {
+    console.error("Sites load error", err);
+  }
+};
+
+const loadGuards = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/settings/guards`);
+    const data = await response.json();
+
+    setGuards(data.guards || []);
+  } catch (err) {
+    console.error("Guards load error", err);
+  }
+};
+
 const addRecipient = async () => {
 
 try{
@@ -86,12 +124,60 @@ err
 
 };
 
+const addSite = async () => {
+  try {
+    await fetch(`${API_BASE_URL}/settings/sites`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newSite),
+    });
+
+    setNewSite({
+      name: "",
+      location: "",
+      required_shifts: 1,
+    });
+
+    await loadSites();
+  } catch (err) {
+    console.error("Add site error", err);
+  }
+};
+
+const addGuard = async () => {
+  try {
+    await fetch(`${API_BASE_URL}/settings/guards`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newGuard),
+    });
+
+    setNewGuard({
+      full_name: "",
+      username: "",
+      phone: "",
+      password: "",
+      site_id: "",
+    });
+
+    await loadGuards();
+  } catch (err) {
+    console.error("Add guard error", err);
+  }
+};
+
 
   useEffect(() => {
     
 
 loadAlertConfiguration();
 loadRecipients();
+loadSites();
+loadGuards();
     async function loadSystemStatus() {
       try {
         const response = await fetch(`${API_BASE_URL}/system/status`);
@@ -118,8 +204,10 @@ loadRecipients();
 
     const interval = setInterval(() => {
   loadSystemStatus();
-  loadAlertConfiguration();
-  loadRecipients();
+loadAlertConfiguration();
+loadRecipients();
+loadSites();
+loadGuards();
 }, 5000);
 
     
@@ -261,6 +349,150 @@ Manage Recipients
 >
   {isTestingAlert ? "Sending..." : "Send Test Alert"}
 </button>
+</div>
+
+<div className="settings-card">
+  <h3>Sites Management</h3>
+
+  <input
+    placeholder="Site name"
+    value={newSite.name}
+    onChange={(e) =>
+      setNewSite({
+        ...newSite,
+        name: e.target.value,
+      })
+    }
+  />
+
+  <input
+    placeholder="Location"
+    value={newSite.location}
+    onChange={(e) =>
+      setNewSite({
+        ...newSite,
+        location: e.target.value,
+      })
+    }
+  />
+
+  <input
+    type="number"
+    min="1"
+    placeholder="Required shifts"
+    value={newSite.required_shifts}
+    onChange={(e) =>
+      setNewSite({
+        ...newSite,
+        required_shifts: Number(e.target.value),
+      })
+    }
+  />
+
+  <button onClick={addSite}>Add Site</button>
+
+  <hr />
+
+  {sites.map((site) => (
+    <div key={site.id} className="settings-item">
+      <span>
+        {site.name}
+        <br />
+        <small>{site.location}</small>
+      </span>
+
+      <strong>
+        {site.required_shifts || 1} shifts
+      </strong>
+    </div>
+  ))}
+</div>
+
+<div className="settings-card">
+  <h3>Guards Management</h3>
+
+  <input
+    placeholder="Full name"
+    value={newGuard.full_name}
+    onChange={(e) =>
+      setNewGuard({
+        ...newGuard,
+        full_name: e.target.value,
+      })
+    }
+  />
+
+  <input
+    placeholder="Username"
+    value={newGuard.username}
+    onChange={(e) =>
+      setNewGuard({
+        ...newGuard,
+        username: e.target.value,
+      })
+    }
+  />
+
+  <input
+    placeholder="Phone"
+    value={newGuard.phone}
+    onChange={(e) =>
+      setNewGuard({
+        ...newGuard,
+        phone: e.target.value,
+      })
+    }
+  />
+
+  <input
+    type="password"
+    placeholder="Temporary password"
+    value={newGuard.password}
+    onChange={(e) =>
+      setNewGuard({
+        ...newGuard,
+        password: e.target.value,
+      })
+    }
+  />
+
+  <select
+    value={newGuard.site_id}
+    onChange={(e) =>
+      setNewGuard({
+        ...newGuard,
+        site_id: e.target.value,
+      })
+    }
+  >
+    <option value="">Assign to site</option>
+
+    {sites.map((site) => (
+      <option key={site.id} value={site.id}>
+        {site.name}
+      </option>
+    ))}
+  </select>
+
+  <button onClick={addGuard}>Add Guard</button>
+
+  <hr />
+
+  {guards.map((guard) => (
+    <div key={guard.id} className="settings-item">
+      <span>
+        {guard.full_name}
+        <br />
+        <small>
+          {guard.username} · {guard.site_name || "No site"}
+        </small>
+      </span>
+
+      <strong>
+        {guard.active ? "Active" : "Inactive"}
+      </strong>
+    </div>
+  ))}
 </div>
 
         <div className="settings-card">
