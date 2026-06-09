@@ -10,6 +10,7 @@ function Settings() {
   const [showRecipientsModal, setShowRecipientsModal] = useState(false);
   const [sites, setSites] = useState([]);
 const [guards, setGuards] = useState([]);
+const [editingSite, setEditingSite] = useState(null);
 
 const [newSite, setNewSite] = useState({
   name: "",
@@ -143,6 +144,25 @@ const addSite = async () => {
     await loadSites();
   } catch (err) {
     console.error("Add site error", err);
+  }
+};
+
+const updateSite = async () => {
+  if (!editingSite) return;
+
+  try {
+    await fetch(`${API_BASE_URL}/settings/sites/${editingSite.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(editingSite),
+    });
+
+    setEditingSite(null);
+    await loadSites();
+  } catch (err) {
+    console.error("Update site error", err);
   }
 };
 
@@ -394,46 +414,138 @@ Manage Recipients
   <hr />
 
   {sites.map((site) => (
-    <div key={site.id} className="settings-item">
-      <span>
-        {site.name}
-        <br />
-        <small>{site.location}</small>
-      </span>
+  <div key={site.id} className="settings-item">
+    <span>
+      {site.name}
+      <br />
+      <small>{site.location}</small>
+    </span>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-  <strong>
-    {site.status === "active" ? "Active" : "Inactive"}
-  </strong>
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <strong>
+        {site.status === "active" ? "Active" : "Inactive"}
+      </strong>
 
-  <small>
-    {site.required_shifts || 1} shifts
-  </small>
+      <small>
+        {site.required_shifts || 1}{" "}
+        {(site.required_shifts || 1) === 1 ? "shift" : "shifts"}
+      </small>
 
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={async () => {
-      try {
-        await fetch(
-          `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
-          {
-            method: "PUT",
-          }
-        );
+      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            setEditingSite(site);
+          }}
+        >
+          Edit
+        </button>
 
-        await loadSites();
-      } catch (err) {
-        console.error("Toggle site active error", err);
-      }
-    }}
-  >
-    {site.status === "active" ? "Deactivate" : "Activate"}
-  </button>
-</div>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={async () => {
+            try {
+              await fetch(
+                `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
+                {
+                  method: "PUT",
+                }
+              );
+
+              await loadSites();
+            } catch (err) {
+              console.error("Toggle site active error", err);
+            }
+          }}
+        >
+          {site.status === "active" ? "Deactivate" : "Activate"}
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button danger-button"
+          onClick={async () => {
+            const confirmed = window.confirm(
+              "Archive this site? It will be removed from operational views, but historical incidents and reports will remain available."
+            );
+
+            if (!confirmed) return;
+
+            try {
+              await fetch(
+                `${API_BASE_URL}/settings/sites/${site.id}/archive`,
+                {
+                  method: "PUT",
+                }
+              );
+
+              await loadSites();
+            } catch (err) {
+              console.error("Archive site error", err);
+            }
+          }}
+        >
+          Archive
+        </button>
+      </div>
     </div>
-  ))}
+  </div>
+))}
 </div>
+
+{editingSite && (
+  <div className="settings-card">
+    <h3>Edit Site</h3>
+
+    <input
+      placeholder="Site name"
+      value={editingSite.name || ""}
+      onChange={(e) =>
+        setEditingSite({
+          ...editingSite,
+          name: e.target.value,
+        })
+      }
+    />
+
+    <input
+      placeholder="Location"
+      value={editingSite.location || ""}
+      onChange={(e) =>
+        setEditingSite({
+          ...editingSite,
+          location: e.target.value,
+        })
+      }
+    />
+
+    <input
+      type="number"
+      min="1"
+      placeholder="Required shifts"
+      value={editingSite.required_shifts || 1}
+      onChange={(e) =>
+        setEditingSite({
+          ...editingSite,
+          required_shifts: Number(e.target.value),
+        })
+      }
+    />
+
+    <button onClick={updateSite}>
+      Save Changes
+    </button>
+
+    <button
+      className="secondary-button"
+      onClick={() => setEditingSite(null)}
+    >
+      Cancel
+    </button>
+  </div>
+)}
 
 <div className="settings-card">
   <h3>Guards Management</h3>
