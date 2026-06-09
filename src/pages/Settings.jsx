@@ -495,57 +495,6 @@ Manage Recipients
 ))}
 </div>
 
-{editingSite && (
-  <div className="settings-card">
-    <h3>Edit Site</h3>
-
-    <input
-      placeholder="Site name"
-      value={editingSite.name || ""}
-      onChange={(e) =>
-        setEditingSite({
-          ...editingSite,
-          name: e.target.value,
-        })
-      }
-    />
-
-    <input
-      placeholder="Location"
-      value={editingSite.location || ""}
-      onChange={(e) =>
-        setEditingSite({
-          ...editingSite,
-          location: e.target.value,
-        })
-      }
-    />
-
-    <input
-      type="number"
-      min="1"
-      placeholder="Required shifts"
-      value={editingSite.required_shifts || 1}
-      onChange={(e) =>
-        setEditingSite({
-          ...editingSite,
-          required_shifts: Number(e.target.value),
-        })
-      }
-    />
-
-    <button onClick={updateSite}>
-      Save Changes
-    </button>
-
-    <button
-      className="secondary-button"
-      onClick={() => setEditingSite(null)}
-    >
-      Cancel
-    </button>
-  </div>
-)}
 
 <div className="settings-card">
   <h3>Guards Management</h3>
@@ -936,6 +885,78 @@ Delete
 </div>
 
 )}
+
+{editingSite && (
+  <div className="modal-overlay">
+    <div className="recipients-modal">
+      <div className="modal-header">
+        <h3>Edit Site</h3>
+
+        <button
+          className="modal-close"
+          onClick={() => setEditingSite(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      <input
+        placeholder="Site name"
+        value={editingSite.name || ""}
+        onChange={(e) =>
+          setEditingSite({
+            ...editingSite,
+            name: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Location"
+        value={editingSite.location || ""}
+        onChange={(e) =>
+          setEditingSite({
+            ...editingSite,
+            location: e.target.value,
+          })
+        }
+      />
+
+      <input
+        type="number"
+        min="1"
+        placeholder="Required shifts"
+        value={editingSite.required_shifts || 1}
+        onChange={(e) =>
+          setEditingSite({
+            ...editingSite,
+            required_shifts: Number(e.target.value),
+          })
+        }
+      />
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "16px",
+        }}
+      >
+        <button onClick={updateSite}>
+          Save Changes
+        </button>
+
+        <button
+          className="secondary-button"
+          onClick={() => setEditingSite(null)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </>
   );
 }
