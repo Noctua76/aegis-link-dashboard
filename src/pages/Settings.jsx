@@ -444,10 +444,10 @@ Manage Recipients
     }
   />
 
-  <input
-    type="number"
-    min="1"
-    placeholder="Required shifts"
+  <label className="settings-field">
+  <span>Required Shifts</span>
+
+  <select
     value={newSite.required_shifts}
     onChange={(e) =>
       setNewSite({
@@ -455,7 +455,14 @@ Manage Recipients
         required_shifts: Number(e.target.value),
       })
     }
-  />
+  >
+    <option value={1}>1 Shift</option>
+    <option value={2}>2 Shifts</option>
+    <option value={3}>3 Shifts</option>
+    <option value={4}>4 Shifts</option>
+    <option value={5}>5 Shifts</option>
+  </select>
+</label>
 
   <button onClick={addSite}>Add Site</button>
 
