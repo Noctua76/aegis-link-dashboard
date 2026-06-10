@@ -277,6 +277,34 @@ loadGuards();
   }
 };
 
+const createDefaultShiftRules = (requiredShifts = 1) => {
+  const templates = {
+    1: [
+      { name: "Shift 1", start: "07:00", end: "19:00" },
+    ],
+    2: [
+      { name: "Shift 1", start: "07:00", end: "19:00" },
+      { name: "Shift 2", start: "19:00", end: "07:00" },
+    ],
+    3: [
+      { name: "Shift 1", start: "07:00", end: "15:00" },
+      { name: "Shift 2", start: "15:00", end: "23:00" },
+      { name: "Shift 3", start: "23:00", end: "07:00" },
+    ],
+  };
+
+  return {
+    shifts: templates[requiredShifts] || Array.from(
+      { length: requiredShifts },
+      (_, index) => ({
+        name: `Shift ${index + 1}`,
+        start: "",
+        end: "",
+      })
+    ),
+  };
+};
+
 const formatGreekDateTime = (value) => {
   if (!value) return "-";
 
@@ -1033,19 +1061,116 @@ Delete
 </label>
 
 <label className="settings-field">
-  <span>Shift Schedule</span>
+  <span>Coverage Type</span>
 
-  <input
-    placeholder="Shift schedule"
-    value={profileSite.shift_schedule || ""}
+  <select
+    value={profileSite.coverage_type || "24_7"}
     onChange={(e) =>
       setProfileSite({
         ...profileSite,
-        shift_schedule: e.target.value,
+        coverage_type: e.target.value,
+        shift_rules:
+          profileSite.shift_rules ||
+          createDefaultShiftRules(profileSite.required_shifts || 1),
       })
     }
-  />
+  >
+    <option value="24_7">24/7 Coverage</option>
+    <option value="custom">Custom Hours</option>
+  </select>
 </label>
+
+<div className="settings-field">
+  <span>Shift Rules</span>
+
+  {(profileSite.shift_rules?.shifts ||
+    createDefaultShiftRules(profileSite.required_shifts || 1).shifts
+  ).map((shift, index) => (
+    <div
+      key={index}
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr 1fr",
+        gap: "8px",
+        marginBottom: "8px",
+      }}
+    >
+      <input
+        value={shift.name}
+        onChange={(e) => {
+          const currentRules =
+            profileSite.shift_rules ||
+            createDefaultShiftRules(profileSite.required_shifts || 1);
+
+          const updatedShifts = [...currentRules.shifts];
+
+          updatedShifts[index] = {
+            ...updatedShifts[index],
+            name: e.target.value,
+          };
+
+          setProfileSite({
+            ...profileSite,
+            shift_rules: {
+              ...currentRules,
+              shifts: updatedShifts,
+            },
+          });
+        }}
+      />
+
+      <input
+        type="time"
+        value={shift.start}
+        onChange={(e) => {
+          const currentRules =
+            profileSite.shift_rules ||
+            createDefaultShiftRules(profileSite.required_shifts || 1);
+
+          const updatedShifts = [...currentRules.shifts];
+
+          updatedShifts[index] = {
+            ...updatedShifts[index],
+            start: e.target.value,
+          };
+
+          setProfileSite({
+            ...profileSite,
+            shift_rules: {
+              ...currentRules,
+              shifts: updatedShifts,
+            },
+          });
+        }}
+      />
+
+      <input
+        type="time"
+        value={shift.end}
+        onChange={(e) => {
+          const currentRules =
+            profileSite.shift_rules ||
+            createDefaultShiftRules(profileSite.required_shifts || 1);
+
+          const updatedShifts = [...currentRules.shifts];
+
+          updatedShifts[index] = {
+            ...updatedShifts[index],
+            end: e.target.value,
+          };
+
+          setProfileSite({
+            ...profileSite,
+            shift_rules: {
+              ...currentRules,
+              shifts: updatedShifts,
+            },
+          });
+        }}
+      />
+    </div>
+  ))}
+</div>
 
       <h4>Residence Contact</h4>
 
