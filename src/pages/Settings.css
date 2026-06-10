@@ -172,3 +172,16 @@ color:#9ca3af;
 font-size:13px;
 
 }
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.settings-field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
