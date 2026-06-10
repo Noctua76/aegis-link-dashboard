@@ -1656,6 +1656,101 @@ Delete
   />
 </label>
 
+<h4>SOP Documentation</h4>
+
+<label className="settings-field">
+  <span>SOP Title</span>
+
+  <input
+    placeholder="Standard Operating Procedure"
+    value={profileSite.sop_title || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        sop_title: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>SOP Version</span>
+
+  <input
+    placeholder="v1.0"
+    value={profileSite.sop_version || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        sop_version: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>SOP Text</span>
+
+  <textarea
+    rows="5"
+    value={profileSite.sop_text || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        sop_text: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>SOP URL</span>
+
+  <input
+    placeholder="https://..."
+    value={profileSite.sop_file_url || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        sop_file_url: e.target.value,
+      })
+    }
+  />
+</label>
+
+<div
+  style={{
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginBottom: "20px",
+  }}
+>
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      if (profileSite.sop_file_url) {
+        window.open(profileSite.sop_file_url, "_blank");
+      }
+    }}
+  >
+    View SOP
+  </button>
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      if (profileSite.sop_file_url) {
+        window.open(profileSite.sop_file_url, "_blank");
+      }
+    }}
+  >
+    Download SOP
+  </button>
+</div>
+
 <div
   style={{
     display: "flex",
