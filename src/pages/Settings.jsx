@@ -11,6 +11,7 @@ function Settings() {
   const [sites, setSites] = useState([]);
 const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
+const [profileSite, setProfileSite] = useState(null);
 
 const [newSite, setNewSite] = useState({
   name: "",
@@ -163,6 +164,25 @@ const updateSite = async () => {
     await loadSites();
   } catch (err) {
     console.error("Update site error", err);
+  }
+};
+
+const updateSiteProfile = async () => {
+  if (!profileSite) return;
+
+  try {
+    await fetch(`${API_BASE_URL}/settings/sites/${profileSite.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(profileSite),
+    });
+
+    setProfileSite(null);
+    await loadSites();
+  } catch (err) {
+    console.error("Update site profile error", err);
   }
 };
 
@@ -441,6 +461,16 @@ Manage Recipients
         >
           Edit
         </button>
+
+        <button
+  type="button"
+  className="secondary-button"
+  onClick={() => {
+    setProfileSite(site);
+  }}
+>
+  Profile
+</button>
 
         <button
           type="button"
@@ -949,6 +979,138 @@ Delete
         <button
           className="secondary-button"
           onClick={() => setEditingSite(null)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{profileSite && (
+  <div className="modal-overlay">
+    <div className="recipients-modal">
+      <div className="modal-header">
+        <h3>Site Profile</h3>
+
+        <button
+          className="modal-close"
+          onClick={() => setProfileSite(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      <h4>Site Information</h4>
+
+      <input
+        placeholder="Full address"
+        value={profileSite.full_address || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            full_address: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Site phone"
+        value={profileSite.site_phone || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            site_phone: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Shift schedule"
+        value={profileSite.shift_schedule || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            shift_schedule: e.target.value,
+          })
+        }
+      />
+
+      <h4>Residence Contact</h4>
+
+      <input
+        placeholder="Contact name"
+        value={profileSite.residence_contact_name || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            residence_contact_name: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Contact phone"
+        value={profileSite.residence_contact_phone || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            residence_contact_phone: e.target.value,
+          })
+        }
+      />
+
+      <h4>Supervisor Contact</h4>
+
+      <input
+        placeholder="Supervisor name"
+        value={profileSite.supervisor_contact_name || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            supervisor_contact_name: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Supervisor phone"
+        value={profileSite.supervisor_contact_phone || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            supervisor_contact_phone: e.target.value,
+          })
+        }
+      />
+
+      <h4>Operational Notes</h4>
+
+      <textarea
+        rows="5"
+        placeholder="Operational notes"
+        value={profileSite.operational_notes || ""}
+        onChange={(e) =>
+          setProfileSite({
+            ...profileSite,
+            operational_notes: e.target.value,
+          })
+        }
+      />
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "16px",
+        }}
+      >
+        <button onClick={updateSiteProfile}>
+          Save Profile
+        </button>
+
+        <button
+          className="secondary-button"
+          onClick={() => setProfileSite(null)}
         >
           Cancel
         </button>
