@@ -1002,38 +1002,50 @@ Delete
 
       <h4>Site Information</h4>
 
-      <input
-        placeholder="Full address"
-        value={profileSite.full_address || ""}
-        onChange={(e) =>
-          setProfileSite({
-            ...profileSite,
-            full_address: e.target.value,
-          })
-        }
-      />
+<label className="settings-field">
+  <span>Full Address</span>
 
-      <input
-        placeholder="Site phone"
-        value={profileSite.site_phone || ""}
-        onChange={(e) =>
-          setProfileSite({
-            ...profileSite,
-            site_phone: e.target.value,
-          })
-        }
-      />
+  <input
+    placeholder="Full address"
+    value={profileSite.full_address || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        full_address: e.target.value,
+      })
+    }
+  />
+</label>
 
-      <input
-        placeholder="Shift schedule"
-        value={profileSite.shift_schedule || ""}
-        onChange={(e) =>
-          setProfileSite({
-            ...profileSite,
-            shift_schedule: e.target.value,
-          })
-        }
-      />
+<label className="settings-field">
+  <span>Site Phone</span>
+
+  <input
+    placeholder="Site phone"
+    value={profileSite.site_phone || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        site_phone: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>Shift Schedule</span>
+
+  <input
+    placeholder="Shift schedule"
+    value={profileSite.shift_schedule || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        shift_schedule: e.target.value,
+      })
+    }
+  />
+</label>
 
       <h4>Residence Contact</h4>
 
