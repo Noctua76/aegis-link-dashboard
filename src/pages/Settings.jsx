@@ -12,11 +12,12 @@ function Settings() {
 const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
+const [expandedSiteId, setExpandedSiteId] = useState(null);
 
 const [newSite, setNewSite] = useState({
   name: "",
   location: "",
-  required_shifts: 1,
+  required_shifts: "",
 });
 
 const [newGuard, setNewGuard] = useState({
@@ -139,7 +140,7 @@ const addSite = async () => {
     setNewSite({
       name: "",
       location: "",
-      required_shifts: 1,
+      required_shifts: "",
     });
 
     await loadSites();
@@ -456,6 +457,7 @@ Manage Recipients
       })
     }
   >
+    <option value="">Select shifts</option>
     <option value={1}>1 Shift</option>
     <option value={2}>2 Shifts</option>
     <option value={3}>3 Shifts</option>
@@ -468,25 +470,65 @@ Manage Recipients
 
   <hr />
 
-  {sites.map((site) => (
-  <div key={site.id} className="settings-item">
-    <span>
-      {site.name}
-      <br />
-      <small>{site.location}</small>
-    </span>
+  {sites.map((site, index) => (
+  <div
+    key={site.id}
+    className="settings-item"
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "stretch",
+      gap: "10px",
+    }}
+  >
+    <div
+      style={{
+        cursor: "pointer",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+      onClick={() =>
+        setExpandedSiteId(
+          expandedSiteId === site.id ? null : site.id
+        )
+      }
+    >
+      <div>
+        <strong>
+          SITE-{String(index + 1).padStart(3, "0")} | {site.name}
+        </strong>
 
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <br />
+
+        <small>{site.location}</small>
+
+        <br />
+
+        <small>
+          {site.status === "active" ? "Active" : "Inactive"}
+          {" • "}
+          {site.required_shifts || 1}
+          {" "}
+          {(site.required_shifts || 1) === 1
+            ? "shift"
+            : "shifts"}
+        </small>
+      </div>
+
       <strong>
-        {site.status === "active" ? "Active" : "Inactive"}
+        {expandedSiteId === site.id ? "▲" : "▼"}
       </strong>
+    </div>
 
-      <small>
-        {site.required_shifts || 1}{" "}
-        {(site.required_shifts || 1) === 1 ? "shift" : "shifts"}
-      </small>
-
-      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+    {expandedSiteId === site.id && (
+      <div
+        style={{
+          display: "flex",
+          gap: "6px",
+          flexWrap: "wrap",
+        }}
+      >
         <button
           type="button"
           className="secondary-button"
@@ -498,14 +540,14 @@ Manage Recipients
         </button>
 
         <button
-  type="button"
-  className="secondary-button"
-  onClick={() => {
-    setProfileSite(site);
-  }}
->
-  Profile
-</button>
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            setProfileSite(site);
+          }}
+        >
+          Profile
+        </button>
 
         <button
           type="button"
@@ -525,7 +567,9 @@ Manage Recipients
             }
           }}
         >
-          {site.status === "active" ? "Deactivate" : "Activate"}
+          {site.status === "active"
+            ? "Deactivate"
+            : "Activate"}
         </button>
 
         <button
@@ -555,7 +599,7 @@ Manage Recipients
           Archive
         </button>
       </div>
-    </div>
+    )}
   </div>
 ))}
 </div>
