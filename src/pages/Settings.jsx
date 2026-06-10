@@ -1381,36 +1381,107 @@ Delete
 
       <h4>Operational Notes</h4>
 
-      <textarea
-        rows="5"
-        placeholder="Operational notes"
-        value={profileSite.operational_notes || ""}
-        onChange={(e) =>
-          setProfileSite({
-            ...profileSite,
-            operational_notes: e.target.value,
-          })
-        }
-      />
+<label className="settings-field">
+  <span>General Notes</span>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginTop: "16px",
-        }}
-      >
-        <button onClick={updateSiteProfile}>
-          Save Profile
-        </button>
+  <textarea
+    rows="3"
+    value={profileSite.general_notes || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        general_notes: e.target.value,
+      })
+    }
+  />
+</label>
 
-        <button
-          className="secondary-button"
-          onClick={() => setProfileSite(null)}
-        >
-          Cancel
-        </button>
-      </div>
+<label className="settings-field">
+  <span>Access Instructions</span>
+
+  <textarea
+    rows="3"
+    value={profileSite.access_instructions || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        access_instructions: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>Patrol Instructions</span>
+
+  <textarea
+    rows="3"
+    value={profileSite.patrol_instructions || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        patrol_instructions: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>Emergency Instructions</span>
+
+  <textarea
+    rows="3"
+    value={profileSite.emergency_instructions || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        emergency_instructions: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>Special Warnings</span>
+
+  <textarea
+    rows="3"
+    value={profileSite.special_warnings || ""}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        special_warnings: e.target.value,
+      })
+    }
+  />
+</label>
+
+<div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginTop: "20px",
+    flexWrap: "wrap",
+  }}
+>
+  <button onClick={updateSiteProfile}>
+    Save Profile
+  </button>
+
+  <button
+    type="button"
+    onClick={() => window.print()}
+  >
+    Print Profile
+  </button>
+
+  <button
+    className="secondary-button"
+    onClick={() => setProfileSite(null)}
+  >
+    Cancel
+  </button>
+</div>
     </div>
   </div>
 )}
