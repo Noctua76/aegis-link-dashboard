@@ -1081,6 +1081,80 @@ Delete
 </label>
 
 <div className="settings-field">
+  <span>Schedule Mode</span>
+
+  <select
+    value={profileSite.shift_rules?.schedule_mode || "daily"}
+    onChange={(e) =>
+      setProfileSite({
+        ...profileSite,
+        shift_rules: {
+          ...(profileSite.shift_rules || {}),
+          schedule_mode: e.target.value,
+          shifts:
+            profileSite.shift_rules?.shifts ||
+            createDefaultShiftRules(
+              profileSite.required_shifts || 1
+            ).shifts,
+        },
+      })
+    }
+  >
+    <option value="daily">Daily</option>
+    <option value="weekly">Specific Days of Week</option>
+    <option value="monthly">Specific Days of Month</option>
+  </select>
+</div>
+
+{profileSite.shift_rules?.schedule_mode === "weekly" && (
+  <div className="settings-field">
+    <span>Days of Week</span>
+
+    <input
+      placeholder="Mon,Tue,Wed,Thu,Fri"
+      value={
+        profileSite.shift_rules?.days_of_week?.join(",") || ""
+      }
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          shift_rules: {
+            ...profileSite.shift_rules,
+            days_of_week: e.target.value
+              .split(",")
+              .map((d) => d.trim()),
+          },
+        })
+      }
+    />
+  </div>
+)}
+
+{profileSite.shift_rules?.schedule_mode === "monthly" && (
+  <div className="settings-field">
+    <span>Days of Month</span>
+
+    <input
+      placeholder="1,5,10,15,20"
+      value={
+        profileSite.shift_rules?.days_of_month?.join(",") || ""
+      }
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          shift_rules: {
+            ...profileSite.shift_rules,
+            days_of_month: e.target.value
+              .split(",")
+              .map((d) => d.trim()),
+          },
+        })
+      }
+    />
+  </div>
+)}
+
+<div className="settings-field">
   <span>Shift Rules</span>
 
   {(profileSite.shift_rules?.shifts ||
@@ -1090,7 +1164,7 @@ Delete
       key={index}
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr",
+        gridTemplateColumns: "1fr 1fr 1fr auto",
         gap: "8px",
         marginBottom: "8px",
       }}
@@ -1098,22 +1172,18 @@ Delete
       <input
         value={shift.name}
         onChange={(e) => {
-          const currentRules =
-            profileSite.shift_rules ||
-            createDefaultShiftRules(profileSite.required_shifts || 1);
+          const updated = [...(profileSite.shift_rules?.shifts || [])];
 
-          const updatedShifts = [...currentRules.shifts];
-
-          updatedShifts[index] = {
-            ...updatedShifts[index],
+          updated[index] = {
+            ...updated[index],
             name: e.target.value,
           };
 
           setProfileSite({
             ...profileSite,
             shift_rules: {
-              ...currentRules,
-              shifts: updatedShifts,
+              ...profileSite.shift_rules,
+              shifts: updated,
             },
           });
         }}
@@ -1123,22 +1193,18 @@ Delete
         type="time"
         value={shift.start}
         onChange={(e) => {
-          const currentRules =
-            profileSite.shift_rules ||
-            createDefaultShiftRules(profileSite.required_shifts || 1);
+          const updated = [...(profileSite.shift_rules?.shifts || [])];
 
-          const updatedShifts = [...currentRules.shifts];
-
-          updatedShifts[index] = {
-            ...updatedShifts[index],
+          updated[index] = {
+            ...updated[index],
             start: e.target.value,
           };
 
           setProfileSite({
             ...profileSite,
             shift_rules: {
-              ...currentRules,
-              shifts: updatedShifts,
+              ...profileSite.shift_rules,
+              shifts: updated,
             },
           });
         }}
@@ -1148,28 +1214,70 @@ Delete
         type="time"
         value={shift.end}
         onChange={(e) => {
-          const currentRules =
-            profileSite.shift_rules ||
-            createDefaultShiftRules(profileSite.required_shifts || 1);
+          const updated = [...(profileSite.shift_rules?.shifts || [])];
 
-          const updatedShifts = [...currentRules.shifts];
-
-          updatedShifts[index] = {
-            ...updatedShifts[index],
+          updated[index] = {
+            ...updated[index],
             end: e.target.value,
           };
 
           setProfileSite({
             ...profileSite,
             shift_rules: {
-              ...currentRules,
-              shifts: updatedShifts,
+              ...profileSite.shift_rules,
+              shifts: updated,
             },
           });
         }}
       />
+
+      <button
+        type="button"
+        onClick={() => {
+          const updated =
+            profileSite.shift_rules.shifts.filter(
+              (_, i) => i !== index
+            );
+
+          setProfileSite({
+            ...profileSite,
+            shift_rules: {
+              ...profileSite.shift_rules,
+              shifts: updated,
+            },
+          });
+        }}
+      >
+        ✕
+      </button>
     </div>
   ))}
+
+  <button
+    type="button"
+    className="secondary-button"
+    onClick={() => {
+      const current =
+        profileSite.shift_rules?.shifts || [];
+
+      setProfileSite({
+        ...profileSite,
+        shift_rules: {
+          ...profileSite.shift_rules,
+          shifts: [
+            ...current,
+            {
+              name: `Shift ${current.length + 1}`,
+              start: "",
+              end: "",
+            },
+          ],
+        },
+      });
+    }}
+  >
+    Add Shift
+  </button>
 </div>
 
       <h4>Residence Contact</h4>
