@@ -13,6 +13,8 @@ const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
+const [sopFile, setSopFile] = useState(null);
+const [isUploadingSop, setIsUploadingSop] = useState(false);
 
 const [newSite, setNewSite] = useState({
   name: "",
@@ -165,6 +167,45 @@ const updateSite = async () => {
     await loadSites();
   } catch (err) {
     console.error("Update site error", err);
+  }
+};
+
+const uploadSopFile = async () => {
+  if (!profileSite || !sopFile) return;
+
+  try {
+    setIsUploadingSop(true);
+
+    const formData = new FormData();
+    formData.append("sop_file", sopFile);
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${profileSite.id}/sop/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "SOP upload failed");
+    }
+
+    setProfileSite({
+      ...profileSite,
+      sop_file_url: data.sop_file_url,
+      sop_updated_at: data.site?.sop_updated_at,
+    });
+
+    setSopFile(null);
+    await loadSites();
+  } catch (err) {
+    console.error("SOP upload error", err);
+    alert(err.message || "SOP upload failed");
+  } finally {
+    setIsUploadingSop(false);
   }
 };
 
@@ -1717,6 +1758,27 @@ Delete
     }
   />
 </label>
+
+<label className="settings-field">
+  <span>Upload SOP PDF</span>
+
+  <input
+    type="file"
+    accept="application/pdf"
+    onChange={(e) => {
+      setSopFile(e.target.files?.[0] || null);
+    }}
+  />
+</label>
+
+<button
+  type="button"
+  className="secondary-button"
+  disabled={!sopFile || isUploadingSop}
+  onClick={uploadSopFile}
+>
+  {isUploadingSop ? "Uploading..." : "Upload SOP PDF"}
+</button>
 
 <div
   style={{
