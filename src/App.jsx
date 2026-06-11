@@ -1712,13 +1712,15 @@ const handleResolveIncident = async (incident) => {
             </div>
 
             <span className="incident-status">
-              {incident.status === "normal"
-                ? "Normal"
-                : incident.status === "active"
-                ? "Active"
-                : incident.status === "resolved"
-                ? "Resolved"
-                : "In Progress"}
+              {incident.status === "inactive"
+  ? "Inactive"
+  : incident.status === "normal"
+  ? "Normal"
+  : incident.status === "active"
+  ? "Active"
+  : incident.status === "resolved"
+  ? "Resolved"
+  : "In Progress"}
             </span>
           </div>
 
@@ -1727,11 +1729,13 @@ const handleResolveIncident = async (incident) => {
             <p><strong>Guard:</strong> {incident.guard}</p>
             <p>
               <strong>Alert status:</strong>{" "}
-              {incident.status === "normal"
-                ? "Waiting for alert"
-                : incident.status === "resolved"
-                ? "Resolved"
-                : "Alert active"}
+              {incident.status === "inactive"
+  ? "Site inactive"
+  : incident.status === "normal"
+  ? "Waiting for alert"
+  : incident.status === "resolved"
+  ? "Resolved"
+  : "Alert active"}
             </p>
             <p><strong>Priority:</strong> {incident.priority}</p>
           </div>
@@ -1759,9 +1763,11 @@ const handleResolveIncident = async (incident) => {
 
             <p>
               <strong>Status:</strong>{" "}
-              {incident.status === "normal"
-                ? "Waiting for incident trigger"
-                : incident.aiSummary}
+              {incident.status === "inactive"
+  ? "Site inactive"
+  : incident.status === "normal"
+  ? "Waiting for incident trigger"
+  : incident.aiSummary}
             </p>
 
             <p>
