@@ -1699,86 +1699,100 @@ Delete
 
 <h4>SOP Documentation</h4>
 
-<label className="settings-field">
-  <span>SOP Title</span>
+<div className="sop-panel">
+  <label className="settings-field">
+    <span>SOP Title</span>
+    <input
+      placeholder="Standard Operating Procedure"
+      value={profileSite.sop_title || ""}
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          sop_title: e.target.value,
+        })
+      }
+    />
+  </label>
 
-  <input
-    placeholder="Standard Operating Procedure"
-    value={profileSite.sop_title || ""}
-    onChange={(e) =>
-      setProfileSite({
-        ...profileSite,
-        sop_title: e.target.value,
-      })
-    }
-  />
-</label>
+  <label className="settings-field">
+    <span>SOP Version</span>
+    <input
+      placeholder="v1.0"
+      value={profileSite.sop_version || ""}
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          sop_version: e.target.value,
+        })
+      }
+    />
+  </label>
 
-<label className="settings-field">
-  <span>SOP Version</span>
+  <label className="settings-field">
+    <span>SOP Text</span>
+    <textarea
+      rows="5"
+      value={profileSite.sop_text || ""}
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          sop_text: e.target.value,
+        })
+      }
+    />
+  </label>
 
-  <input
-    placeholder="v1.0"
-    value={profileSite.sop_version || ""}
-    onChange={(e) =>
-      setProfileSite({
-        ...profileSite,
-        sop_version: e.target.value,
-      })
-    }
-  />
-</label>
+  <div className="sop-current-file">
+    <span>Current SOP File</span>
 
-<label className="settings-field">
-  <span>SOP Text</span>
+    {profileSite.sop_file_url ? (
+      <div className="sop-actions-row">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => window.open(profileSite.sop_file_url, "_blank")}
+        >
+          View SOP
+        </button>
 
-  <textarea
-    rows="5"
-    value={profileSite.sop_text || ""}
-    onChange={(e) =>
-      setProfileSite({
-        ...profileSite,
-        sop_text: e.target.value,
-      })
-    }
-  />
-</label>
+        <a
+          className="secondary-button"
+          href={profileSite.sop_file_url}
+          target="_blank"
+          rel="noreferrer"
+          download
+        >
+          Download PDF
+        </a>
+      </div>
+    ) : (
+      <small>No SOP PDF uploaded</small>
+    )}
+  </div>
 
-<label className="settings-field">
-  <span>SOP URL</span>
+  <label className="settings-field">
+    <span>Replace SOP PDF</span>
 
-  <input
-    placeholder="https://..."
-    value={profileSite.sop_file_url || ""}
-    onChange={(e) =>
-      setProfileSite({
-        ...profileSite,
-        sop_file_url: e.target.value,
-      })
-    }
-  />
-</label>
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        setSopFile(e.target.files?.[0] || null);
+      }}
+    />
+  </label>
 
-<label className="settings-field">
-  <span>Upload SOP PDF</span>
-
-  <input
-    type="file"
-    accept="application/pdf"
-    onChange={(e) => {
-      setSopFile(e.target.files?.[0] || null);
-    }}
-  />
-</label>
-
-<button
-  type="button"
-  className="secondary-button"
-  disabled={!sopFile || isUploadingSop}
-  onClick={uploadSopFile}
->
-  {isUploadingSop ? "Uploading..." : "Upload SOP PDF"}
-</button>
+  {sopFile && (
+    <button
+      type="button"
+      className="secondary-button"
+      disabled={isUploadingSop}
+      onClick={uploadSopFile}
+    >
+      {isUploadingSop ? "Uploading..." : "Upload Selected PDF"}
+    </button>
+  )}
+</div>
 
 <div
   style={{
