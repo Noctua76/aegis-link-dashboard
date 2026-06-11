@@ -58,9 +58,7 @@ export default function Sites() {
       ...site,
       assignedGuards,
       currentSession: currentSession || null,
-      coverageStatus: currentSession?.is_currently_online
-        ? "Covered"
-        : "Uncovered",
+      coverageStatus: site.coverage_status || "Uncovered",
       activeIncidents: incidents.filter(
         (incident) =>
           incident.site_id === site.id &&
@@ -133,9 +131,9 @@ export default function Sites() {
                 <p>{site.location || "—"}</p>
               </div>
 
-              <span className={`status-pill ${statusClass(site.status)}`}>
-                {site.status}
-              </span>
+              <span className={`status-pill ${site.status_class || statusClass(site.status)}`}>
+  {site.status_label || site.status || "—"}
+</span>
             </div>
 
             <div className="site-card-grid">
@@ -151,9 +149,7 @@ export default function Sites() {
 
               <div>
                 <span>Current Guard</span>
-                <strong>
-                  {site.currentSession?.full_name || "No guard"}
-                </strong>
+                <strong>{site.active_guard || "No guard"}</strong>
               </div>
 
               <div>
@@ -181,7 +177,7 @@ export default function Sites() {
 
               <p>
                 <span>Status</span>
-                {selectedSite.status || "—"}
+                {selectedSite.status_label || selectedSite.status || "—"}
               </p>
 
               <p>
@@ -191,7 +187,7 @@ export default function Sites() {
 
               <p>
                 <span>Current Guard</span>
-                {selectedSite.currentSession?.full_name || "No active guard"}
+                {selectedSite.active_guard || "No active guard"}
               </p>
 
               <p>
