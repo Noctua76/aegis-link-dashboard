@@ -15,6 +15,11 @@ const [profileSite, setProfileSite] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [sopFile, setSopFile] = useState(null);
 const [isUploadingSop, setIsUploadingSop] = useState(false);
+const [document1File, setDocument1File] = useState(null);
+const [document2File, setDocument2File] = useState(null);
+
+const [isUploadingDocument1, setIsUploadingDocument1] = useState(false);
+const [isUploadingDocument2, setIsUploadingDocument2] = useState(false);
 
 const [newSite, setNewSite] = useState({
   name: "",
@@ -206,6 +211,48 @@ const uploadSopFile = async () => {
     alert(err.message || "SOP upload failed");
   } finally {
     setIsUploadingSop(false);
+  }
+};
+
+const uploadSiteDocument = async (slot, file) => {
+  if (!profileSite || !file) return;
+
+  try {
+    if (slot === 1) {
+      setIsUploadingDocument1(true);
+    } else {
+      setIsUploadingDocument2(true);
+    }
+
+    const formData = new FormData();
+    formData.append("site_document", file);
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${profileSite.id}/documents/${slot}/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Upload failed");
+    }
+
+    setProfileSite({
+      ...profileSite,
+      [`document_${slot}_url`]: data.document_url,
+    });
+
+    await loadSites();
+  } catch (err) {
+    console.error("Document upload error:", err);
+    alert(err.message);
+  } finally {
+    setIsUploadingDocument1(false);
+    setIsUploadingDocument2(false);
   }
 };
 
@@ -1815,37 +1862,142 @@ Delete
   )}
 </div>
 
-<div
-  style={{
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-    marginBottom: "20px",
-  }}
->
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={() => {
-      if (profileSite.sop_file_url) {
-        window.open(profileSite.sop_file_url, "_blank");
-      }
-    }}
-  >
-    View SOP
-  </button>
+<h4>Additional Site Documents</h4>
 
-  <button
-    type="button"
-    className="secondary-button"
-    onClick={() => {
-      if (profileSite.sop_file_url) {
-        window.open(profileSite.sop_file_url, "_blank");
+<div className="sop-panel">
+  <label className="settings-field">
+    <span>Document 1 Title</span>
+
+    <input
+      placeholder="e.g. Guarding Contract"
+      value={profileSite.document_1_title || ""}
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          document_1_title: e.target.value,
+        })
       }
-    }}
-  >
-    Download SOP
-  </button>
+    />
+  </label>
+
+  <div className="sop-current-file">
+    <span>Document 1 File</span>
+
+    {profileSite.document_1_url ? (
+      <div className="sop-actions-row">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => window.open(profileSite.document_1_url, "_blank")}
+        >
+          View
+        </button>
+
+        <a
+          className="secondary-button"
+          href={profileSite.document_1_url}
+          target="_blank"
+          rel="noreferrer"
+          download
+        >
+          Download
+        </a>
+      </div>
+    ) : (
+      <small>No document uploaded</small>
+    )}
+  </div>
+
+  <label className="settings-field">
+    <span>Replace Document 1 PDF</span>
+
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        setDocument1File(e.target.files?.[0] || null);
+      }}
+    />
+  </label>
+
+  {document1File && (
+    <button
+      type="button"
+      className="secondary-button"
+      disabled={isUploadingDocument1}
+      onClick={() => uploadSiteDocument(1, document1File)}
+    >
+      {isUploadingDocument1 ? "Uploading..." : "Upload Document 1"}
+    </button>
+  )}
+
+  <hr />
+
+  <label className="settings-field">
+    <span>Document 2 Title</span>
+
+    <input
+      placeholder="e.g. Emergency Plan"
+      value={profileSite.document_2_title || ""}
+      onChange={(e) =>
+        setProfileSite({
+          ...profileSite,
+          document_2_title: e.target.value,
+        })
+      }
+    />
+  </label>
+
+  <div className="sop-current-file">
+    <span>Document 2 File</span>
+
+    {profileSite.document_2_url ? (
+      <div className="sop-actions-row">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => window.open(profileSite.document_2_url, "_blank")}
+        >
+          View
+        </button>
+
+        <a
+          className="secondary-button"
+          href={profileSite.document_2_url}
+          target="_blank"
+          rel="noreferrer"
+          download
+        >
+          Download
+        </a>
+      </div>
+    ) : (
+      <small>No document uploaded</small>
+    )}
+  </div>
+
+  <label className="settings-field">
+    <span>Replace Document 2 PDF</span>
+
+    <input
+      type="file"
+      accept="application/pdf"
+      onChange={(e) => {
+        setDocument2File(e.target.files?.[0] || null);
+      }}
+    />
+  </label>
+
+  {document2File && (
+    <button
+      type="button"
+      className="secondary-button"
+      disabled={isUploadingDocument2}
+      onClick={() => uploadSiteDocument(2, document2File)}
+    >
+      {isUploadingDocument2 ? "Uploading..." : "Upload Document 2"}
+    </button>
+  )}
 </div>
 
 <div

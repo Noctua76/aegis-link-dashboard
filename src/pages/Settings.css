@@ -188,3 +188,36 @@ font-size:13px;
   font-weight: 600;
   color: #cbd5e1;
 }
+
+.sop-panel {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.sop-current-file {
+  margin: 14px 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sop-current-file > span {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.sop-actions-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sop-panel hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
+}
