@@ -531,8 +531,29 @@ const printSiteProfile = (site) => {
         <p><strong>Emergency Instructions:</strong><br/><span class="notes">${formatValue(site.emergency_instructions)}</span></p>
         <p><strong>Special Warnings:</strong><br/><span class="notes">${formatValue(site.special_warnings)}</span></p>
 
-        <h2>SOP Reference</h2>
-        <p>${formatValue(site.sop_file_url || site.sop_text)}</p>
+        <h2>SOP Documentation</h2>
+
+<div class="grid">
+  <div class="item">
+    <span class="label">SOP Title</span>
+    <span class="value">${formatValue(site.sop_title)}</span>
+  </div>
+
+  <div class="item">
+    <span class="label">SOP Version</span>
+    <span class="value">${formatValue(site.sop_version)}</span>
+  </div>
+</div>
+
+<p>
+  <strong>SOP Text:</strong><br/>
+  <span class="notes">${formatValue(site.sop_text)}</span>
+</p>
+
+<p>
+  <strong>SOP File URL:</strong><br/>
+  <span class="notes">${formatValue(site.sop_file_url)}</span>
+</p>
 
         <div class="footer">
           <span>Aegis Link Security Operations Platform</span>
