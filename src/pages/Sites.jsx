@@ -13,23 +13,31 @@ export default function Sites() {
   const [sites, setSites] = useState([]);
   const [guards, setGuards] = useState([]);
   const [activeGuards, setActiveGuards] = useState([]);
-  const [incidents] = useState([]);
+  const [incidents, setIncidents] = useState([]);
+const [shiftHistory, setShiftHistory] = useState([]);
 
   const loadData = async () => {
     try {
-      const [sitesRes, guardsRes, activeRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/sites`),
-        fetch(`${API_BASE_URL}/guards`),
-        fetch(`${API_BASE_URL}/guards/active`),
-      ]);
+      const [sitesRes, guardsRes, activeRes, shiftsRes, incidentsRes] =
+  await Promise.all([
+    fetch(`${API_BASE_URL}/sites`),
+    fetch(`${API_BASE_URL}/guards`),
+    fetch(`${API_BASE_URL}/guards/active`),
+    fetch(`${API_BASE_URL}/guards/shifts/history`),
+    fetch(`${API_BASE_URL}/incidents/site-monitoring`),
+  ]);
 
       const sitesData = await sitesRes.json();
-      const guardsData = await guardsRes.json();
-      const activeData = await activeRes.json();
+const guardsData = await guardsRes.json();
+const activeData = await activeRes.json();
+const shiftsData = await shiftsRes.json();
+const incidentsData = await incidentsRes.json();
 
       setSites(sitesData.sites || []);
-      setGuards(guardsData.guards || []);
-      setActiveGuards(activeData.guards || []);
+setGuards(guardsData.guards || []);
+setActiveGuards(activeData.guards || []);
+setShiftHistory(shiftsData.shifts || []);
+setIncidents(incidentsData.cards || []);
     } catch (err) {
       console.error("Sites load error:", err);
     }
@@ -60,11 +68,14 @@ export default function Sites() {
       currentSession: currentSession || null,
       coverageStatus: site.coverage_status || "Uncovered",
       activeIncidents: incidents.filter(
-        (incident) =>
-          incident.site_id === site.id &&
-          incident.status !== "Resolved"
-      ),
-      recentSessions: [],
+  (incident) =>
+    incident.siteId === site.id &&
+    incident.status !== "normal" &&
+    incident.status !== "inactive"
+),
+recentSessions: shiftHistory
+  .filter((session) => session.site_id === site.id)
+  .slice(0, 5),
     };
   });
 
@@ -226,9 +237,23 @@ export default function Sites() {
             </div>
 
             <div className="site-detail-box">
-              <span>Recent Guard Sessions</span>
-              <p>No recent sessions</p>
-            </div>
+  <span>Recent Guard Sessions</span>
+
+  {selectedSite.recentSessions.length === 0 ? (
+    <p>No recent sessions</p>
+  ) : (
+    selectedSite.recentSessions.map((session) => (
+      <p key={session.id}>
+        {session.full_name} · {session.status} ·{" "}
+        {session.check_in_time
+          ? new Date(session.check_in_time).toLocaleString("el-GR", {
+              timeZone: "Europe/Athens",
+            })
+          : "—"}
+      </p>
+    ))
+  )}
+</div>
           </div>
         </div>
       )}
