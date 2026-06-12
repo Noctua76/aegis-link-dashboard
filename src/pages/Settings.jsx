@@ -12,6 +12,7 @@ function Settings() {
 const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
+const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [sopFile, setSopFile] = useState(null);
 const [isUploadingSop, setIsUploadingSop] = useState(false);
@@ -282,7 +283,12 @@ const addGuard = async () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(newGuard),
+      body: JSON.stringify({
+  ...newGuard,
+  site_id: newGuard.site_id === "trial" ? null : newGuard.site_id,
+  assignment_status:
+    newGuard.site_id === "trial" ? "trial" : "assigned",
+}),
     });
 
     setNewGuard({
@@ -972,6 +978,7 @@ Manage Recipients
     }
   >
     <option value="">Assign to site</option>
+    <option value="trial">Trial / Unassigned</option>
 
     {sites.map((site) => (
       <option key={site.id} value={site.id}>
@@ -984,10 +991,19 @@ Manage Recipients
 
   <hr />
 
-  {guards.map((guard) => (
-    <div key={guard.id} className="settings-item">
+  {[...guards]
+  .sort((a, b) =>
+    (a.full_name || "").localeCompare(b.full_name || "")
+  )
+  .map((guard, index) => (
+    <div
+  key={guard.id}
+  className="settings-item"
+  style={{ cursor: "pointer" }}
+  onClick={() => setProfileGuard(guard)}
+>
       <span>
-        {guard.full_name}
+        {index + 1}. {guard.full_name}
         <br />
         <small>
           {guard.username} · {guard.site_name || "No site"}
@@ -1002,7 +1018,8 @@ Manage Recipients
   <button
     type="button"
     className="secondary-button"
-    onClick={async () => {
+    onClick={async (e) => {
+  e.stopPropagation();
       try {
         await fetch(
           `${API_BASE_URL}/settings/guards/${guard.id}/toggle-active`,
@@ -2026,6 +2043,225 @@ Delete
     Cancel
   </button>
 </div>
+    </div>
+  </div>
+)}
+
+{profileGuard && (
+  <div className="modal-overlay">
+    <div className="recipients-modal">
+      <div className="modal-header">
+        <h3>Guard Profile</h3>
+
+        <button
+          className="modal-close"
+          onClick={() => setProfileGuard(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      <h4>Basic Information</h4>
+
+      <label className="settings-field">
+        <span>Full Name</span>
+        <input
+          value={profileGuard.full_name || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              full_name: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Username</span>
+        <input
+          value={profileGuard.username || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              username: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Mobile Phone</span>
+        <input
+          value={profileGuard.mobile_phone || profileGuard.phone || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              mobile_phone: e.target.value,
+              phone: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Landline Phone</span>
+        <input
+          value={profileGuard.landline_phone || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              landline_phone: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Tax ID / ΑΦΜ</span>
+        <input
+          value={profileGuard.tax_id || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              tax_id: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Home Address</span>
+        <input
+          value={profileGuard.home_address || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              home_address: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <h4>Assignment</h4>
+
+      <label className="settings-field">
+        <span>Assigned Site</span>
+
+        <select
+          value={profileGuard.site_id || "trial"}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              site_id: e.target.value === "trial" ? null : e.target.value,
+              assignment_status:
+                e.target.value === "trial" ? "trial" : "assigned",
+            })
+          }
+        >
+          <option value="trial">Trial / Unassigned</option>
+
+          {sites.map((site) => (
+            <option key={site.id} value={site.id}>
+              {site.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <h4>Training & Experience</h4>
+
+      <label className="settings-field">
+        <span>Education Level</span>
+
+        <select
+          value={profileGuard.education_level || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              education_level: e.target.value,
+            })
+          }
+        >
+          <option value="">Select education</option>
+          <option value="secondary">Secondary Education</option>
+          <option value="tertiary">Tertiary Education</option>
+        </select>
+      </label>
+
+      <label className="settings-field">
+        <span>Foreign Languages</span>
+        <input
+          placeholder="English, German, French..."
+          value={profileGuard.foreign_languages || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              foreign_languages: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Security Experience</span>
+
+        <select
+          value={profileGuard.security_experience_range || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              security_experience_range: e.target.value,
+            })
+          }
+        >
+          <option value="">Select experience</option>
+          <option value="1-2">1–2 years</option>
+          <option value="2-5">2–5 years</option>
+          <option value="5-8">5–8 years</option>
+          <option value="9-13">9–13 years</option>
+          <option value="14-18">14–18 years</option>
+          <option value="18+">18+ years</option>
+        </select>
+      </label>
+
+      <label className="settings-field">
+        <span>Guard Notes</span>
+        <textarea
+          rows="4"
+          value={profileGuard.guard_notes || ""}
+          onChange={(e) =>
+            setProfileGuard({
+              ...profileGuard,
+              guard_notes: e.target.value,
+            })
+          }
+        />
+      </label>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginTop: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+        <button type="button">
+          Save Guard Profile
+        </button>
+
+        <button type="button">
+          Print Guard Profile
+        </button>
+
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setProfileGuard(null)}
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 )}
