@@ -276,6 +276,38 @@ const updateSiteProfile = async () => {
   }
 };
 
+const saveGuardProfile = async () => {
+  if (!profileGuard) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/guards/${profileGuard.id}/profile`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(profileGuard),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to save guard profile");
+    }
+
+    await loadData();
+
+    setProfileGuard(data.guard);
+
+    alert("Guard profile saved successfully");
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+};
+
 const addGuard = async () => {
   try {
     await fetch(`${API_BASE_URL}/settings/guards`, {
