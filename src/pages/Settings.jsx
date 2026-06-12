@@ -14,6 +14,7 @@ const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
+const [guardProfileSaveStatus, setGuardProfileSaveStatus] = useState("");
 const [sopFile, setSopFile] = useState(null);
 const [isUploadingSop, setIsUploadingSop] = useState(false);
 const [document1File, setDocument1File] = useState(null);
@@ -279,6 +280,8 @@ const updateSiteProfile = async () => {
 const saveGuardProfile = async () => {
   if (!profileGuard) return;
 
+  setGuardProfileSaveStatus("Saving...");
+
   try {
     const response = await fetch(
       `${API_BASE_URL}/guards/${profileGuard.id}/profile`,
@@ -299,12 +302,15 @@ const saveGuardProfile = async () => {
 
     await loadGuards();
 
-    setProfileGuard(data.guard);
+setProfileGuard(data.guard);
 
-    alert("Guard profile saved successfully");
+setGuardProfileSaveStatus("Saved");
   } catch (err) {
     console.error(err);
-    alert(err.message);
+
+setGuardProfileSaveStatus("Save failed");
+
+alert(err.message);
   }
 };
 
@@ -2284,6 +2290,12 @@ Delete
 >
   Save Guard Profile
 </button>
+
+{guardProfileSaveStatus && (
+  <div className="profile-save-status">
+    {guardProfileSaveStatus}
+  </div>
+)}
 
         <button type="button">
           Print Guard Profile

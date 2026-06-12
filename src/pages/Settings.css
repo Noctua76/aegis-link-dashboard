@@ -221,3 +221,10 @@ font-size:13px;
   border: none;
   border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
+
+.profile-save-status {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #22c55e;
+}
