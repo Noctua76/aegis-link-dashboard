@@ -138,9 +138,9 @@ export default function Sites() {
 
             <div className="site-card-grid">
               <div>
-                <span>Company Phone</span>
-                <strong>{site.phone || "—"}</strong>
-              </div>
+  <span>Company Phone</span>
+  <strong>{site.site_phone || "—"}</strong>
+</div>
 
               <div>
                 <span>Coverage</span>
