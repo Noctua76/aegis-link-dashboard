@@ -56,13 +56,13 @@ export default function Guards() {
   }, []);
 
   const activeGuardsNow = activeGuards
-    .filter((item) => item.guard_id && item.is_currently_online)
-    .map((item) => ({
-      id: item.guard_id,
-      fullName: item.full_name,
-      username: item.username,
-      phone: item.phone,
-      role: "Guard",
+  .filter((item) => item.guard_id && item.is_currently_online)
+  .map((item) => ({
+    id: item.guard_id,
+    fullName: item.full_name,
+    username: item.username,
+    phone: item.mobile_phone || item.phone || "—",
+    role: "Guard",
       siteName: item.site_name,
       siteLocation: item.site_location,
       status: item.status || "on_duty",
