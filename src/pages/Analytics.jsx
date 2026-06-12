@@ -128,7 +128,10 @@ function Analytics() {
         </div>
       </section>
 
-      <section className="analytics-table-card">
+      <section
+  className="analytics-table-card"
+  style={{ marginTop: "24px" }}
+>
         <h3>Calculation Notes</h3>
 
         <div className="analytics-notes">
