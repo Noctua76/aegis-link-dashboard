@@ -16,6 +16,11 @@ function SiteCard({ site }) {
         </p>
 
         <p>
+  <strong>Company Phone:</strong>{" "}
+  {site.site_phone || "—"}
+</p>
+
+        <p>
           <strong>Guards Assigned:</strong> {site.guards_assigned || 0}
         </p>
 
