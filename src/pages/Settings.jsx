@@ -297,7 +297,7 @@ const saveGuardProfile = async () => {
       throw new Error(data.message || "Failed to save guard profile");
     }
 
-    await loadData();
+    await loadGuards();
 
     setProfileGuard(data.guard);
 
@@ -2278,9 +2278,12 @@ Delete
           flexWrap: "wrap",
         }}
       >
-        <button type="button">
-          Save Guard Profile
-        </button>
+        <button
+  type="button"
+  onClick={saveGuardProfile}
+>
+  Save Guard Profile
+</button>
 
         <button type="button">
           Print Guard Profile
