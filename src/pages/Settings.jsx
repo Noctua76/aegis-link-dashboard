@@ -290,7 +290,13 @@ const saveGuardProfile = async () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(profileGuard),
+        body: JSON.stringify({
+  ...profileGuard,
+  mobile_phone:
+    profileGuard.mobile_phone || profileGuard.phone || "",
+  phone:
+    profileGuard.mobile_phone || profileGuard.phone || "",
+}),
       }
     );
 
