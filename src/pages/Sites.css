@@ -314,3 +314,61 @@ font-weight:600;
   font-size: 16px;
   font-weight: 700;
 }
+
+/* LIVE GPS LOCATION */
+
+.site-live-location {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #0c0c0c;
+  border: 1px solid #1f1f1f;
+}
+
+.site-live-location > span {
+  display: block;
+  font-size: 12px;
+  opacity: 0.65;
+  margin-bottom: 8px;
+}
+
+.site-live-location p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e5e7eb;
+}
+
+.site-live-location-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.site-live-location-grid small {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: #d1d5db;
+}
+
+.site-live-location-grid a,
+.site-detail-box a {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #151515;
+  border: 1px solid #2a2a2a;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.site-live-location-grid a:hover,
+.site-detail-box a:hover {
+  background: #202020;
+}
