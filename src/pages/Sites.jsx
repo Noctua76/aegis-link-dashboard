@@ -28,6 +28,43 @@ function isGpsLive(lastLocationAt) {
   return now - lastUpdate < 2 * 60 * 1000;
 }
 
+function gpsAccuracyLabel(accuracy) {
+  const value = Number(accuracy);
+
+  if (!value && value !== 0) {
+    return {
+      label: "Unknown",
+      className: "gps-accuracy-unknown",
+    };
+  }
+
+  if (value <= 20) {
+    return {
+      label: "Excellent",
+      className: "gps-accuracy-excellent",
+    };
+  }
+
+  if (value <= 50) {
+    return {
+      label: "Good",
+      className: "gps-accuracy-good",
+    };
+  }
+
+  if (value <= 100) {
+    return {
+      label: "Fair",
+      className: "gps-accuracy-fair",
+    };
+  }
+
+  return {
+    label: "Poor",
+    className: "gps-accuracy-poor",
+  };
+}
+
 export default function Sites() {
   const [selectedSite, setSelectedSite] = useState(null);
   const [sites, setSites] = useState([]);
@@ -218,12 +255,17 @@ recentSessions: shiftHistory
 <p>{shortAddress(site.liveLocation.last_location_address)}</p>
 
     <div className="site-live-location-grid">
-      <small>
-        Accuracy:{" "}
-        {site.liveLocation.last_location_accuracy
-          ? `${site.liveLocation.last_location_accuracy}m`
-          : "—"}
-      </small>
+      <small
+  className={`gps-accuracy-pill ${
+    gpsAccuracyLabel(site.liveLocation.last_location_accuracy).className
+  }`}
+>
+  Accuracy:{" "}
+  {site.liveLocation.last_location_accuracy
+    ? `${site.liveLocation.last_location_accuracy}m`
+    : "—"}{" "}
+  · {gpsAccuracyLabel(site.liveLocation.last_location_accuracy).label}
+</small>
 
       <small>
         Battery:{" "}
@@ -338,9 +380,10 @@ recentSessions: shiftHistory
 
       <p>
         <strong>Accuracy:</strong>{" "}
-        {selectedSite.liveLocation.last_location_accuracy
-          ? `${selectedSite.liveLocation.last_location_accuracy}m`
-          : "—"}
+{selectedSite.liveLocation.last_location_accuracy
+  ? `${selectedSite.liveLocation.last_location_accuracy}m`
+  : "—"}{" "}
+· {gpsAccuracyLabel(selectedSite.liveLocation.last_location_accuracy).label}
       </p>
 
       <p>
