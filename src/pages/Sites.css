@@ -401,3 +401,29 @@ font-weight:600;
 .gps-status-offline {
   color: #ff5050;
 }
+
+/* GPS ACCURACY QUALITY */
+
+.gps-accuracy-pill {
+  font-weight: 700;
+}
+
+.gps-accuracy-excellent {
+  color: #00c878 !important;
+}
+
+.gps-accuracy-good {
+  color: #facc15 !important;
+}
+
+.gps-accuracy-fair {
+  color: #fb923c !important;
+}
+
+.gps-accuracy-poor {
+  color: #ff5050 !important;
+}
+
+.gps-accuracy-unknown {
+  color: #9ca3af !important;
+}
