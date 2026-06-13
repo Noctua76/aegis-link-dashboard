@@ -15,16 +15,18 @@ export default function Sites() {
   const [activeGuards, setActiveGuards] = useState([]);
   const [incidents, setIncidents] = useState([]);
 const [shiftHistory, setShiftHistory] = useState([]);
+const [liveLocations, setLiveLocations] = useState([]);
 
   const loadData = async () => {
     try {
-      const [sitesRes, guardsRes, activeRes, shiftsRes, incidentsRes] =
+      const [sitesRes, guardsRes, activeRes, shiftsRes, incidentsRes, locationsRes] =
   await Promise.all([
     fetch(`${API_BASE_URL}/sites`),
     fetch(`${API_BASE_URL}/guards`),
     fetch(`${API_BASE_URL}/guards/active`),
     fetch(`${API_BASE_URL}/guards/shifts/history`),
     fetch(`${API_BASE_URL}/incidents/site-monitoring`),
+    fetch(`${API_BASE_URL}/guards/live-locations`),
   ]);
 
       const sitesData = await sitesRes.json();
@@ -32,12 +34,14 @@ const guardsData = await guardsRes.json();
 const activeData = await activeRes.json();
 const shiftsData = await shiftsRes.json();
 const incidentsData = await incidentsRes.json();
+const locationsData = await locationsRes.json();
 
       setSites(sitesData.sites || []);
 setGuards(guardsData.guards || []);
 setActiveGuards(activeData.guards || []);
 setShiftHistory(shiftsData.shifts || []);
 setIncidents(incidentsData.cards || []);
+setLiveLocations(locationsData.locations || []);
     } catch (err) {
       console.error("Sites load error:", err);
     }
@@ -62,10 +66,15 @@ setIncidents(incidentsData.cards || []);
         session.is_currently_online
     );
 
+    const liveLocation = liveLocations.find(
+  (location) => location.site_id === site.id
+);
+
     return {
       ...site,
       assignedGuards,
       currentSession: currentSession || null,
+      liveLocation: liveLocation || null,
       coverageStatus: site.coverage_status || "Uncovered",
       activeIncidents: incidents.filter(
   (incident) =>
@@ -95,7 +104,7 @@ recentSessions: shiftHistory
     0
   );
 
-  return (
+    return (
     <div className="sites-page">
       <header className="sites-header">
         <div>
@@ -168,6 +177,47 @@ recentSessions: shiftHistory
                 <strong>{site.activeIncidents.length}</strong>
               </div>
             </div>
+            {site.liveLocation && (
+  <div className="site-live-location">
+    <span>Live Guard Location</span>
+
+    <p>{site.liveLocation.last_location_address || "Location unavailable"}</p>
+
+    <div className="site-live-location-grid">
+      <small>
+        Accuracy:{" "}
+        {site.liveLocation.last_location_accuracy
+          ? `${site.liveLocation.last_location_accuracy}m`
+          : "—"}
+      </small>
+
+      <small>
+        Battery:{" "}
+        {site.liveLocation.last_battery_level
+          ? `${site.liveLocation.last_battery_level}%`
+          : "—"}
+      </small>
+
+      <small>
+        Updated:{" "}
+        {site.liveLocation.last_location_at
+          ? new Date(site.liveLocation.last_location_at).toLocaleString("el-GR", {
+              timeZone: "Europe/Athens",
+            })
+          : "—"}
+      </small>
+
+      <a
+        href={`https://www.google.com/maps?q=${site.liveLocation.last_latitude},${site.liveLocation.last_longitude}`}
+        target="_blank"
+        rel="noreferrer"
+        onClick={(e) => e.stopPropagation()}
+      >
+        Open Map
+      </a>
+    </div>
+  </div>
+)}
           </div>
         ))}
       </section>
@@ -235,6 +285,59 @@ recentSessions: shiftHistory
                 <strong>{selectedSite.activeIncidents.length}</strong>
               </p>
             </div>
+
+            <div className="site-detail-box">
+  <span>Live Guard Location</span>
+
+  {selectedSite.liveLocation ? (
+    <>
+      <p>
+        <strong>Address:</strong>{" "}
+        {selectedSite.liveLocation.last_location_address || "—"}
+      </p>
+
+      <p>
+        <strong>Coordinates:</strong>{" "}
+        {selectedSite.liveLocation.last_latitude},{" "}
+        {selectedSite.liveLocation.last_longitude}
+      </p>
+
+      <p>
+        <strong>Accuracy:</strong>{" "}
+        {selectedSite.liveLocation.last_location_accuracy
+          ? `${selectedSite.liveLocation.last_location_accuracy}m`
+          : "—"}
+      </p>
+
+      <p>
+        <strong>Battery:</strong>{" "}
+        {selectedSite.liveLocation.last_battery_level
+          ? `${selectedSite.liveLocation.last_battery_level}%`
+          : "—"}
+      </p>
+
+      <p>
+        <strong>Last Update:</strong>{" "}
+        {selectedSite.liveLocation.last_location_at
+          ? new Date(selectedSite.liveLocation.last_location_at).toLocaleString(
+              "el-GR",
+              { timeZone: "Europe/Athens" }
+            )
+          : "—"}
+      </p>
+
+      <a
+        href={`https://www.google.com/maps?q=${selectedSite.liveLocation.last_latitude},${selectedSite.liveLocation.last_longitude}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Open in Google Maps
+      </a>
+    </>
+  ) : (
+    <p>No live location available</p>
+  )}
+</div>
 
             <div className="site-detail-box">
   <span>Recent Guard Sessions</span>
