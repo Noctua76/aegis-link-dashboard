@@ -372,3 +372,32 @@ font-weight:600;
 .site-detail-box a:hover {
   background: #202020;
 }
+
+/* GPS STATUS */
+
+.gps-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.gps-status-row span {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.gps-status-row strong {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.gps-status-live {
+  color: #00c878;
+}
+
+.gps-status-offline {
+  color: #ff5050;
+}
