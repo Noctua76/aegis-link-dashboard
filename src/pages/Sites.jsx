@@ -8,6 +8,26 @@ function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
 }
 
+function shortAddress(address = "") {
+  if (!address) return "Location unavailable";
+
+  const parts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts.slice(0, 3).join(", ");
+}
+
+function isGpsLive(lastLocationAt) {
+  if (!lastLocationAt) return false;
+
+  const lastUpdate = new Date(lastLocationAt).getTime();
+  const now = Date.now();
+
+  return now - lastUpdate < 2 * 60 * 1000;
+}
+
 export default function Sites() {
   const [selectedSite, setSelectedSite] = useState(null);
   const [sites, setSites] = useState([]);
@@ -179,9 +199,23 @@ recentSessions: shiftHistory
             </div>
             {site.liveLocation && (
   <div className="site-live-location">
-    <span>Live Guard Location</span>
+    <div className="gps-status-row">
+  <span>Live Guard Location</span>
 
-    <p>{site.liveLocation.last_location_address || "Location unavailable"}</p>
+  <strong
+    className={
+      isGpsLive(site.liveLocation.last_location_at)
+        ? "gps-status-live"
+        : "gps-status-offline"
+    }
+  >
+    {isGpsLive(site.liveLocation.last_location_at)
+      ? "GPS LIVE ●"
+      : "GPS OFFLINE"}
+  </strong>
+</div>
+
+<p>{shortAddress(site.liveLocation.last_location_address)}</p>
 
     <div className="site-live-location-grid">
       <small>
