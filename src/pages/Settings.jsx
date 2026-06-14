@@ -12,6 +12,7 @@ function Settings() {
 const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
+const [patrolSite, setPatrolSite] = useState(null);
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [guardProfileSaveStatus, setGuardProfileSaveStatus] = useState("");
@@ -1073,8 +1074,8 @@ Manage Recipients
   type="button"
   className="secondary-button"
   onClick={() => {
-    alert(`Patrols setup for ${site.name} will be added next.`);
-  }}
+  setPatrolSite(site);
+}}
 >
   Patrols
 </button>
@@ -2489,6 +2490,40 @@ Delete
           Cancel
         </button>
       </div>
+    </div>
+  </div>
+)}
+
+{patrolSite && (
+  <div className="modal-overlay">
+    <div className="recipients-modal">
+      <div className="modal-header">
+        <h3>Patrol Points</h3>
+
+        <button
+          className="modal-close"
+          onClick={() => setPatrolSite(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      <p>
+        SITE-{String(patrolSite.id).padStart(3, "0")} | {patrolSite.name}
+      </p>
+
+      <hr />
+
+      <p>QR Patrol Module V.1</p>
+
+      <p>Patrol Points management coming next.</p>
+
+      <button
+        className="secondary-button"
+        onClick={() => setPatrolSite(null)}
+      >
+        Close
+      </button>
     </div>
   </div>
 )}
