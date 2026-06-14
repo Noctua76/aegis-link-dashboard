@@ -1024,6 +1024,68 @@ const handleResolveIncident = async (incident) => {
   }
 };
 
+const gpsAccuracyLabel = (accuracy) => {
+  const value = Number(accuracy);
+
+  if (!Number.isFinite(value)) return "Unknown";
+  if (value <= 20) return "Excellent";
+  if (value <= 50) return "Good";
+  if (value <= 100) return "Fair";
+  return "Poor";
+};
+
+const renderIncidentLocation = (incident) => {
+  if (!incident?.incidentLatitude || !incident?.incidentLongitude) {
+    return null;
+  }
+
+  const address =
+    incident.incidentAddress ||
+    `${incident.incidentLatitude}, ${incident.incidentLongitude}`;
+
+  return (
+    <div className="incident-location-box">
+      <h4>📍 Incident Location</h4>
+
+      <p><strong>Address:</strong> {address}</p>
+
+      <p>
+        <strong>Accuracy:</strong>{" "}
+        {incident.incidentAccuracy
+          ? `${incident.incidentAccuracy}m · ${gpsAccuracyLabel(incident.incidentAccuracy)}`
+          : "-"}
+      </p>
+
+      <p>
+        <strong>Battery:</strong>{" "}
+        {incident.incidentBatteryLevel !== null &&
+        incident.incidentBatteryLevel !== undefined
+          ? `${incident.incidentBatteryLevel}%`
+          : "-"}
+      </p>
+
+      <p>
+        <strong>Snapshot Time:</strong>{" "}
+        {incident.incidentLocationTimestamp
+          ? new Date(incident.incidentLocationTimestamp).toLocaleString("el-GR")
+          : "-"}
+      </p>
+
+      <button
+        type="button"
+        onClick={() =>
+          window.open(
+            `https://www.google.com/maps?q=${incident.incidentLatitude},${incident.incidentLongitude}`,
+            "_blank"
+          )
+        }
+      >
+        Open Map
+      </button>
+    </div>
+  );
+};
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", margin: 0 }}>
       <aside
