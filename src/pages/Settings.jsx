@@ -2499,7 +2499,7 @@ Delete
   <div className="modal-overlay">
     <div className="recipients-modal">
       <div className="modal-header">
-        <h3>Patrol Points</h3>
+        <h3>Patrol Points V1.2</h3>
 
         <button
           className="modal-close"
@@ -2530,21 +2530,21 @@ Delete
   }}
 >
   <button
-  className="secondary-button"
+  className={`patrol-tab ${activePatrolTab === "points" ? "active" : ""}`}
   onClick={() => setActivePatrolTab("points")}
 >
   Patrol Points
 </button>
 
 <button
-  className="secondary-button"
+  className={`patrol-tab ${activePatrolTab === "schedule" ? "active" : ""}`}
   onClick={() => setActivePatrolTab("schedule")}
 >
   Patrol Schedule
 </button>
 
 <button
-  className="secondary-button"
+  className={`patrol-tab ${activePatrolTab === "qr" ? "active" : ""}`}
   onClick={() => setActivePatrolTab("qr")}
 >
   QR Codes

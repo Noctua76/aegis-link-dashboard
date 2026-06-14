@@ -228,3 +228,21 @@ font-size:13px;
   font-weight: 700;
   color: #22c55e;
 }
+
+.patrol-tab {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.05);
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.patrol-tab.active {
+  background: linear-gradient(145deg, #2563eb, #60a5fa);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(37,99,235,0.45);
+  border-color: rgba(96,165,250,0.7);
+}
