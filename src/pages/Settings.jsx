@@ -1070,6 +1070,16 @@ Manage Recipients
         </button>
 
         <button
+  type="button"
+  className="secondary-button"
+  onClick={() => {
+    alert(`Patrols setup for ${site.name} will be added next.`);
+  }}
+>
+  Patrols
+</button>
+
+        <button
           type="button"
           className="secondary-button"
           onClick={async () => {
