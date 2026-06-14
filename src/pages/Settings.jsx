@@ -2514,16 +2514,59 @@ Delete
 
       <hr />
 
-      <p>QR Patrol Module V.1</p>
+      <div style={{ marginBottom: "16px" }}>
+  <strong>
+    SITE-{String(patrolSite.id).padStart(3, "0")}
+  </strong>
+</div>
 
-      <p>Patrol Points management coming next.</p>
+<div
+  style={{
+    display: "flex",
+    gap: "10px",
+    marginBottom: "20px",
+    flexWrap: "wrap"
+  }}
+>
+  <button className="secondary-button">
+    Patrol Points
+  </button>
 
-      <button
-        className="secondary-button"
-        onClick={() => setPatrolSite(null)}
-      >
-        Close
-      </button>
+  <button className="secondary-button">
+    Patrol Schedule
+  </button>
+
+  <button className="secondary-button">
+    QR Codes
+  </button>
+</div>
+
+<div
+  style={{
+    padding: "16px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "12px"
+  }}
+>
+  <p><strong>Total Points:</strong> 0</p>
+
+  <button className="primary-button">
+    + Add Patrol Point
+  </button>
+
+  <div style={{ marginTop: "16px" }}>
+    No patrol points configured.
+  </div>
+</div>
+
+<div style={{ marginTop: "20px" }}>
+  <button
+    className="secondary-button"
+    onClick={() => setPatrolSite(null)}
+  >
+    Close
+  </button>
+</div>
     </div>
   </div>
 )}
