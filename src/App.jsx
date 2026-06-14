@@ -1539,6 +1539,7 @@ const renderIncidentLocation = (incident) => {
           </p>
 
           <p>Guard: {incident.guard}</p>
+          {renderIncidentLocation(incident)}
         </div>
       ))
       : incidentFilter === "In Progress"
@@ -1558,6 +1559,7 @@ const renderIncidentLocation = (incident) => {
 <p><strong>Site:</strong> {incident.site}</p>
 <p><strong>Guard:</strong> {incident.guard}</p>
 <p><strong>Incident:</strong> {incident.incidentId}</p>
+{renderIncidentLocation(incident)}
 
 <hr />
 
@@ -1835,6 +1837,7 @@ const renderIncidentLocation = (incident) => {
             <p>
               <strong>Site:</strong> {incident.site}
             </p>
+            {renderIncidentLocation(incident)}
 
             <p>
               <strong>Escalation:</strong>{" "}
