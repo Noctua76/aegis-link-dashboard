@@ -1736,6 +1736,14 @@ const renderIncidentLocation = (incident) => {
         <h3>✅ {incident.incident_ref}</h3>
         <p><strong>Site:</strong> {incident.site_name}</p>
         <p><strong>Guard:</strong> {incident.guard_name}</p>
+        {renderIncidentLocation({
+  incidentLatitude: incident.incident_latitude,
+  incidentLongitude: incident.incident_longitude,
+  incidentAccuracy: incident.incident_accuracy,
+  incidentBatteryLevel: incident.incident_battery_level,
+  incidentAddress: incident.incident_address,
+  incidentLocationTimestamp: incident.incident_location_timestamp,
+})}
         <p><strong>Resolved:</strong> {incident.resolved_time ? new Date(incident.resolved_time).toLocaleString("el-GR") : "-"}</p>
         <p><strong>Approved By:</strong> {incident.approved_by || "-"}</p>
         <p><strong>Supervisor:</strong> {incident.supervisor_name || "-"}</p>
