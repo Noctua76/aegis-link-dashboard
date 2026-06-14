@@ -13,6 +13,7 @@ const [guards, setGuards] = useState([]);
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
+const [activePatrolTab, setActivePatrolTab] = useState("points");
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [guardProfileSaveStatus, setGuardProfileSaveStatus] = useState("");
@@ -2528,17 +2529,26 @@ Delete
     flexWrap: "wrap"
   }}
 >
-  <button className="secondary-button">
-    Patrol Points
-  </button>
+  <button
+  className="secondary-button"
+  onClick={() => setActivePatrolTab("points")}
+>
+  Patrol Points
+</button>
 
-  <button className="secondary-button">
-    Patrol Schedule
-  </button>
+<button
+  className="secondary-button"
+  onClick={() => setActivePatrolTab("schedule")}
+>
+  Patrol Schedule
+</button>
 
-  <button className="secondary-button">
-    QR Codes
-  </button>
+<button
+  className="secondary-button"
+  onClick={() => setActivePatrolTab("qr")}
+>
+  QR Codes
+</button>
 </div>
 
 <div
@@ -2548,15 +2558,39 @@ Delete
     borderRadius: "12px"
   }}
 >
-  <p><strong>Total Points:</strong> 0</p>
+  {activePatrolTab === "points" && (
+  <>
+    <p><strong>Total Points:</strong> 0</p>
 
-  <button className="primary-button">
-    + Add Patrol Point
-  </button>
+    <button className="primary-button">
+      + Add Patrol Point
+    </button>
 
-  <div style={{ marginTop: "16px" }}>
-    No patrol points configured.
-  </div>
+    <div style={{ marginTop: "16px" }}>
+      No patrol points configured.
+    </div>
+  </>
+)}
+
+{activePatrolTab === "schedule" && (
+  <>
+    <p><strong>Patrol Schedule</strong></p>
+
+    <div style={{ marginTop: "12px" }}>
+      Recurring and manual patrol scheduling will be configured here.
+    </div>
+  </>
+)}
+
+{activePatrolTab === "qr" && (
+  <>
+    <p><strong>QR Codes</strong></p>
+
+    <div style={{ marginTop: "12px" }}>
+      Generated checkpoint QR codes will appear here.
+    </div>
+  </>
+)}
 </div>
 
 <div style={{ marginTop: "20px" }}>
