@@ -700,6 +700,49 @@ const handlePreviewIncidentReport = async (incident) => {
       )
       .join("");
 
+      const incidentLocationHtml =
+  data.incident?.incident_latitude && data.incident?.incident_longitude
+    ? `
+      <h2>Incident Location</h2>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="label">Address</span>
+          <span class="value">${data.incident.incident_address || "-"}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="label">Coordinates</span>
+          <span class="value">
+            ${data.incident.incident_latitude}, ${data.incident.incident_longitude}
+          </span>
+        </div>
+
+        <div class="summary-item">
+          <span class="label">Accuracy</span>
+          <span class="value">${data.incident.incident_accuracy || "-"}m</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="label">Battery</span>
+          <span class="value">${data.incident.incident_battery_level || "-"}%</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="label">Snapshot Time</span>
+          <span class="value">${data.incident.incident_location_timestamp_display || "-"}</span>
+        </div>
+
+        <div class="summary-item">
+          <span class="label">Map</span>
+          <span class="value">
+            https://www.google.com/maps?q=${data.incident.incident_latitude},${data.incident.incident_longitude}
+          </span>
+        </div>
+      </div>
+    `
+    : "";
+
     const reportHtml = `
       <html>
   <head>
@@ -913,6 +956,8 @@ const handlePreviewIncidentReport = async (incident) => {
         <span class="value">${data.incident.resolved_time_display}</span>
       </div>
     </div>
+
+    ${incidentLocationHtml}
 
     <h2>Incident Timeline</h2>
     <table>
