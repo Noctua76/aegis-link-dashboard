@@ -733,12 +733,15 @@
 
 .login-card h1{
   color:white;
-  margin-bottom:8px;
+  margin-bottom:14px;
+  line-height:1.1;
 }
 
 .login-card p{
   color:#999;
+  margin-top:0;
   margin-bottom:30px;
+  line-height:1.4;
 }
 
 .login-form{
