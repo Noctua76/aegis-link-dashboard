@@ -14,6 +14,7 @@ const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
 const [activePatrolTab, setActivePatrolTab] = useState("points");
+const [patrolScheduleScope, setPatrolScheduleScope] = useState("24_7");
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [guardProfileSaveStatus, setGuardProfileSaveStatus] = useState("");
@@ -2582,60 +2583,65 @@ Delete
       <label className="settings-field">
   <span>Schedule Scope</span>
 
-  <select>
+  <select
+    value={patrolScheduleScope}
+    onChange={(e) => setPatrolScheduleScope(e.target.value)}
+  >
     <option value="24_7">24/7 Patrol</option>
-    <option value="custom">
-      Custom Days & Hours
-    </option>
+    <option value="custom">Custom Days & Hours</option>
   </select>
 </label>
 
-      <label className="settings-field">
-        <span>Every</span>
-        <select>
-          <option value="1">Every 1 hour</option>
-          <option value="2">Every 2 hours</option>
-          <option value="3">Every 3 hours</option>
-          <option value="4">Every 4 hours</option>
-        </select>
-      </label>
+<label className="settings-field">
+  <span>Every</span>
+  <select>
+    <option value="1">Every 1 hour</option>
+    <option value="2">Every 2 hours</option>
+    <option value="3">Every 3 hours</option>
+    <option value="4">Every 4 hours</option>
+  </select>
+</label>
 
-      <label className="settings-field">
-        <span>Start Time</span>
-        <input type="time" />
-      </label>
+{patrolScheduleScope === "custom" && (
+  <>
+    <div className="patrol-days-box">
+      <strong>Custom Days</strong>
 
-      <label className="settings-field">
-        <span>End Time</span>
-        <input type="time" />
-      </label>
+      <div className="patrol-days-grid">
+        <label><input type="checkbox" /> Mon</label>
+        <label><input type="checkbox" /> Tue</label>
+        <label><input type="checkbox" /> Wed</label>
+        <label><input type="checkbox" /> Thu</label>
+        <label><input type="checkbox" /> Fri</label>
+        <label><input type="checkbox" /> Sat</label>
+        <label><input type="checkbox" /> Sun</label>
+      </div>
+    </div>
 
-      <label className="settings-field">
-        <span>Reminder</span>
-        <select defaultValue="5">
-          <option value="5">5 minutes before</option>
-          <option value="10">10 minutes before</option>
-          <option value="15">15 minutes before</option>
-        </select>
-      </label>
+    <label className="settings-field">
+      <span>Start Time</span>
+      <input type="time" />
+    </label>
 
-      <div className="patrol-days-box">
-  <strong>Custom Days</strong>
+    <label className="settings-field">
+      <span>End Time</span>
+      <input type="time" />
+    </label>
+  </>
+)}
 
-  <div className="patrol-days-grid">
-    <label><input type="checkbox" /> Mon</label>
-    <label><input type="checkbox" /> Tue</label>
-    <label><input type="checkbox" /> Wed</label>
-    <label><input type="checkbox" /> Thu</label>
-    <label><input type="checkbox" /> Fri</label>
-    <label><input type="checkbox" /> Sat</label>
-    <label><input type="checkbox" /> Sun</label>
-  </div>
-</div>
+<label className="settings-field">
+  <span>Reminder</span>
+  <select defaultValue="5">
+    <option value="5">5 minutes before</option>
+    <option value="10">10 minutes before</option>
+    <option value="15">15 minutes before</option>
+  </select>
+</label>
 
-      <button className="primary-button">
-        Save Recurring Schedule
-      </button>
+<button className="primary-button">
+  Save Recurring Schedule
+</button>
     </div>
 
     <div className="patrol-schedule-box">
