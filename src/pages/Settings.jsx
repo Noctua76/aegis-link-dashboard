@@ -2807,11 +2807,60 @@ Delete
 
 {activePatrolTab === "qr" && (
   <>
-    <p><strong>QR Codes</strong></p>
+    <p><strong>QR Codes V1.5</strong></p>
 
-    <div style={{ marginTop: "12px" }}>
-      Generated checkpoint QR codes will appear here.
-    </div>
+    {patrolPoints.length === 0 ? (
+      <div>No patrol points configured.</div>
+    ) : (
+      patrolPoints.map((point, index) => (
+        <div
+          key={point.id}
+          className="settings-item"
+          style={{
+            marginTop: "10px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div>
+            <strong>
+              PT-{String(index + 1).padStart(3, "0")} | {point.point_name}
+            </strong>
+
+            <br />
+
+            <small>
+              {point.qr_token
+                ? point.qr_token
+                : "QR Not Generated"}
+            </small>
+          </div>
+
+          <button
+            className="primary-button"
+            onClick={async () => {
+              try {
+                await fetch(
+                  `${API_BASE_URL}/settings/patrol-points/${point.id}/generate-qr`,
+                  {
+                    method: "POST",
+                  }
+                );
+
+                await loadPatrolPoints(patrolSite.id);
+              } catch (err) {
+                console.error("Generate QR error", err);
+              }
+            }}
+          >
+            {point.qr_token
+              ? "Regenerate QR"
+              : "Generate QR"}
+          </button>
+        </div>
+      ))
+    )}
   </>
 )}
 </div>
