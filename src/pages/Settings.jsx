@@ -20,7 +20,6 @@ const [patrolPoints, setPatrolPoints] = useState([]);
 const [newPatrolPoint, setNewPatrolPoint] = useState({
   point_name: "",
   point_description: "",
-  expected_interval_minutes: 60,
 });
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
@@ -142,8 +141,7 @@ const addPatrolPoint = async () => {
 
     setNewPatrolPoint({
       point_name: "",
-      point_description: "",
-      expected_interval_minutes: 60,
+      point_description: "",      
     });
 
     await loadPatrolPoints(patrolSite.id);
@@ -2642,24 +2640,6 @@ Delete
   />
 </label>
 
-<label className="settings-field">
-  <span>Expected Interval</span>
-  <select
-    value={newPatrolPoint.expected_interval_minutes}
-    onChange={(e) =>
-      setNewPatrolPoint({
-        ...newPatrolPoint,
-        expected_interval_minutes: Number(e.target.value),
-      })
-    }
-  >
-    <option value={60}>Every 1 hour</option>
-    <option value={120}>Every 2 hours</option>
-    <option value={180}>Every 3 hours</option>
-    <option value={240}>Every 4 hours</option>
-  </select>
-</label>
-
 <button
   className="primary-button"
   onClick={addPatrolPoint}
@@ -2682,11 +2662,7 @@ Delete
     PT-{String(index + 1).padStart(3, "0")} | {point.point_name}
   </strong>
   <br />
-  <small>{point.point_description || "No description"}</small>
-  <br />
-  <small>
-    Every {Number(point.expected_interval_minutes || 60) / 60}h
-  </small>
+  <small>{point.point_description || "No description"}</small>  
 </span>
 
 <button
