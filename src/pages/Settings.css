@@ -265,3 +265,22 @@ font-size:13px;
   color: #9ca3af;
   font-size: 13px;
 }
+
+.patrol-days-box {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+}
+
+.patrol-days-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.patrol-days-grid label {
+  font-size: 13px;
+  color: #d1d5db;
+}

@@ -2580,6 +2580,17 @@ Delete
       <h4>Recurring Patrol</h4>
 
       <label className="settings-field">
+  <span>Schedule Scope</span>
+
+  <select>
+    <option value="24_7">24/7 Patrol</option>
+    <option value="custom">
+      Custom Days & Hours
+    </option>
+  </select>
+</label>
+
+      <label className="settings-field">
         <span>Every</span>
         <select>
           <option value="1">Every 1 hour</option>
@@ -2607,6 +2618,20 @@ Delete
           <option value="15">15 minutes before</option>
         </select>
       </label>
+
+      <div className="patrol-days-box">
+  <strong>Custom Days</strong>
+
+  <div className="patrol-days-grid">
+    <label><input type="checkbox" /> Mon</label>
+    <label><input type="checkbox" /> Tue</label>
+    <label><input type="checkbox" /> Wed</label>
+    <label><input type="checkbox" /> Thu</label>
+    <label><input type="checkbox" /> Fri</label>
+    <label><input type="checkbox" /> Sat</label>
+    <label><input type="checkbox" /> Sun</label>
+  </div>
+</div>
 
       <button className="primary-button">
         Save Recurring Schedule
