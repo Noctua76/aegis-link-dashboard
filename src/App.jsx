@@ -1,3 +1,4 @@
+import Patrols from "./pages/Patrols";
 import { APP_VERSION, APP_BUILD } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
 import { useEffect, useState } from "react";
@@ -153,6 +154,7 @@ const menuItems = [
   "Admin Audit Logs",
   "Guards",
   "Sites",
+  "Patrols",
   "System Status",
   "Analytics",
   "Settings",
@@ -1983,6 +1985,7 @@ const renderIncidentLocation = (incident) => {
 }
         {activeMenu === "Event Logs" && <EventLogs />}
         {activeMenu === "Sites" && <Sites />}
+        {activeMenu === "Patrols" && <Patrols />}
         {activeMenu === "Settings" && (
 <Settings/>
 )}
