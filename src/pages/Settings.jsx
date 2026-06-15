@@ -2671,21 +2671,38 @@ Delete
   {patrolPoints.length === 0 ? (
     <div>No patrol points configured.</div>
   ) : (
-    patrolPoints.map((point) => (
+    patrolPoints.map((point, index) => (
       <div
         key={point.id}
         className="settings-item"
         style={{ marginTop: "10px" }}
       >
         <span>
-          <strong>{point.point_name}</strong>
-          <br />
-          <small>{point.point_description || "No description"}</small>
-          <br />
-          <small>
-            Every {Number(point.expected_interval_minutes || 60) / 60}h
-          </small>
-        </span>
+  <strong>
+    PT-{String(index + 1).padStart(3, "0")} | {point.point_name}
+  </strong>
+  <br />
+  <small>{point.point_description || "No description"}</small>
+  <br />
+  <small>
+    Every {Number(point.expected_interval_minutes || 60) / 60}h
+  </small>
+</span>
+
+<button
+  type="button"
+  className="secondary-button danger-button"
+  onClick={async () => {
+    await fetch(
+      `${API_BASE_URL}/settings/patrol-points/${point.id}/deactivate`,
+      { method: "PUT" }
+    );
+
+    await loadPatrolPoints(patrolSite.id);
+  }}
+>
+  Deactivate
+</button>
       </div>
     ))
   )}
