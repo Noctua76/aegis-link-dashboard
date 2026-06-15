@@ -383,7 +383,7 @@ const downloadQr = async (pointId) => {
 >
   Print QR
 </button>
-  <button type="button">Regenerate QR</button>
+  
 </div>
 
               <p style={{ color: "#9ca3af", fontSize: "13px" }}>
