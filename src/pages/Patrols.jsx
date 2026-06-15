@@ -202,6 +202,34 @@ const printQrCard = async (pointId) => {
   }
 };
 
+const downloadQr = async (pointId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const data = await response.json();
+
+    if (data.status !== "ok") {
+      throw new Error("Failed to load QR");
+    }
+
+    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+
+    const imageUrl = await QRCode.toDataURL(qrPayload, {
+      width: 640,
+      margin: 2,
+    });
+
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.download = `aegis-link-${data.point.point_name}-qr.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (err) {
+    console.error("Failed downloading QR:", err);
+    alert("Failed to download QR");
+  }
+};
+
   return (
     <div className="page">
       <div className="page-header">
@@ -337,7 +365,15 @@ const printQrCard = async (pointId) => {
 >
   View QR
 </button>
-  <button type="button">Download QR</button>
+  <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    downloadQr(point.id);
+  }}
+>
+  Download QR
+</button>
   <button
   type="button"
   onClick={(e) => {
