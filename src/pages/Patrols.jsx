@@ -102,65 +102,70 @@ const printQrCard = async (pointId) => {
         <head>
           <title>Aegis Link Patrol QR</title>
           <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 0;
-              padding: 40px;
-              text-align: center;
-              color: #111827;
-            }
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
 
-            .card {
-              border: 3px solid #111827;
-              border-radius: 18px;
-              padding: 36px;
-              max-width: 620px;
-              margin: 0 auto;
-            }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    color: #111827;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
 
-            h1 {
-              margin: 0;
-              font-size: 30px;
-              letter-spacing: 1px;
-            }
+  .card {
+    border: 3px solid #111827;
+    border-radius: 18px;
+    padding: 28px;
+    width: 500px;
+    margin: 0 auto;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 
-            h2 {
-              margin-top: 24px;
-              font-size: 24px;
-            }
+  h1 {
+    margin: 0;
+    font-size: 30px;
+    letter-spacing: 1px;
+  }
 
-            .subtitle {
-              color: #4b5563;
-              margin-top: 8px;
-              font-size: 16px;
-            }
+  h2 {
+    margin-top: 20px;
+    font-size: 24px;
+  }
 
-            img {
-              width: 420px;
-              height: 420px;
-              margin: 28px auto;
-              display: block;
-            }
+  .subtitle {
+    color: #4b5563;
+    margin-top: 8px;
+    font-size: 16px;
+  }
 
-            .meta {
-              margin-top: 20px;
-              font-size: 15px;
-              color: #374151;
-              word-break: break-all;
-            }
+  img {
+    width: 320px;
+    height: 320px;
+    margin: 24px auto;
+    display: block;
+  }
 
-            .footer {
-              margin-top: 28px;
-              font-size: 13px;
-              color: #6b7280;
-            }
+  .meta {
+    margin-top: 16px;
+    font-size: 14px;
+    color: #374151;
+    word-break: break-all;
+  }
 
-            @media print {
-              body {
-                padding: 20px;
-              }
-            }
-          </style>
+  .footer {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #6b7280;
+  }
+</style>
         </head>
 
         <body>
