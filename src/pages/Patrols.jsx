@@ -79,6 +79,124 @@ const openQrModal = async (pointId) => {
   }
 };
 
+const printQrCard = async (pointId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const data = await response.json();
+
+    if (data.status !== "ok") {
+      throw new Error("Failed to load QR");
+    }
+
+    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+
+    const imageUrl = await QRCode.toDataURL(qrPayload, {
+      width: 420,
+      margin: 2,
+    });
+
+    const printWindow = window.open("", "_blank");
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Aegis Link Patrol QR</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 40px;
+              text-align: center;
+              color: #111827;
+            }
+
+            .card {
+              border: 3px solid #111827;
+              border-radius: 18px;
+              padding: 36px;
+              max-width: 620px;
+              margin: 0 auto;
+            }
+
+            h1 {
+              margin: 0;
+              font-size: 30px;
+              letter-spacing: 1px;
+            }
+
+            h2 {
+              margin-top: 24px;
+              font-size: 24px;
+            }
+
+            .subtitle {
+              color: #4b5563;
+              margin-top: 8px;
+              font-size: 16px;
+            }
+
+            img {
+              width: 420px;
+              height: 420px;
+              margin: 28px auto;
+              display: block;
+            }
+
+            .meta {
+              margin-top: 20px;
+              font-size: 15px;
+              color: #374151;
+              word-break: break-all;
+            }
+
+            .footer {
+              margin-top: 28px;
+              font-size: 13px;
+              color: #6b7280;
+            }
+
+            @media print {
+              body {
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+
+        <body>
+          <div class="card">
+            <h1>AEGIS LINK</h1>
+            <div class="subtitle">Patrol Checkpoint QR</div>
+
+            <h2>${data.point.point_name}</h2>
+
+            <img src="${imageUrl}" />
+
+            <div class="meta">
+              Token: ${data.point.qr_token}
+            </div>
+
+            <div class="footer">
+              Scan this QR only during an assigned patrol round.
+            </div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+  } catch (err) {
+    console.error("Failed printing QR:", err);
+    alert("Failed to print QR");
+  }
+};
+
   return (
     <div className="page">
       <div className="page-header">
@@ -215,7 +333,15 @@ const openQrModal = async (pointId) => {
   View QR
 </button>
   <button type="button">Download QR</button>
-  <button type="button">Print QR</button>
+  <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    printQrCard(point.id);
+  }}
+>
+  Print QR
+</button>
   <button type="button">Regenerate QR</button>
 </div>
 
