@@ -117,10 +117,7 @@ const [detailsLoading, setDetailsLoading] = useState(false);
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
-                <button type="button">View QR</button>
-                <button type="button">Download QR</button>
-                <button type="button">Print QR</button>
+              <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>                
               </div>
             </div>
           ))}
@@ -159,15 +156,29 @@ const [detailsLoading, setDetailsLoading] = useState(false);
                 PT-{String(index + 1).padStart(3, "0")} | {point.point_name}
               </h4>
 
-              <p>
-                QR Status:{" "}
-                <strong>{point.qr_token ? "Generated" : "Pending"}</strong>
-              </p>
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+  <span className="site-status normal">
+    {point.qr_token ? "QR GENERATED" : "QR PENDING"}
+  </span>
 
-              <p>
-                Status:{" "}
-                <strong>{point.active ? "Active" : "Inactive"}</strong>
-              </p>
+  <span className={point.active ? "site-status normal" : "site-status inactive"}>
+    {point.active ? "ACTIVE" : "INACTIVE"}
+  </span>
+</div>
+
+<div
+  style={{
+    display: "flex",
+    gap: "10px",
+    justifyContent: "center",
+    marginTop: "16px",
+  }}
+>
+  <button type="button">View QR</button>
+  <button type="button">Download QR</button>
+  <button type="button">Print QR</button>
+  <button type="button">Regenerate QR</button>
+</div>
 
               <p style={{ color: "#9ca3af", fontSize: "13px" }}>
                 Created:{" "}
