@@ -246,3 +246,22 @@ font-size:13px;
   box-shadow: 0 0 14px rgba(37,99,235,0.45);
   border-color: rgba(96,165,250,0.7);
 }
+
+.patrol-schedule-box {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.patrol-schedule-box h4 {
+  margin: 0 0 14px;
+  color: #f9fafb;
+}
+
+.patrol-empty-state {
+  margin-top: 14px;
+  color: #9ca3af;
+  font-size: 13px;
+}

@@ -2574,10 +2574,65 @@ Delete
 
 {activePatrolTab === "schedule" && (
   <>
-    <p><strong>Patrol Schedule</strong></p>
+    <p><strong>Patrol Schedule V1.3</strong></p>
 
-    <div style={{ marginTop: "12px" }}>
-      Recurring and manual patrol scheduling will be configured here.
+    <div className="patrol-schedule-box">
+      <h4>Recurring Patrol</h4>
+
+      <label className="settings-field">
+        <span>Every</span>
+        <select>
+          <option value="1">Every 1 hour</option>
+          <option value="2">Every 2 hours</option>
+          <option value="3">Every 3 hours</option>
+          <option value="4">Every 4 hours</option>
+        </select>
+      </label>
+
+      <label className="settings-field">
+        <span>Start Time</span>
+        <input type="time" />
+      </label>
+
+      <label className="settings-field">
+        <span>End Time</span>
+        <input type="time" />
+      </label>
+
+      <label className="settings-field">
+        <span>Reminder</span>
+        <select defaultValue="5">
+          <option value="5">5 minutes before</option>
+          <option value="10">10 minutes before</option>
+          <option value="15">15 minutes before</option>
+        </select>
+      </label>
+
+      <button className="primary-button">
+        Save Recurring Schedule
+      </button>
+    </div>
+
+    <div className="patrol-schedule-box">
+      <h4>Manual Patrol</h4>
+
+      <label className="settings-field">
+        <span>Date</span>
+        <input type="date" />
+      </label>
+
+      <label className="settings-field">
+        <span>Time</span>
+        <input type="time" />
+      </label>
+
+      <button className="secondary-button">
+        Add Manual Patrol
+      </button>
+
+      <div className="patrol-empty-state">
+        No manual patrols configured.
+      </div>
     </div>
   </>
 )}
