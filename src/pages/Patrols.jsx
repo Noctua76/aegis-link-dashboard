@@ -60,7 +60,8 @@ const openQrModal = async (pointId) => {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+    const qrPayload =
+`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 320,
@@ -88,7 +89,8 @@ const printQrCard = async (pointId) => {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+    const qrPayload =
+`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 420,
@@ -211,7 +213,8 @@ const downloadQr = async (pointId) => {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+    const qrPayload =
+`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 640,
