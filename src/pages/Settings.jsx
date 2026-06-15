@@ -15,6 +15,13 @@ const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
 const [activePatrolTab, setActivePatrolTab] = useState("points");
 const [patrolScheduleScope, setPatrolScheduleScope] = useState("24_7");
+const [patrolPoints, setPatrolPoints] = useState([]);
+
+const [newPatrolPoint, setNewPatrolPoint] = useState({
+  point_name: "",
+  point_description: "",
+  expected_interval_minutes: 60,
+});
 const [profileGuard, setProfileGuard] = useState(null);
 const [expandedSiteId, setExpandedSiteId] = useState(null);
 const [guardProfileSaveStatus, setGuardProfileSaveStatus] = useState("");
@@ -101,6 +108,47 @@ const loadGuards = async () => {
     setGuards(data.guards || []);
   } catch (err) {
     console.error("Guards load error", err);
+  }
+};
+
+const loadPatrolPoints = async (siteId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${siteId}/patrol-points`
+    );
+
+    const data = await response.json();
+
+    setPatrolPoints(data.points || []);
+  } catch (err) {
+    console.error("Patrol points load error", err);
+  }
+};
+
+const addPatrolPoint = async () => {
+  if (!patrolSite || !newPatrolPoint.point_name) return;
+
+  try {
+    await fetch(
+      `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-points`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newPatrolPoint),
+      }
+    );
+
+    setNewPatrolPoint({
+      point_name: "",
+      point_description: "",
+      expected_interval_minutes: 60,
+    });
+
+    await loadPatrolPoints(patrolSite.id);
+  } catch (err) {
+    console.error("Add patrol point error", err);
   }
 };
 
@@ -1077,6 +1125,7 @@ Manage Recipients
   className="secondary-button"
   onClick={() => {
   setPatrolSite(site);
+  loadPatrolPoints(site.id);
 }}
 >
   Patrols
@@ -2561,15 +2610,86 @@ Delete
 >
   {activePatrolTab === "points" && (
   <>
-    <p><strong>Total Points:</strong> 0</p>
+    <p>
+  <strong>Total Points:</strong> {patrolPoints.length}
+</p>
 
-    <button className="primary-button">
-      + Add Patrol Point
-    </button>
+<label className="settings-field">
+  <span>Point Name</span>
+  <input
+    placeholder="Main Gate"
+    value={newPatrolPoint.point_name}
+    onChange={(e) =>
+      setNewPatrolPoint({
+        ...newPatrolPoint,
+        point_name: e.target.value,
+      })
+    }
+  />
+</label>
 
-    <div style={{ marginTop: "16px" }}>
-      No patrol points configured.
-    </div>
+<label className="settings-field">
+  <span>Description</span>
+  <input
+    placeholder="North entrance / garage / perimeter"
+    value={newPatrolPoint.point_description}
+    onChange={(e) =>
+      setNewPatrolPoint({
+        ...newPatrolPoint,
+        point_description: e.target.value,
+      })
+    }
+  />
+</label>
+
+<label className="settings-field">
+  <span>Expected Interval</span>
+  <select
+    value={newPatrolPoint.expected_interval_minutes}
+    onChange={(e) =>
+      setNewPatrolPoint({
+        ...newPatrolPoint,
+        expected_interval_minutes: Number(e.target.value),
+      })
+    }
+  >
+    <option value={60}>Every 1 hour</option>
+    <option value={120}>Every 2 hours</option>
+    <option value={180}>Every 3 hours</option>
+    <option value={240}>Every 4 hours</option>
+  </select>
+</label>
+
+<button
+  className="primary-button"
+  onClick={addPatrolPoint}
+>
+  Save Patrol Point
+</button>
+
+<div style={{ marginTop: "16px" }}>
+  {patrolPoints.length === 0 ? (
+    <div>No patrol points configured.</div>
+  ) : (
+    patrolPoints.map((point) => (
+      <div
+        key={point.id}
+        className="settings-item"
+        style={{ marginTop: "10px" }}
+      >
+        <span>
+          <strong>{point.point_name}</strong>
+          <br />
+          <small>{point.point_description || "No description"}</small>
+          <br />
+          <small>
+            Every {Number(point.expected_interval_minutes || 60) / 60}h
+          </small>
+        </span>
+      </div>
+    ))
+  )}
+</div>
   </>
 )}
 
