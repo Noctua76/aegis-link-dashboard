@@ -2691,7 +2691,7 @@ Delete
 
 <button
   type="button"
-  className="secondary-button danger-button"
+  className="patrol-point-action danger"
   onClick={async () => {
     await fetch(
       `${API_BASE_URL}/settings/patrol-points/${point.id}/deactivate`,

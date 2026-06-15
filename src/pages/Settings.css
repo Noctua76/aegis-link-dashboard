@@ -284,3 +284,20 @@ font-size:13px;
   font-size: 13px;
   color: #d1d5db;
 }
+
+.patrol-point-action {
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.05);
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.patrol-point-action.danger {
+  border-color: rgba(239,68,68,0.45);
+  color: #fecaca;
+  background: rgba(239,68,68,0.12);
+}
