@@ -1,3 +1,4 @@
+import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
@@ -7,6 +8,8 @@ function Patrols() {
   const [loading, setLoading] = useState(true);
   const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
 const [detailsLoading, setDetailsLoading] = useState(false);
+const [selectedQr, setSelectedQr] = useState(null);
+const [qrImageUrl, setQrImageUrl] = useState("");
 
   useEffect(() => {
     const loadPatrolSites = async () => {
@@ -45,6 +48,34 @@ const [detailsLoading, setDetailsLoading] = useState(false);
     console.error("Failed loading patrol site details:", err);
   } finally {
     setDetailsLoading(false);
+  }
+};
+
+const openQrModal = async (pointId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const data = await response.json();
+
+    if (data.status !== "ok") {
+      throw new Error("Failed to load QR");
+    }
+
+    const qrPayload = `${window.location.origin}/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+
+    const imageUrl = await QRCode.toDataURL(qrPayload, {
+      width: 320,
+      margin: 2,
+    });
+
+    setSelectedQr({
+      ...data.point,
+      qr_payload: qrPayload,
+    });
+
+    setQrImageUrl(imageUrl);
+  } catch (err) {
+    console.error("Failed opening QR modal:", err);
+    alert("Failed to load QR");
   }
 };
 
@@ -174,7 +205,15 @@ const [detailsLoading, setDetailsLoading] = useState(false);
     marginTop: "16px",
   }}
 >
-  <button type="button">View QR</button>
+  <button
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation();
+    openQrModal(point.id);
+  }}
+>
+  View QR
+</button>
   <button type="button">Download QR</button>
   <button type="button">Print QR</button>
   <button type="button">Regenerate QR</button>
@@ -189,6 +228,52 @@ const [detailsLoading, setDetailsLoading] = useState(false);
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedQr && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>QR Code | {selectedQr.point_name}</h2>
+
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedQr(null);
+            setQrImageUrl("");
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px", textAlign: "center" }}>
+        {qrImageUrl && (
+          <img
+            src={qrImageUrl}
+            alt={`QR Code for ${selectedQr.point_name}`}
+            style={{
+              width: "320px",
+              height: "320px",
+              background: "#ffffff",
+              padding: "12px",
+              borderRadius: "12px",
+            }}
+          />
+        )}
+
+        <h3 style={{ marginTop: "20px" }}>{selectedQr.point_name}</h3>
+
+        <p style={{ color: "#9ca3af", wordBreak: "break-all" }}>
+          {selectedQr.qr_payload}
+        </p>
+
+        <p style={{ color: "#9ca3af", wordBreak: "break-all" }}>
+          Token: {selectedQr.qr_token}
+        </p>
       </div>
     </div>
   </div>
