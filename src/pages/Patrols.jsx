@@ -238,9 +238,9 @@ const downloadQr = async (pointId) => {
       <div className="page-header">
         <div>
           <h1>Patrols</h1>
-          <p>
-            Operational center for patrol points, QR codes, and patrol monitoring.
-          </p>
+          <p style={{ marginBottom: "22px" }}>
+  Operational center for patrol points, QR codes, and patrol monitoring.
+</p>
         </div>
       </div>
 
@@ -293,10 +293,32 @@ const downloadQr = async (pointId) => {
 
                 <div className="system-status-card">
   <h3>Last Patrol</h3>
-  <span>
-    {site.last_patrol
-      ? new Date(site.last_patrol).toLocaleString("el-GR")
-      : "-"}
+  <span
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-end",
+      gap: "3px",
+      fontSize: "13px",
+      lineHeight: "1.25",
+      whiteSpace: "nowrap",
+    }}
+  >
+    {site.last_patrol ? (
+      <>
+        <strong>
+          {new Date(site.last_patrol).toLocaleDateString("el-GR")}
+        </strong>
+        <strong>
+          {new Date(site.last_patrol).toLocaleTimeString("el-GR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </strong>
+      </>
+    ) : (
+      "-"
+    )}
   </span>
 </div>
 
