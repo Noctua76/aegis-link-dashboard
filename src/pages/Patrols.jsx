@@ -7,6 +7,7 @@ function Patrols() {
   const [patrolSites, setPatrolSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
+  const [selectedQrSiteDetails, setSelectedQrSiteDetails] = useState(null);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
@@ -46,6 +47,23 @@ const [qrImageUrl, setQrImageUrl] = useState("");
     }
   } catch (err) {
     console.error("Failed loading patrol site details:", err);
+  } finally {
+    setDetailsLoading(false);
+  }
+};
+
+const openQrSiteDetails = async (siteId) => {
+  setDetailsLoading(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrols/sites/${siteId}/details`);
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setSelectedQrSiteDetails(data);
+    }
+  } catch (err) {
+    console.error("Failed loading QR site details:", err);
   } finally {
     setDetailsLoading(false);
   }
@@ -304,7 +322,7 @@ const downloadQr = async (pointId) => {
 
                 <div
   className="system-status-card"
-  onClick={() => openSiteDetails(site.site_id)}
+  onClick={() => openQrSiteDetails(site.site_id)}
   style={{ cursor: "pointer" }}
 >
   <h3>QR Codes</h3>
@@ -753,6 +771,105 @@ const downloadQr = async (pointId) => {
                   ? new Date(point.created_at).toLocaleString("el-GR")
                   : "-"}
               </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedQrSiteDetails && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          QR Codes | SITE-
+          {String(selectedQrSiteDetails.site.site_id).padStart(3, "0")} |{" "}
+          {selectedQrSiteDetails.site.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => setSelectedQrSiteDetails(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "20px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedQrSiteDetails.site.site_location} ·{" "}
+          {selectedQrSiteDetails.site.site_status}
+        </p>
+
+        <h3>Checkpoint QR Codes</h3>
+
+        <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+          {selectedQrSiteDetails.points.map((point, index) => (
+            <div key={point.id} className="analytics-table-card">
+              <h4>
+                PT-{String(index + 1).padStart(3, "0")} | {point.point_name}
+              </h4>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "center",
+                }}
+              >
+                <span className="site-status normal">
+                  {point.qr_token ? "QR GENERATED" : "QR PENDING"}
+                </span>
+
+                <span
+                  className={
+                    point.active ? "site-status normal" : "site-status inactive"
+                  }
+                >
+                  {point.active ? "ACTIVE" : "INACTIVE"}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "center",
+                  marginTop: "16px",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openQrModal(point.id);
+                  }}
+                >
+                  View QR
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadQr(point.id);
+                  }}
+                >
+                  Download QR
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    printQrCard(point.id);
+                  }}
+                >
+                  Print QR
+                </button>
+              </div>
             </div>
           ))}
         </div>
