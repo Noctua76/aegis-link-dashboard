@@ -238,7 +238,12 @@ const downloadQr = async (pointId) => {
       <div className="page-header">
         <div>
           <h1>Patrols</h1>
-          <p style={{ marginBottom: "22px" }}>
+          <p
+  style={{
+    marginBottom: "40px",
+    color: "#9ca3af",
+  }}
+>
   Operational center for patrol points, QR codes, and patrol monitoring.
 </p>
         </div>
@@ -293,33 +298,45 @@ const downloadQr = async (pointId) => {
 
                 <div className="system-status-card">
   <h3>Last Patrol</h3>
-  <span
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "flex-end",
-      gap: "3px",
-      fontSize: "13px",
-      lineHeight: "1.25",
-      whiteSpace: "nowrap",
-    }}
-  >
-    {site.last_patrol ? (
-      <>
-        <strong>
-          {new Date(site.last_patrol).toLocaleDateString("el-GR")}
-        </strong>
-        <strong>
-          {new Date(site.last_patrol).toLocaleTimeString("el-GR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </strong>
-      </>
-    ) : (
-      "-"
-    )}
-  </span>
+
+  {site.last_patrol ? (
+    <span
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "3px",
+        fontSize: "15px",
+        lineHeight: "1.25",
+        whiteSpace: "nowrap",
+        textAlign: "center",
+      }}
+    >
+      <strong>
+        {new Date(site.last_patrol).toLocaleDateString("el-GR")}
+      </strong>
+
+      <strong>
+        {new Date(site.last_patrol).toLocaleTimeString("el-GR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </strong>
+
+      <small
+        style={{
+          marginTop: "4px",
+          color: "#22c55e",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        ● Completed
+      </small>
+    </span>
+  ) : (
+    <span>-</span>
+  )}
 </div>
 
                 <div className="system-status-card">
