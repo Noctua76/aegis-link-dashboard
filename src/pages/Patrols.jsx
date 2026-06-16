@@ -341,11 +341,55 @@ const downloadQr = async (pointId) => {
 
                 <div className="system-status-card">
   <h3>Next Patrol</h3>
-  <span>
-    {site.next_patrol
-      ? new Date(site.next_patrol).toLocaleString("el-GR")
-      : "-"}
-  </span>
+
+  {site.next_patrol ? (
+    <span
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "3px",
+        fontSize: "15px",
+        lineHeight: "1.25",
+        whiteSpace: "nowrap",
+        textAlign: "center",
+      }}
+    >
+      <strong>
+        {new Date(site.next_patrol).toLocaleDateString("el-GR")}
+      </strong>
+
+      <strong>
+        {new Date(site.next_patrol).toLocaleTimeString("el-GR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </strong>
+
+      <small
+        style={{
+          marginTop: "4px",
+          color:
+            site.patrol_status === "overdue"
+              ? "#ef4444"
+              : site.patrol_status === "due_soon"
+              ? "#f59e0b"
+              : "#60a5fa",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        ●{" "}
+        {site.patrol_status === "overdue"
+          ? "Overdue"
+          : site.patrol_status === "due_soon"
+          ? "Due Soon"
+          : "Scheduled"}
+      </small>
+    </span>
+  ) : (
+    <span>-</span>
+  )}
 </div>
               </div>
 
