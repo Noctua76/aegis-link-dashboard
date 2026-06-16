@@ -292,14 +292,22 @@ const downloadQr = async (pointId) => {
                 </div>
 
                 <div className="system-status-card">
-                  <h3>Last Patrol</h3>
-                  <span>-</span>
-                </div>
+  <h3>Last Patrol</h3>
+  <span>
+    {site.last_patrol
+      ? new Date(site.last_patrol).toLocaleString("el-GR")
+      : "-"}
+  </span>
+</div>
 
                 <div className="system-status-card">
-                  <h3>Next Patrol</h3>
-                  <span>-</span>
-                </div>
+  <h3>Next Patrol</h3>
+  <span>
+    {site.next_patrol
+      ? new Date(site.next_patrol).toLocaleString("el-GR")
+      : "-"}
+  </span>
+</div>
               </div>
 
               <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>                
