@@ -302,10 +302,14 @@ const downloadQr = async (pointId) => {
   <span>{site.active_points}</span>
 </div>
 
-                <div className="system-status-card">
-                  <h3>QR Codes</h3>
-                  <span>{site.generated_qrs}</span>
-                </div>
+                <div
+  className="system-status-card"
+  onClick={() => openSiteDetails(site.site_id)}
+  style={{ cursor: "pointer" }}
+>
+  <h3>QR Codes</h3>
+  <span>{site.generated_qrs}</span>
+</div>
 
                 <div className="system-status-card">
   <h3>Last Patrol</h3>
