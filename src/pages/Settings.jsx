@@ -18,6 +18,9 @@ const [patrolScheduleScope, setPatrolScheduleScope] = useState("24_7");
 const [patrolIntervalHours, setPatrolIntervalHours] = useState("1");
 const [patrolReminderMinutes, setPatrolReminderMinutes] = useState("5");
 const [patrolScheduleSaveStatus, setPatrolScheduleSaveStatus] = useState("");
+const [manualPatrolDate, setManualPatrolDate] = useState("");
+const [manualPatrolTime, setManualPatrolTime] = useState("");
+const [manualPatrolSaveStatus, setManualPatrolSaveStatus] = useState("");
 const [patrolPoints, setPatrolPoints] = useState([]);
 
 const [newPatrolPoint, setNewPatrolPoint] = useState({
@@ -923,6 +926,50 @@ const saveRecurringPatrolSchedule = async () => {
     console.error("Save recurring patrol schedule error", err);
     setPatrolScheduleSaveStatus("Save failed");
     alert(err.message || "Failed to save patrol schedule");
+  }
+};
+
+const addManualPatrolSchedule = async () => {
+  if (!patrolSite) return;
+
+  if (!manualPatrolDate || !manualPatrolTime) {
+    alert("Please select date and time.");
+    return;
+  }
+
+  setManualPatrolSaveStatus("Saving...");
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/manual`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          scheduled_date: manualPatrolDate,
+          scheduled_time: manualPatrolTime,
+          reminder_minutes_before: Number(patrolReminderMinutes),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "ok") {
+      throw new Error(data.message || "Failed to add manual patrol.");
+    }
+
+    setManualPatrolDate("");
+    setManualPatrolTime("");
+    setManualPatrolSaveStatus("Saved");
+
+    await loadPatrolPoints(patrolSite.id);
+  } catch (err) {
+    console.error("Add manual patrol error", err);
+    setManualPatrolSaveStatus("Save failed");
+    alert(err.message || "Failed to add manual patrol.");
   }
 };
 
@@ -2814,17 +2861,35 @@ Delete
 
       <label className="settings-field">
         <span>Date</span>
-        <input type="date" />
+        <input
+  type="date"
+  value={manualPatrolDate}
+  onChange={(e) => setManualPatrolDate(e.target.value)}
+/>
       </label>
 
       <label className="settings-field">
         <span>Time</span>
-        <input type="time" />
+        <input
+  type="time"
+  value={manualPatrolTime}
+  onChange={(e) => setManualPatrolTime(e.target.value)}
+/>
       </label>
 
-      <button className="secondary-button">
-        Add Manual Patrol
-      </button>
+      <button
+  type="button"
+  className="secondary-button"
+  onClick={addManualPatrolSchedule}
+>
+  Add Manual Patrol
+</button>
+
+{manualPatrolSaveStatus && (
+  <div className="profile-save-status">
+    {manualPatrolSaveStatus}
+  </div>
+)}
 
       <div className="patrol-empty-state">
         No manual patrols configured.
