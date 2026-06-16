@@ -313,14 +313,17 @@ const downloadQr = async (pointId) => {
       }}
     >
       <strong>
-        {new Date(site.last_patrol).toLocaleDateString("el-GR")}
+        {new Date(site.last_patrol).toLocaleDateString("el-GR", {
+  timeZone: "Europe/Athens",
+})}
       </strong>
 
       <strong>
         {new Date(site.last_patrol).toLocaleTimeString("el-GR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+  timeZone: "Europe/Athens",
+  hour: "2-digit",
+  minute: "2-digit",
+})}
       </strong>
 
       <small
@@ -356,14 +359,17 @@ const downloadQr = async (pointId) => {
       }}
     >
       <strong>
-        {new Date(site.next_patrol).toLocaleDateString("el-GR")}
+        {new Date(site.next_patrol).toLocaleDateString("el-GR", {
+  timeZone: "Europe/Athens",
+})}
       </strong>
 
       <strong>
         {new Date(site.next_patrol).toLocaleTimeString("el-GR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
+  timeZone: "Europe/Athens",
+  hour: "2-digit",
+  minute: "2-digit",
+})}
       </strong>
 
       <small
@@ -490,11 +496,14 @@ const downloadQr = async (pointId) => {
                 marginTop: "3px",
               }}
             >
-              {new Date(patrol.scheduled_at).toLocaleDateString("el-GR")} ·{" "}
-              {new Date(patrol.scheduled_at).toLocaleTimeString("el-GR", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {new Date(patrol.scheduled_at).toLocaleDateString("el-GR", {
+  timeZone: "Europe/Athens",
+})} ·{" "}
+{new Date(patrol.scheduled_at).toLocaleTimeString("el-GR", {
+  timeZone: "Europe/Athens",
+  hour: "2-digit",
+  minute: "2-digit",
+})}
             </div>
           </div>
 
