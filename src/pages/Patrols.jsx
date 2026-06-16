@@ -275,8 +275,6 @@ const downloadQr = async (pointId) => {
             <div
   key={site.site_id}
   className="analytics-table-card"
-  onClick={() => openSiteDetails(site.site_id)}
-  style={{ cursor: "pointer" }}
 >
               <h3>
                 SITE-{String(site.site_id).padStart(3, "0")} |{" "}
@@ -295,10 +293,14 @@ const downloadQr = async (pointId) => {
                   marginTop: "18px",
                 }}
               >
-                <div className="system-status-card">
-                  <h3>Patrol Points</h3>
-                  <span>{site.active_points}</span>
-                </div>
+                <div
+  className="system-status-card"
+  onClick={() => openSiteDetails(site.site_id)}
+  style={{ cursor: "pointer" }}
+>
+  <h3>Patrol Points</h3>
+  <span>{site.active_points}</span>
+</div>
 
                 <div className="system-status-card">
                   <h3>QR Codes</h3>
