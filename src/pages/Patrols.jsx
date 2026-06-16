@@ -262,7 +262,16 @@ const downloadQr = async (pointId) => {
         </div>
       ) : (
         <div style={{ display: "grid", gap: "16px" }}>
-          {patrolSites.map((site) => (
+          {patrolSites.map((site) => {
+  const activePatrols = (site.upcoming_patrols || []).filter(
+    (patrol) => patrol.status !== "overdue"
+  );
+
+  const overduePatrols = (site.upcoming_patrols || []).filter(
+    (patrol) => patrol.status === "overdue"
+  );
+
+  return (
             <div
   key={site.site_id}
   className="analytics-table-card"
@@ -402,153 +411,292 @@ const downloadQr = async (pointId) => {
               <div
   style={{
     marginTop: "20px",
-    padding: "16px",
-    borderRadius: "16px",
-    background: "rgba(255,255,255,0.03)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    display: "grid",
+    gap: "14px",
   }}
 >
   <div
     style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: "12px",
-      marginBottom: "14px",
+      padding: "16px",
+      borderRadius: "16px",
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.08)",
     }}
   >
-    <div>
-      <h3 style={{ margin: 0 }}>Upcoming Patrols</h3>
-      <p
-        style={{
-          margin: "4px 0 0",
-          color: "#9ca3af",
-          fontSize: "13px",
-        }}
-      >
-        Recurring and manual patrols scheduled for this site.
-      </p>
-    </div>
-
-    <span
-      style={{
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "rgba(96,165,250,0.12)",
-        border: "1px solid rgba(96,165,250,0.35)",
-        color: "#bfdbfe",
-        fontSize: "12px",
-        fontWeight: 800,
-      }}
-    >
-      {site.upcoming_patrols?.length || 0} Scheduled
-    </span>
-  </div>
-
-  {site.upcoming_patrols?.length ? (
-    <div style={{ display: "grid", gap: "10px" }}>
-      {site.upcoming_patrols.map((patrol, index) => (
-        <div
-          key={`${patrol.schedule_type}-${patrol.point_id}-${index}`}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(90px, 110px) 1fr auto",
-            gap: "12px",
-            alignItems: "center",
-            padding: "12px",
-            borderRadius: "14px",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          <span
-            style={{
-              padding: "5px 9px",
-              borderRadius: "999px",
-              textAlign: "center",
-              fontSize: "11px",
-              fontWeight: 800,
-              textTransform: "uppercase",
-              color:
-                patrol.schedule_type === "manual"
-                  ? "#fcd34d"
-                  : "#bfdbfe",
-              background:
-                patrol.schedule_type === "manual"
-                  ? "rgba(245,158,11,0.12)"
-                  : "rgba(96,165,250,0.12)",
-              border:
-                patrol.schedule_type === "manual"
-                  ? "1px solid rgba(245,158,11,0.35)"
-                  : "1px solid rgba(96,165,250,0.35)",
-            }}
-          >
-            {patrol.schedule_type}
-          </span>
-
-          <div>
-            <strong>{patrol.point_name || "Patrol Point"}</strong>
-
-            <div
-              style={{
-                color: "#9ca3af",
-                fontSize: "13px",
-                marginTop: "3px",
-              }}
-            >
-              {new Date(patrol.scheduled_at).toLocaleDateString("el-GR", {
-  timeZone: "Europe/Athens",
-})} ·{" "}
-{new Date(patrol.scheduled_at).toLocaleTimeString("el-GR", {
-  timeZone: "Europe/Athens",
-  hour: "2-digit",
-  minute: "2-digit",
-})}
-            </div>
-          </div>
-
-          <span
-            style={{
-              color:
-                patrol.status === "overdue"
-                  ? "#ef4444"
-                  : patrol.status === "due_soon"
-                  ? "#f59e0b"
-                  : "#22c55e",
-              fontSize: "12px",
-              fontWeight: 800,
-              whiteSpace: "nowrap",
-            }}
-          >
-            ●{" "}
-            {patrol.status === "overdue"
-              ? "Overdue"
-              : patrol.status === "due_soon"
-              ? "Due Soon"
-              : "Scheduled"}
-          </span>
-        </div>
-      ))}
-    </div>
-  ) : (
     <div
       style={{
-        padding: "14px",
-        borderRadius: "14px",
-        color: "#9ca3af",
-        background: "rgba(255,255,255,0.03)",
-        border: "1px dashed rgba(255,255,255,0.12)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "14px",
       }}
     >
-      No upcoming patrols scheduled.
+      <div>
+        <h3 style={{ margin: 0 }}>Active Patrol Queue</h3>
+        <p
+          style={{
+            margin: "4px 0 0",
+            color: "#9ca3af",
+            fontSize: "13px",
+          }}
+        >
+          Scheduled and due patrols awaiting completion.
+        </p>
+      </div>
+
+      <span
+        style={{
+          padding: "6px 10px",
+          borderRadius: "999px",
+          background: "rgba(96,165,250,0.12)",
+          border: "1px solid rgba(96,165,250,0.35)",
+          color: "#bfdbfe",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        {activePatrols.length} Active
+      </span>
+    </div>
+
+    {activePatrols.length ? (
+      <div style={{ display: "grid", gap: "10px" }}>
+        {activePatrols.map((patrol, index) => (
+          <div
+            key={`active-${patrol.schedule_type}-${patrol.point_id}-${index}`}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(90px, 120px) 1fr auto",
+              gap: "12px",
+              alignItems: "center",
+              padding: "12px",
+              borderRadius: "14px",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            <span
+              style={{
+                padding: "5px 9px",
+                borderRadius: "999px",
+                textAlign: "center",
+                fontSize: "11px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                color:
+                  patrol.schedule_type === "manual"
+                    ? "#fcd34d"
+                    : "#bfdbfe",
+                background:
+                  patrol.schedule_type === "manual"
+                    ? "rgba(245,158,11,0.12)"
+                    : "rgba(96,165,250,0.12)",
+                border:
+                  patrol.schedule_type === "manual"
+                    ? "1px solid rgba(245,158,11,0.35)"
+                    : "1px solid rgba(96,165,250,0.35)",
+              }}
+            >
+              {patrol.schedule_type === "manual"
+                ? "Extra Patrol"
+                : "Routine Patrol"}
+            </span>
+
+            <div>
+              <strong>{patrol.point_name || "Patrol Point"}</strong>
+
+              <div
+                style={{
+                  color: "#9ca3af",
+                  fontSize: "13px",
+                  marginTop: "3px",
+                }}
+              >
+                {new Date(patrol.scheduled_at).toLocaleDateString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })}{" "}
+                ·{" "}
+                {new Date(patrol.scheduled_at).toLocaleTimeString("el-GR", {
+                  timeZone: "Europe/Athens",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+
+            <span
+              style={{
+                color:
+                  patrol.status === "due_soon" ? "#f59e0b" : "#22c55e",
+                fontSize: "12px",
+                fontWeight: 800,
+                whiteSpace: "nowrap",
+              }}
+            >
+              ● {patrol.status === "due_soon" ? "Due Soon" : "Scheduled"}
+            </span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div
+        style={{
+          padding: "14px",
+          borderRadius: "14px",
+          color: "#9ca3af",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px dashed rgba(255,255,255,0.12)",
+        }}
+      >
+        No active patrols scheduled.
+      </div>
+    )}
+  </div>
+
+  <div
+    style={{
+      padding: "16px",
+      borderRadius: "16px",
+      background: "rgba(239,68,68,0.05)",
+      border: "1px solid rgba(239,68,68,0.22)",
+    }}
+  >
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "14px",
+      }}
+    >
+      <div>
+        <h3 style={{ margin: 0 }}>Overdue Patrols</h3>
+        <p
+          style={{
+            margin: "4px 0 0",
+            color: "#9ca3af",
+            fontSize: "13px",
+          }}
+        >
+          Patrols that were scheduled but not completed on time.
+        </p>
+      </div>
+
+      <span
+        style={{
+          padding: "6px 10px",
+          borderRadius: "999px",
+          background: "rgba(239,68,68,0.12)",
+          border: "1px solid rgba(239,68,68,0.35)",
+          color: "#fecaca",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        {overduePatrols.length} Overdue
+      </span>
+    </div>
+
+    {overduePatrols.length ? (
+      <div style={{ display: "grid", gap: "10px" }}>
+        {overduePatrols.map((patrol, index) => (
+          <div
+            key={`overdue-${patrol.schedule_type}-${patrol.point_id}-${index}`}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(90px, 120px) 1fr auto",
+              gap: "12px",
+              alignItems: "center",
+              padding: "12px",
+              borderRadius: "14px",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(239,68,68,0.18)",
+            }}
+          >
+            <span
+              style={{
+                padding: "5px 9px",
+                borderRadius: "999px",
+                textAlign: "center",
+                fontSize: "11px",
+                fontWeight: 800,
+                textTransform: "uppercase",
+                color:
+                  patrol.schedule_type === "manual"
+                    ? "#fcd34d"
+                    : "#bfdbfe",
+                background:
+                  patrol.schedule_type === "manual"
+                    ? "rgba(245,158,11,0.12)"
+                    : "rgba(96,165,250,0.12)",
+                border:
+                  patrol.schedule_type === "manual"
+                    ? "1px solid rgba(245,158,11,0.35)"
+                    : "1px solid rgba(96,165,250,0.35)",
+              }}
+            >
+              {patrol.schedule_type === "manual"
+                ? "Extra Patrol"
+                : "Routine Patrol"}
+            </span>
+
+            <div>
+              <strong>{patrol.point_name || "Patrol Point"}</strong>
+
+              <div
+                style={{
+                  color: "#9ca3af",
+                  fontSize: "13px",
+                  marginTop: "3px",
+                }}
+              >
+                {new Date(patrol.scheduled_at).toLocaleDateString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })}{" "}
+                ·{" "}
+                {new Date(patrol.scheduled_at).toLocaleTimeString("el-GR", {
+                  timeZone: "Europe/Athens",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+            </div>
+
+            <span
+              style={{
+                color: "#ef4444",
+                fontSize: "12px",
+                fontWeight: 800,
+                whiteSpace: "nowrap",
+              }}
+            >
+              ● Overdue
+            </span>
+          </div>
+                ))}
+      </div>
+    ) : (
+      <div
+        style={{
+          padding: "14px",
+          borderRadius: "14px",
+          color: "#9ca3af",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px dashed rgba(255,255,255,0.12)",
+        }}
+      >
+              No overdue patrols.
     </div>
   )}
 </div>
-              
-            </div>
-          ))}
-        </div>
-      )}
+</div>
+</div>
+);
+})}
+</div>
+)}
 
 {selectedSiteDetails && (
   <div className="report-modal-overlay">
