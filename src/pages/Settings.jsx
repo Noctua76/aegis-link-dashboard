@@ -15,6 +15,9 @@ const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
 const [activePatrolTab, setActivePatrolTab] = useState("points");
 const [patrolScheduleScope, setPatrolScheduleScope] = useState("24_7");
+const [patrolIntervalHours, setPatrolIntervalHours] = useState("1");
+const [patrolReminderMinutes, setPatrolReminderMinutes] = useState("5");
+const [patrolScheduleSaveStatus, setPatrolScheduleSaveStatus] = useState("");
 const [patrolPoints, setPatrolPoints] = useState([]);
 
 const [newPatrolPoint, setNewPatrolPoint] = useState({
@@ -889,6 +892,39 @@ const formatGreekDateTime = (value) => {
   });
 };
 
+const saveRecurringPatrolSchedule = async () => {
+  if (!patrolSite) return;
+
+  setPatrolScheduleSaveStatus("Saving...");
+
+  try {
+    const intervalMinutes = Number(patrolIntervalHours) * 60;
+
+    await Promise.all(
+      patrolPoints.map((point) =>
+        fetch(`${API_BASE_URL}/settings/patrol-points/${point.id}/schedule`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            expected_interval_minutes: intervalMinutes,
+            reminder_minutes_before: Number(patrolReminderMinutes),
+            schedule_scope: patrolScheduleScope,
+          }),
+        })
+      )
+    );
+
+    await loadPatrolPoints(patrolSite.id);
+
+    setPatrolScheduleSaveStatus("Saved");
+  } catch (err) {
+    console.error("Save recurring patrol schedule error", err);
+    setPatrolScheduleSaveStatus("Save failed");
+    alert(err.message || "Failed to save patrol schedule");
+  }
+};
 
   return (
     <>
@@ -2707,7 +2743,10 @@ Delete
 
 <label className="settings-field">
   <span>Every</span>
-  <select>
+  <select
+  value={patrolIntervalHours}
+  onChange={(e) => setPatrolIntervalHours(e.target.value)}
+>
     <option value="1">Every 1 hour</option>
     <option value="2">Every 2 hours</option>
     <option value="3">Every 3 hours</option>
@@ -2745,16 +2784,29 @@ Delete
 
 <label className="settings-field">
   <span>Reminder</span>
-  <select defaultValue="5">
+  <select
+  value={patrolReminderMinutes}
+  onChange={(e) => setPatrolReminderMinutes(e.target.value)}
+>
     <option value="5">5 minutes before</option>
     <option value="10">10 minutes before</option>
     <option value="15">15 minutes before</option>
   </select>
 </label>
 
-<button className="primary-button">
+<button
+  type="button"
+  className="primary-button"
+  onClick={saveRecurringPatrolSchedule}
+>
   Save Recurring Schedule
 </button>
+
+{patrolScheduleSaveStatus && (
+  <div className="profile-save-status">
+    {patrolScheduleSaveStatus}
+  </div>
+)}
     </div>
 
     <div className="patrol-schedule-box">
