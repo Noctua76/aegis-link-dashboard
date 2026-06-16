@@ -746,43 +746,6 @@ const downloadQr = async (pointId) => {
   </span>
 </div>
 
-<div
-  style={{
-    display: "flex",
-    gap: "10px",
-    justifyContent: "center",
-    marginTop: "16px",
-  }}
->
-  <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation();
-    openQrModal(point.id);
-  }}
->
-  View QR
-</button>
-  <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation();
-    downloadQr(point.id);
-  }}
->
-  Download QR
-</button>
-  <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation();
-    printQrCard(point.id);
-  }}
->
-  Print QR
-</button>
-  
-</div>
 
               <p style={{ color: "#9ca3af", fontSize: "13px" }}>
                 Created:{" "}
