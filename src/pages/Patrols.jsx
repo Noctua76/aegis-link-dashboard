@@ -9,6 +9,7 @@ function Patrols() {
   const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
   const [selectedQrSiteDetails, setSelectedQrSiteDetails] = useState(null);
   const [selectedLastPatrol, setSelectedLastPatrol] = useState(null);
+  const [selectedNextPatrol, setSelectedNextPatrol] = useState(null);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
@@ -392,7 +393,22 @@ const downloadQr = async (pointId) => {
   )}
 </div>
 
-                <div className="system-status-card">
+                <div
+  className="system-status-card"
+  onClick={() =>
+    site.next_patrol &&
+    setSelectedNextPatrol({
+      site_id: site.site_id,
+      site_name: site.site_name,
+      site_location: site.site_location,
+      next_patrol: site.next_patrol,
+      next_patrol_point: site.next_patrol_point,
+      next_patrol_type: site.next_patrol_type,
+      patrol_status: site.patrol_status,
+    })
+  }
+  style={{ cursor: site.next_patrol ? "pointer" : "default" }}
+>
   <h3>Next Patrol</h3>
 
   {site.next_patrol ? (
@@ -790,6 +806,67 @@ const downloadQr = async (pointId) => {
               </p>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedNextPatrol && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          Next Patrol | SITE-
+          {String(selectedNextPatrol.site_id).padStart(3, "0")} |{" "}
+          {selectedNextPatrol.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => setSelectedNextPatrol(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedNextPatrol.site_location}
+        </p>
+
+        <div className="analytics-table-card">
+          <h3>Scheduled Patrol Details</h3>
+
+          <p>
+            <strong>Checkpoint:</strong>{" "}
+            {selectedNextPatrol.next_patrol_point || "-"}
+          </p>
+
+          <p>
+            <strong>Type:</strong>{" "}
+            {selectedNextPatrol.next_patrol_type === "manual"
+              ? "Extra Patrol"
+              : "Routine Patrol"}
+          </p>
+
+          <p>
+            <strong>Scheduled:</strong>{" "}
+            {selectedNextPatrol.next_patrol
+              ? new Date(selectedNextPatrol.next_patrol).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </p>
+
+          <p>
+            <strong>Status:</strong>{" "}
+            {selectedNextPatrol.patrol_status === "due_soon"
+              ? "Due Soon"
+              : selectedNextPatrol.patrol_status === "scheduled"
+              ? "Scheduled"
+              : "Not Scheduled"}
+          </p>
         </div>
       </div>
     </div>
