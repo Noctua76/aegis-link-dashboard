@@ -664,6 +664,9 @@ const downloadQr = async (pointId) => {
   key={`overdue-${patrol.schedule_type}-${patrol.point_id}-${index}`}
   onClick={() =>
     setSelectedOverduePatrol({
+      assigned_guard: patrol.assigned_guard,
+guard_session_login: patrol.guard_session_login,
+shift_label: patrol.shift_label,
       site_id: site.site_id,
       site_name: site.site_name,
       site_location: site.site_location,
@@ -870,11 +873,13 @@ const downloadQr = async (pointId) => {
           </p>
 
           <p>
-            <strong>Assigned Guard:</strong> -
+            <strong>Assigned Guard:</strong>{" "}
+{selectedOverduePatrol.assigned_guard || "No logged-in guard found"}
           </p>
 
           <p>
-            <strong>Current Shift:</strong> -
+            <strong>Current Shift:</strong>{" "}
+{selectedOverduePatrol.shift_label || "24/7 Coverage"}
           </p>
 
           <p>
