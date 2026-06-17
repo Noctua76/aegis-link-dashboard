@@ -857,6 +857,19 @@ const downloadQr = async (pointId) => {
             <strong>Longitude:</strong>{" "}
             {selectedLastPatrol.last_patrol_longitude || "-"}
           </p>
+          {selectedLastPatrol.last_patrol_latitude &&
+  selectedLastPatrol.last_patrol_longitude && (
+    <div style={{ marginTop: "20px" }}>
+      <a
+        href={`https://maps.google.com/?q=${selectedLastPatrol.last_patrol_latitude},${selectedLastPatrol.last_patrol_longitude}`}
+        target="_blank"
+        rel="noreferrer"
+        className="action-button"
+      >
+        View Location
+      </a>
+    </div>
+)}
         </div>
       </div>
     </div>
