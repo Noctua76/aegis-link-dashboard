@@ -8,6 +8,7 @@ function Patrols() {
   const [loading, setLoading] = useState(true);
   const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
   const [selectedQrSiteDetails, setSelectedQrSiteDetails] = useState(null);
+  const [selectedLastPatrol, setSelectedLastPatrol] = useState(null);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
@@ -329,7 +330,23 @@ const downloadQr = async (pointId) => {
   <span>{site.generated_qrs}</span>
 </div>
 
-                <div className="system-status-card">
+                <div
+  className="system-status-card"
+  onClick={() =>
+    setSelectedLastPatrol({
+      site_id: site.site_id,
+      site_name: site.site_name,
+      site_location: site.site_location,
+      last_patrol: site.last_patrol,
+      last_patrol_point: site.last_patrol_point,
+      last_patrol_guard: site.last_patrol_guard,
+      last_patrol_accuracy: site.last_patrol_accuracy,
+      last_patrol_latitude: site.last_patrol_latitude,
+      last_patrol_longitude: site.last_patrol_longitude,
+    })
+  }
+  style={{ cursor: site.last_patrol ? "pointer" : "default" }}
+>
   <h3>Last Patrol</h3>
 
   {site.last_patrol ? (
@@ -773,6 +790,73 @@ const downloadQr = async (pointId) => {
               </p>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedLastPatrol && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          Last Patrol | SITE-
+          {String(selectedLastPatrol.site_id).padStart(3, "0")} |{" "}
+          {selectedLastPatrol.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => setSelectedLastPatrol(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedLastPatrol.site_location}
+        </p>
+
+        <div className="analytics-table-card">
+          <h3>Completed Patrol Details</h3>
+
+          <p>
+            <strong>Checkpoint:</strong>{" "}
+            {selectedLastPatrol.last_patrol_point || "-"}
+          </p>
+
+          <p>
+            <strong>Guard:</strong>{" "}
+            {selectedLastPatrol.last_patrol_guard || "-"}
+          </p>
+
+          <p>
+            <strong>Completed:</strong>{" "}
+            {selectedLastPatrol.last_patrol
+              ? new Date(selectedLastPatrol.last_patrol).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </p>
+
+          <p>
+            <strong>GPS Accuracy:</strong>{" "}
+            {selectedLastPatrol.last_patrol_accuracy
+              ? `${selectedLastPatrol.last_patrol_accuracy}m`
+              : "-"}
+          </p>
+
+          <p>
+            <strong>Latitude:</strong>{" "}
+            {selectedLastPatrol.last_patrol_latitude || "-"}
+          </p>
+
+          <p>
+            <strong>Longitude:</strong>{" "}
+            {selectedLastPatrol.last_patrol_longitude || "-"}
+          </p>
         </div>
       </div>
     </div>
