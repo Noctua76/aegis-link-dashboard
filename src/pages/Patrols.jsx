@@ -10,6 +10,7 @@ function Patrols() {
   const [selectedQrSiteDetails, setSelectedQrSiteDetails] = useState(null);
   const [selectedLastPatrol, setSelectedLastPatrol] = useState(null);
   const [selectedNextPatrol, setSelectedNextPatrol] = useState(null);
+  const [selectedOverduePatrol, setSelectedOverduePatrol] = useState(null);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
@@ -660,8 +661,20 @@ const downloadQr = async (pointId) => {
       <div style={{ display: "grid", gap: "10px" }}>
         {overduePatrols.map((patrol, index) => (
           <div
-            key={`overdue-${patrol.schedule_type}-${patrol.point_id}-${index}`}
-            style={{
+  key={`overdue-${patrol.schedule_type}-${patrol.point_id}-${index}`}
+  onClick={() =>
+    setSelectedOverduePatrol({
+      site_id: site.site_id,
+      site_name: site.site_name,
+      site_location: site.site_location,
+      point_name: patrol.point_name,
+      schedule_type: patrol.schedule_type,
+      scheduled_at: patrol.scheduled_at,
+      status: patrol.status,
+    })
+  }
+  style={{
+    cursor: "pointer",
               display: "grid",
               gridTemplateColumns: "minmax(90px, 120px) 1fr auto",
               gap: "12px",
@@ -806,6 +819,82 @@ const downloadQr = async (pointId) => {
               </p>
             </div>
           ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{selectedOverduePatrol && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          Overdue Patrol | SITE-
+          {String(selectedOverduePatrol.site_id).padStart(3, "0")} |{" "}
+          {selectedOverduePatrol.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => setSelectedOverduePatrol(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedOverduePatrol.site_location}
+        </p>
+
+        <div className="analytics-table-card">
+          <h3>Overdue Patrol Details</h3>
+
+          <p>
+            <strong>Checkpoint:</strong>{" "}
+            {selectedOverduePatrol.point_name || "-"}
+          </p>
+
+          <p>
+            <strong>Scheduled:</strong>{" "}
+            {selectedOverduePatrol.scheduled_at
+              ? new Date(selectedOverduePatrol.scheduled_at).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </p>
+
+          <p>
+            <strong>Status:</strong> Overdue
+          </p>
+
+          <p>
+            <strong>Assigned Guard:</strong> -
+          </p>
+
+          <p>
+            <strong>Current Shift:</strong> -
+          </p>
+
+          <p>
+            <strong>Minutes Late:</strong>{" "}
+            {selectedOverduePatrol.scheduled_at
+              ? Math.max(
+                  0,
+                  Math.floor(
+                    (Date.now() -
+                      new Date(selectedOverduePatrol.scheduled_at).getTime()) /
+                      60000
+                  )
+                )
+              : "-"}
+          </p>
+
+          <p>
+            <strong>Site:</strong>{" "}
+            {selectedOverduePatrol.site_name || "-"}
+          </p>
         </div>
       </div>
     </div>
