@@ -57,6 +57,25 @@ const [qrImageUrl, setQrImageUrl] = useState("");
   }
 };
 
+const loadPatrolHistory = async () => {
+  setHistoryLoading(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrols/history`);
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setPatrolHistory(data.history || []);
+    }
+  } catch (err) {
+    console.error("Failed loading patrol history:", err);
+  } finally {
+    setHistoryLoading(false);
+  }
+};
+
+loadPatrolHistory();
+
 const openQrSiteDetails = async (siteId) => {
   setDetailsLoading(true);
 
@@ -793,6 +812,7 @@ shift_label: patrol.shift_label,
     </span>
   </div>
 
+  {historyLoading ? (
   <div
     style={{
       textAlign: "center",
@@ -800,8 +820,73 @@ shift_label: patrol.shift_label,
       color: "#9ca3af",
     }}
   >
-    Patrol history loading...
+    Loading patrol history...
   </div>
+) : (
+  <div
+    style={{
+      display: "grid",
+      gap: "12px",
+    }}
+  >
+    {patrolHistory.map((entry) => (
+      <div
+        key={entry.id}
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "12px",
+          padding: "14px",
+          cursor: "pointer",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <strong>{entry.point_name}</strong>
+
+          <span style={{ color: "#10b981" }}>
+            Completed
+          </span>
+        </div>
+
+        <div
+          style={{
+            marginTop: "6px",
+            color: "#9ca3af",
+            fontSize: "14px",
+          }}
+        >
+          {entry.site_name}
+        </div>
+
+        <div
+          style={{
+            marginTop: "6px",
+            fontSize: "14px",
+          }}
+        >
+          Guard: {entry.guard_name}
+        </div>
+
+        <div
+          style={{
+            marginTop: "6px",
+            fontSize: "14px",
+          }}
+        >
+          {new Date(entry.patrol_time).toLocaleString("el-GR", {
+            timeZone: "Europe/Athens",
+          })}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 </div>
 })}
 </div>
