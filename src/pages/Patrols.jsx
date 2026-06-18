@@ -11,6 +11,8 @@ function Patrols() {
   const [selectedLastPatrol, setSelectedLastPatrol] = useState(null);
   const [selectedNextPatrol, setSelectedNextPatrol] = useState(null);
   const [selectedOverduePatrol, setSelectedOverduePatrol] = useState(null);
+  const [patrolHistory, setPatrolHistory] = useState([]);
+const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
@@ -767,6 +769,40 @@ shift_label: patrol.shift_label,
 </div>
 </div>
 );
+<div
+  className="analytics-table-card"
+  style={{ marginTop: "24px" }}
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "16px",
+    }}
+  >
+    <div>
+      <h2>Patrol History</h2>
+      <p style={{ color: "#9ca3af" }}>
+        Completed patrol activity log.
+      </p>
+    </div>
+
+    <span className="analytics-badge">
+      History
+    </span>
+  </div>
+
+  <div
+    style={{
+      textAlign: "center",
+      padding: "40px",
+      color: "#9ca3af",
+    }}
+  >
+    Patrol history loading...
+  </div>
+</div>
 })}
 </div>
 )}
