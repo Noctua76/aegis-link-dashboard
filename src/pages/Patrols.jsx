@@ -40,24 +40,7 @@ const [qrImageUrl, setQrImageUrl] = useState("");
     return () => clearInterval(interval);
   }, []);
 
-  const openSiteDetails = async (siteId) => {
-  setDetailsLoading(true);
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/patrols/sites/${siteId}/details`);
-    const data = await response.json();
-
-    if (data.status === "ok") {
-      setSelectedSiteDetails(data);
-    }
-  } catch (err) {
-    console.error("Failed loading patrol site details:", err);
-  } finally {
-    setDetailsLoading(false);
-  }
-};
-
-const loadPatrolHistory = async () => {
+  const loadPatrolHistory = async () => {
   setHistoryLoading(true);
 
   try {
@@ -75,6 +58,23 @@ const loadPatrolHistory = async () => {
 };
 
 loadPatrolHistory();
+
+  const openSiteDetails = async (siteId) => {
+  setDetailsLoading(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/patrols/sites/${siteId}/details`);
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setSelectedSiteDetails(data);
+    }
+  } catch (err) {
+    console.error("Failed loading patrol site details:", err);
+  } finally {
+    setDetailsLoading(false);
+  }
+};
 
 const openQrSiteDetails = async (siteId) => {
   setDetailsLoading(true);
