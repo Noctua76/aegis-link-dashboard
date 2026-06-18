@@ -18,44 +18,45 @@ const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
 
   useEffect(() => {
-    const loadPatrolSites = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/patrols/sites`);
-        const data = await response.json();
+  const loadPatrolSites = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/patrols/sites`);
+      const data = await response.json();
 
-        if (data.status === "ok") {
-          setPatrolSites(data.sites || []);
-        }
-      } catch (err) {
-        console.error("Failed loading patrol sites:", err);
-      } finally {
-        setLoading(false);
+      if (data.status === "ok") {
+        setPatrolSites(data.sites || []);
       }
-    };
-
-    loadPatrolSites();
-
-    const interval = setInterval(loadPatrolSites, 15000);
-
-    return () => clearInterval(interval);
-  }, []);
+    } catch (err) {
+      console.error("Failed loading patrol sites:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadPatrolHistory = async () => {
-  setHistoryLoading(true);
+    setHistoryLoading(true);
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/patrols/history`);
-    const data = await response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/patrols/history`);
+      const data = await response.json();
 
-    if (data.status === "ok") {
-      setPatrolHistory(data.history || []);
+      if (data.status === "ok") {
+        setPatrolHistory(data.history || []);
+      }
+    } catch (err) {
+      console.error("Failed loading patrol history:", err);
+    } finally {
+      setHistoryLoading(false);
     }
-  } catch (err) {
-    console.error("Failed loading patrol history:", err);
-  } finally {
-    setHistoryLoading(false);
-  }
-};
+  };
+
+  loadPatrolSites();
+  loadPatrolHistory();
+
+  const interval = setInterval(loadPatrolSites, 15000);
+
+  return () => clearInterval(interval);
+}, []);
 
 loadPatrolHistory();
 
