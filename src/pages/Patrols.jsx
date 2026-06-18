@@ -306,12 +306,16 @@ const downloadQr = async (pointId) => {
         <div style={{ display: "grid", gap: "16px" }}>
           {patrolSites.map((site) => {
   const activePatrols = (site.upcoming_patrols || []).filter(
-    (patrol) => patrol.status !== "overdue"
-  );
+  (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
+);
 
-  const overduePatrols = (site.upcoming_patrols || []).filter(
-    (patrol) => patrol.status === "overdue"
-  );
+const overduePatrols = (site.upcoming_patrols || []).filter(
+  (patrol) => patrol.status === "overdue"
+);
+
+const missedPatrols = (site.upcoming_patrols || []).filter(
+  (patrol) => patrol.status === "missed"
+);
 
   return (
             <div
@@ -784,6 +788,106 @@ shift_label: patrol.shift_label,
               No overdue patrols.
     </div>
   )}
+
+<div
+  style={{
+    marginTop: "20px",
+    padding: "16px",
+    borderRadius: "16px",
+    background: "rgba(239,68,68,0.08)",
+    border: "1px solid rgba(239,68,68,0.35)",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "14px",
+    }}
+  >
+    <div>
+      <h3 style={{ margin: 0 }}>Missed Patrols</h3>
+
+      <p
+        style={{
+          margin: "4px 0 0",
+          color: "#9ca3af",
+          fontSize: "13px",
+        }}
+      >
+        Patrols that were not completed within the allowed time window.
+      </p>
+    </div>
+
+    <span
+      style={{
+        padding: "6px 10px",
+        borderRadius: "999px",
+        background: "rgba(239,68,68,0.15)",
+        color: "#fecaca",
+        fontSize: "12px",
+        fontWeight: 800,
+      }}
+    >
+      {missedPatrols.length} Missed
+    </span>
+  </div>
+
+  {missedPatrols.length ? (
+    <div style={{ display: "grid", gap: "10px" }}>
+      {missedPatrols.map((patrol, index) => (
+        <div
+          key={`missed-${patrol.schedule_type}-${patrol.point_id}-${index}`}
+          style={{
+            padding: "12px",
+            borderRadius: "14px",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(239,68,68,0.25)",
+          }}
+        >
+          <strong>{patrol.point_name}</strong>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#9ca3af",
+              fontSize: "13px",
+            }}
+          >
+            {new Date(patrol.scheduled_at).toLocaleString("el-GR", {
+              timeZone: "Europe/Athens",
+            })}
+          </div>
+
+          <div
+            style={{
+              marginTop: "6px",
+              color: "#ef4444",
+              fontSize: "12px",
+              fontWeight: 800,
+            }}
+          >
+            ● Missed Patrol
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div
+      style={{
+        padding: "14px",
+        borderRadius: "14px",
+        color: "#9ca3af",
+        background: "rgba(255,255,255,0.03)",
+        border: "1px dashed rgba(255,255,255,0.12)",
+      }}
+    >
+      No missed patrols.
+    </div>
+  )}
+</div>
+
 </div>
 </div>
 </div>
