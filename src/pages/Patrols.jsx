@@ -1216,8 +1216,8 @@ shift_label: patrol.shift_label,
           <p>
             <strong>GPS Accuracy:</strong>{" "}
             {selectedHistoryPatrol.accuracy
-              ? `${selectedHistoryPatrol.accuracy}m`
-              : "-"}
+  ? `${Number(selectedHistoryPatrol.accuracy).toFixed(2)} m`
+  : "-"}
           </p>
 
           <p>
