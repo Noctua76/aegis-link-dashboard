@@ -58,8 +58,6 @@ const [qrImageUrl, setQrImageUrl] = useState("");
   return () => clearInterval(interval);
 }, []);
 
-loadPatrolHistory();
-
   const openSiteDetails = async (siteId) => {
   setDetailsLoading(true);
 
