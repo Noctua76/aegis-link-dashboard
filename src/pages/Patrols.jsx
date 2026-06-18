@@ -1171,6 +1171,84 @@ shift_label: patrol.shift_label,
   </div>
 )}
 
+{selectedHistoryPatrol && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>Patrol History Details</h2>
+
+        <button
+          type="button"
+          onClick={() => setSelectedHistoryPatrol(null)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <div className="analytics-table-card">
+          <h3>Completed Patrol Details</h3>
+
+          <p>
+            <strong>Checkpoint:</strong>{" "}
+            {selectedHistoryPatrol.point_name || "-"}
+          </p>
+
+          <p>
+            <strong>Site:</strong>{" "}
+            {selectedHistoryPatrol.site_name || "-"}
+          </p>
+
+          <p>
+            <strong>Guard:</strong>{" "}
+            {selectedHistoryPatrol.guard_name || "-"}
+          </p>
+
+          <p>
+            <strong>Completed:</strong>{" "}
+            {selectedHistoryPatrol.patrol_time
+              ? new Date(selectedHistoryPatrol.patrol_time).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </p>
+
+          <p>
+            <strong>GPS Accuracy:</strong>{" "}
+            {selectedHistoryPatrol.accuracy
+              ? `${selectedHistoryPatrol.accuracy}m`
+              : "-"}
+          </p>
+
+          <p>
+            <strong>Latitude:</strong>{" "}
+            {selectedHistoryPatrol.latitude || "-"}
+          </p>
+
+          <p>
+            <strong>Longitude:</strong>{" "}
+            {selectedHistoryPatrol.longitude || "-"}
+          </p>
+
+          {selectedHistoryPatrol.latitude &&
+            selectedHistoryPatrol.longitude && (
+              <div style={{ marginTop: "20px" }}>
+                <a
+                  href={`https://maps.google.com/?q=${selectedHistoryPatrol.latitude},${selectedHistoryPatrol.longitude}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="action-button"
+                >
+                  View Location
+                </a>
+              </div>
+            )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 {selectedQrSiteDetails && (
   <div className="report-modal-overlay">
     <div className="report-modal">
