@@ -16,6 +16,9 @@ function Patrols() {
 const [selectedMissedHistorySite, setSelectedMissedHistorySite] = useState(null);
 const [missedHistory, setMissedHistory] = useState([]);
 const [missedHistoryLoading, setMissedHistoryLoading] = useState(false);
+const [missedHistoryFrom, setMissedHistoryFrom] = useState("");
+const [missedHistoryTo, setMissedHistoryTo] = useState("");
+const [missedHistoryPointId, setMissedHistoryPointId] = useState("");
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -316,12 +319,24 @@ const downloadQr = async (pointId) => {
   (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
 );
 
-const loadMissedHistory = async (siteId) => {
+const loadMissedHistory = async ({
+  siteId,
+  from = "",
+  to = "",
+  pointId = "",
+}) => {
   setMissedHistoryLoading(true);
 
   try {
+    const params = new URLSearchParams();
+
+    if (siteId) params.append("site_id", siteId);
+    if (from) params.append("from", from);
+    if (to) params.append("to", to);
+    if (pointId) params.append("point_id", pointId);
+
     const response = await fetch(
-      `${API_BASE_URL}/patrols/missed-history?site_id=${siteId}`
+      `${API_BASE_URL}/patrols/missed-history?${params.toString()}`
     );
 
     const data = await response.json();
