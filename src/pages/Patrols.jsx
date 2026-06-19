@@ -1293,6 +1293,19 @@ shift_label: patrol.shift_label,
               </select>
             </div>
 
+            <div>
+  <label>Patrol Type</label>
+
+  <select
+    value={missedHistoryType}
+    onChange={(e) => setMissedHistoryType(e.target.value)}
+  >
+    <option value="all">All Patrols</option>
+    <option value="recurring">Routine Patrols</option>
+    <option value="manual">Manual Patrols</option>
+  </select>
+</div>
+
             <div
               style={{
                 display: "flex",
@@ -1308,6 +1321,7 @@ shift_label: patrol.shift_label,
                     from: missedHistoryFrom,
                     to: missedHistoryTo,
                     pointId: missedHistoryPointId,
+                    type: missedHistoryType,
                   })
                 }
               >
