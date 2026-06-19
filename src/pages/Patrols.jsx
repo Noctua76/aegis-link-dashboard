@@ -19,6 +19,7 @@ const [missedHistoryLoading, setMissedHistoryLoading] = useState(false);
 const [missedHistoryFrom, setMissedHistoryFrom] = useState("");
 const [missedHistoryTo, setMissedHistoryTo] = useState("");
 const [missedHistoryPointId, setMissedHistoryPointId] = useState("");
+const [missedHistoryType, setMissedHistoryType] = useState("all");
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -324,6 +325,7 @@ const loadMissedHistory = async ({
   from = "",
   to = "",
   pointId = "",
+  type = "all",
 }) => {
   setMissedHistoryLoading(true);
 
@@ -334,6 +336,7 @@ const loadMissedHistory = async ({
     if (from) params.append("from", from);
     if (to) params.append("to", to);
     if (pointId) params.append("point_id", pointId);
+    if (type) params.append("type", type);
 
     const response = await fetch(
       `${API_BASE_URL}/patrols/missed-history?${params.toString()}`
@@ -877,7 +880,11 @@ shift_label: patrol.shift_label,
     onClick={() => {
   setSelectedMissedHistorySite(site);
   setMissedHistoryModalOpen(true);
-  loadMissedHistory(site.site_id);
+  setMissedHistoryType("all");
+  loadMissedHistory({
+    siteId: site.site_id,
+    type: "all"
+  });
 }}
     style={{
       padding: "6px 10px",
