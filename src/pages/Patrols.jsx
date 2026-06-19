@@ -1170,6 +1170,98 @@ shift_label: patrol.shift_label,
   </div>
 )}
 
+{missedHistoryModalOpen && selectedMissedHistorySite && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          Missed Patrol History | SITE-
+          {String(selectedMissedHistorySite.site_id).padStart(3, "0")} |{" "}
+          {selectedMissedHistorySite.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMissedHistoryModalOpen(false);
+            setSelectedMissedHistorySite(null);
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedMissedHistorySite.site_location}
+        </p>
+
+        <div className="analytics-table-card">
+          <h3>History Filters</h3>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "12px",
+              marginTop: "16px",
+            }}
+          >
+            <div>
+              <label>From Date</label>
+              <input type="date" />
+            </div>
+
+            <div>
+              <label>To Date</label>
+              <input type="date" />
+            </div>
+
+            <div>
+              <label>Patrol Point</label>
+              <select>
+                <option value="">All Points</option>
+                {(selectedMissedHistorySite.upcoming_patrols || [])
+                  .filter(
+                    (patrol, index, arr) =>
+                      patrol.point_id &&
+                      arr.findIndex((p) => p.point_id === patrol.point_id) === index
+                  )
+                  .map((patrol) => (
+                    <option key={patrol.point_id} value={patrol.point_id}>
+                      {patrol.point_name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <label>Status</label>
+              <select defaultValue="missed">
+                <option value="all">All</option>
+                <option value="missed">Missed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="analytics-table-card" style={{ marginTop: "18px" }}>
+          <h3>Missed Patrol Results</h3>
+
+          <p style={{ color: "#9ca3af" }}>
+            Full missed patrol history will appear here after connecting the
+            backend history endpoint.
+          </p>
+
+          <button type="button" style={{ marginTop: "12px" }}>
+            Print Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
 {selectedNextPatrol && (
   <div className="report-modal-overlay">
     <div className="report-modal">
