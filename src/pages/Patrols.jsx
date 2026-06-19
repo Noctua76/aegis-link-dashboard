@@ -1384,13 +1384,19 @@ shift_label: patrol.shift_label,
                   </div>
 
                   <div
-                    style={{
-                      color: "#9ca3af",
-                      fontSize: "13px",
-                    }}
-                  >
-                    Guard: {entry.guard_name || "-"}
-                  </div>
+  style={{
+    color: "#9ca3af",
+    fontSize: "13px",
+  }}
+>
+  <div>Guard: {entry.guard_name || "-"}</div>
+  <div>
+    Type:{" "}
+    {entry.schedule_type === "manual"
+      ? "Manual Patrol"
+      : "Routine Patrol"}
+  </div>
+</div>
 
                   <span
                     style={{
