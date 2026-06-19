@@ -897,10 +897,12 @@ const formatGreekDateTime = (value) => {
 
 const saveRecurringPatrolSchedule = async () => {
   if (!patrolSite) return;
+  console.log("Saving recurring schedule for site:", patrolSite);
 
   setPatrolScheduleSaveStatus("Saving...");
 
   try {
+    console.log("Calling recurring endpoint:", `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/recurring`);
     const response = await fetch(
       `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/recurring`,
       {
