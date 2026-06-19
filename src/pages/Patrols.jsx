@@ -1208,6 +1208,7 @@ shift_label: patrol.shift_label,
           onClick={() => {
             setMissedHistoryModalOpen(false);
             setSelectedMissedHistorySite(null);
+            setMissedHistory([]);
           }}
         >
           ✕
@@ -1232,23 +1233,35 @@ shift_label: patrol.shift_label,
           >
             <div>
               <label>From Date</label>
-              <input type="date" />
+              <input
+                type="date"
+                value={missedHistoryFrom}
+                onChange={(e) => setMissedHistoryFrom(e.target.value)}
+              />
             </div>
 
             <div>
               <label>To Date</label>
-              <input type="date" />
+              <input
+                type="date"
+                value={missedHistoryTo}
+                onChange={(e) => setMissedHistoryTo(e.target.value)}
+              />
             </div>
 
             <div>
               <label>Patrol Point</label>
-              <select>
+              <select
+                value={missedHistoryPointId}
+                onChange={(e) => setMissedHistoryPointId(e.target.value)}
+              >
                 <option value="">All Points</option>
                 {(selectedMissedHistorySite.upcoming_patrols || [])
                   .filter(
                     (patrol, index, arr) =>
                       patrol.point_id &&
-                      arr.findIndex((p) => p.point_id === patrol.point_id) === index
+                      arr.findIndex((p) => p.point_id === patrol.point_id) ===
+                        index
                   )
                   .map((patrol) => (
                     <option key={patrol.point_id} value={patrol.point_id}>
@@ -1258,77 +1271,110 @@ shift_label: patrol.shift_label,
               </select>
             </div>
 
-            <div>
-              <label>Status</label>
-              <select defaultValue="missed">
-                <option value="all">All</option>
-                <option value="missed">Missed</option>
-              </select>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-end",
+                gap: "10px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  loadMissedHistory({
+                    siteId: selectedMissedHistorySite.site_id,
+                    from: missedHistoryFrom,
+                    to: missedHistoryTo,
+                    pointId: missedHistoryPointId,
+                  })
+                }
+              >
+                View Results
+              </button>
+
+              <button type="button">
+                Print Report
+              </button>
             </div>
           </div>
         </div>
 
         <div className="analytics-table-card" style={{ marginTop: "18px" }}>
-  <h3>Missed Patrol Results</h3>
+          <h3>Missed Patrol Results</h3>
 
-  {missedHistoryLoading ? (
-    <p style={{ color: "#9ca3af" }}>Loading missed patrol history...</p>
-  ) : missedHistory.length ? (
-    <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
-      {missedHistory.map((entry) => (
-        <div
-          key={entry.id}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.2fr 1fr auto",
-            gap: "12px",
-            alignItems: "center",
-            padding: "12px",
-            borderRadius: "14px",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(239,68,68,0.22)",
-          }}
-        >
-          <div>
-            <strong>{entry.point_name || "Patrol Point"}</strong>
-
+          {missedHistoryLoading ? (
+            <p style={{ color: "#9ca3af" }}>
+              Loading missed patrol history...
+            </p>
+          ) : missedHistory.length ? (
             <div
               style={{
-                marginTop: "4px",
-                color: "#9ca3af",
-                fontSize: "13px",
+                display: "grid",
+                gap: "10px",
+                marginTop: "14px",
+                maxHeight: "360px",
+                overflowY: "auto",
+                paddingRight: "6px",
               }}
             >
-              {new Date(entry.scheduled_at).toLocaleString("el-GR", {
-                timeZone: "Europe/Athens",
-              })}
+              {missedHistory.map((entry) => (
+                <div
+                  key={entry.id}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1.2fr 1fr 1fr",
+                    gap: "12px",
+                    alignItems: "center",
+                    padding: "12px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(239,68,68,0.22)",
+                  }}
+                >
+                  <div>
+                    <strong>{entry.point_name || "Patrol Point"}</strong>
+
+                    <div
+                      style={{
+                        marginTop: "4px",
+                        color: "#9ca3af",
+                        fontSize: "13px",
+                      }}
+                    >
+                      {new Date(entry.scheduled_at).toLocaleString("el-GR", {
+                        timeZone: "Europe/Athens",
+                      })}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      color: "#9ca3af",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Guard: {entry.guard_name || "-"}
+                  </div>
+
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      fontSize: "12px",
+                      fontWeight: 800,
+                      textAlign: "right",
+                    }}
+                  >
+                    ● Missed
+                  </span>
+                </div>
+              ))}
             </div>
-          </div>
-
-          <span
-            style={{
-              color: "#ef4444",
-              fontSize: "12px",
-              fontWeight: 800,
-            }}
-          >
-            ● Missed
-          </span>
-
-          <button type="button">
-            View
-          </button>
+          ) : (
+            <p style={{ color: "#9ca3af" }}>
+              Select filters and press View Results.
+            </p>
+          )}
         </div>
-      ))}
-    </div>
-  ) : (
-    <p style={{ color: "#9ca3af" }}>No missed patrol history found.</p>
-  )}
-
-  <button type="button" style={{ marginTop: "16px" }}>
-    Print Report
-  </button>
-</div>
       </div>
     </div>
   </div>
