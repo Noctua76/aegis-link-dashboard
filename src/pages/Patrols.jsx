@@ -327,6 +327,8 @@ const missedPatrols = (site.upcoming_patrols || []).filter((patrol) => {
   return diffHours <= 24;
 });
 
+const visibleMissedPatrols = missedPatrols.slice(-5).reverse();
+
   return (
             <div
   key={site.site_id}
@@ -846,7 +848,7 @@ shift_label: patrol.shift_label,
 
   {missedPatrols.length ? (
     <div style={{ display: "grid", gap: "10px" }}>
-      {missedPatrols.map((patrol, index) => (
+      {visibleMissedPatrols.map((patrol, index) => (
         <div
           key={`missed-${patrol.schedule_type}-${patrol.point_id}-${index}`}
           style={{
