@@ -12,6 +12,8 @@ function Patrols() {
   const [selectedNextPatrol, setSelectedNextPatrol] = useState(null);
   const [selectedOverduePatrol, setSelectedOverduePatrol] = useState(null);
   const [selectedHistoryPatrol, setSelectedHistoryPatrol] = useState(null);
+  const [missedHistoryModalOpen, setMissedHistoryModalOpen] = useState(false);
+const [selectedMissedHistorySite, setSelectedMissedHistorySite] = useState(null);
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -832,18 +834,40 @@ shift_label: patrol.shift_label,
       </p>
     </div>
 
-    <span
-      style={{
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background: "rgba(239,68,68,0.15)",
-        color: "#fecaca",
-        fontSize: "12px",
-        fontWeight: 800,
-      }}
-    >
-      {missedPatrols.length} Missed
-    </span>
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+  <button
+    type="button"
+    onClick={() => {
+      setSelectedMissedHistorySite(site);
+      setMissedHistoryModalOpen(true);
+    }}
+    style={{
+      padding: "6px 10px",
+      borderRadius: "999px",
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(255,255,255,0.14)",
+      color: "#e5e7eb",
+      fontSize: "12px",
+      fontWeight: 800,
+      cursor: "pointer",
+    }}
+  >
+    View History
+  </button>
+
+  <span
+    style={{
+      padding: "6px 10px",
+      borderRadius: "999px",
+      background: "rgba(239,68,68,0.15)",
+      color: "#fecaca",
+      fontSize: "12px",
+      fontWeight: 800,
+    }}
+  >
+    {missedPatrols.length} Missed
+  </span>
+</div>
   </div>
 
   {missedPatrols.length ? (
