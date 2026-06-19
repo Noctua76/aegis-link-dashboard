@@ -338,6 +338,15 @@ const loadMissedHistory = async ({
     if (pointId) params.append("point_id", pointId);
     if (type) params.append("type", type);
 
+    console.log("MISSED HISTORY REQUEST:", {
+  siteId,
+  from,
+  to,
+  pointId,
+  type,
+  url: `${API_BASE_URL}/patrols/missed-history?${params.toString()}`,
+});
+
     const response = await fetch(
       `${API_BASE_URL}/patrols/missed-history?${params.toString()}`
     );
