@@ -14,6 +14,8 @@ function Patrols() {
   const [selectedHistoryPatrol, setSelectedHistoryPatrol] = useState(null);
   const [missedHistoryModalOpen, setMissedHistoryModalOpen] = useState(false);
 const [selectedMissedHistorySite, setSelectedMissedHistorySite] = useState(null);
+const [missedHistory, setMissedHistory] = useState([]);
+const [missedHistoryLoading, setMissedHistoryLoading] = useState(false);
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -313,6 +315,26 @@ const downloadQr = async (pointId) => {
   const activePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
 );
+
+const loadMissedHistory = async (siteId) => {
+  setMissedHistoryLoading(true);
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/missed-history?site_id=${siteId}`
+    );
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setMissedHistory(data.history || []);
+    }
+  } catch (err) {
+    console.error("Failed loading missed patrol history:", err);
+  } finally {
+    setMissedHistoryLoading(false);
+  }
+};
 
 const overduePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status === "overdue"
@@ -838,9 +860,10 @@ shift_label: patrol.shift_label,
   <button
     type="button"
     onClick={() => {
-      setSelectedMissedHistorySite(site);
-      setMissedHistoryModalOpen(true);
-    }}
+  setSelectedMissedHistorySite(site);
+  setMissedHistoryModalOpen(true);
+  loadMissedHistory(site.site_id);
+}}
     style={{
       padding: "6px 10px",
       borderRadius: "999px",
@@ -1246,17 +1269,66 @@ shift_label: patrol.shift_label,
         </div>
 
         <div className="analytics-table-card" style={{ marginTop: "18px" }}>
-          <h3>Missed Patrol Results</h3>
+  <h3>Missed Patrol Results</h3>
 
-          <p style={{ color: "#9ca3af" }}>
-            Full missed patrol history will appear here after connecting the
-            backend history endpoint.
-          </p>
+  {missedHistoryLoading ? (
+    <p style={{ color: "#9ca3af" }}>Loading missed patrol history...</p>
+  ) : missedHistory.length ? (
+    <div style={{ display: "grid", gap: "10px", marginTop: "14px" }}>
+      {missedHistory.map((entry) => (
+        <div
+          key={entry.id}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.2fr 1fr auto",
+            gap: "12px",
+            alignItems: "center",
+            padding: "12px",
+            borderRadius: "14px",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(239,68,68,0.22)",
+          }}
+        >
+          <div>
+            <strong>{entry.point_name || "Patrol Point"}</strong>
 
-          <button type="button" style={{ marginTop: "12px" }}>
-            Print Report
+            <div
+              style={{
+                marginTop: "4px",
+                color: "#9ca3af",
+                fontSize: "13px",
+              }}
+            >
+              {new Date(entry.scheduled_at).toLocaleString("el-GR", {
+                timeZone: "Europe/Athens",
+              })}
+            </div>
+          </div>
+
+          <span
+            style={{
+              color: "#ef4444",
+              fontSize: "12px",
+              fontWeight: 800,
+            }}
+          >
+            ● Missed
+          </span>
+
+          <button type="button">
+            View
           </button>
         </div>
+      ))}
+    </div>
+  ) : (
+    <p style={{ color: "#9ca3af" }}>No missed patrol history found.</p>
+  )}
+
+  <button type="button" style={{ marginTop: "16px" }}>
+    Print Report
+  </button>
+</div>
       </div>
     </div>
   </div>
