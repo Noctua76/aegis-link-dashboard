@@ -286,40 +286,6 @@ const downloadQr = async (pointId) => {
   }
 };
 
-  return (
-    <div className="page">
-      <div className="page-header">
-        <div>
-          <h1>Patrols</h1>
-          <p
-  style={{
-    marginBottom: "40px",
-    color: "#9ca3af",
-  }}
->
-  Operational center for patrol points, QR codes, and patrol monitoring.
-</p>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="analytics-table-card">
-          <h3>Loading Patrol Operations...</h3>
-        </div>
-      ) : patrolSites.length === 0 ? (
-        <div className="analytics-table-card">
-          <h3>No Patrol Sites</h3>
-          <p style={{ color: "#9ca3af" }}>
-            No sites with patrol points have been configured yet.
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: "grid", gap: "16px" }}>
-          {patrolSites.map((site) => {
-  const activePatrols = (site.upcoming_patrols || []).filter(
-  (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
-);
-
 const loadMissedHistory = async ({
   siteId,
   from = "",
@@ -362,6 +328,40 @@ const loadMissedHistory = async ({
     setMissedHistoryLoading(false);
   }
 };
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <h1>Patrols</h1>
+          <p
+  style={{
+    marginBottom: "40px",
+    color: "#9ca3af",
+  }}
+>
+  Operational center for patrol points, QR codes, and patrol monitoring.
+</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="analytics-table-card">
+          <h3>Loading Patrol Operations...</h3>
+        </div>
+      ) : patrolSites.length === 0 ? (
+        <div className="analytics-table-card">
+          <h3>No Patrol Sites</h3>
+          <p style={{ color: "#9ca3af" }}>
+            No sites with patrol points have been configured yet.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: "16px" }}>
+          {patrolSites.map((site) => {
+  const activePatrols = (site.upcoming_patrols || []).filter(
+  (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
+);
 
 const overduePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status === "overdue"
