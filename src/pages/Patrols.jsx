@@ -316,9 +316,16 @@ const overduePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status === "overdue"
 );
 
-const missedPatrols = (site.upcoming_patrols || []).filter(
-  (patrol) => patrol.status === "missed"
-);
+const now = new Date();
+
+const missedPatrols = (site.upcoming_patrols || []).filter((patrol) => {
+  if (patrol.status !== "missed") return false;
+
+  const scheduledAt = new Date(patrol.scheduled_at);
+  const diffHours = (now - scheduledAt) / (1000 * 60 * 60);
+
+  return diffHours <= 24;
+});
 
   return (
             <div
