@@ -901,23 +901,26 @@ const saveRecurringPatrolSchedule = async () => {
   setPatrolScheduleSaveStatus("Saving...");
 
   try {
-    const intervalMinutes = Number(patrolIntervalHours) * 60;
-
-    await Promise.all(
-      patrolPoints.map((point) =>
-        fetch(`${API_BASE_URL}/settings/patrol-points/${point.id}/schedule`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            expected_interval_minutes: intervalMinutes,
-            reminder_minutes_before: Number(patrolReminderMinutes),
-            schedule_scope: patrolScheduleScope,
-          }),
-        })
-      )
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/recurring`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          interval_hours: Number(patrolIntervalHours),
+          reminder_minutes_before: Number(patrolReminderMinutes),
+          schedule_scope: patrolScheduleScope,
+        }),
+      }
     );
+
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "ok") {
+      throw new Error(data.message || "Failed to save patrol schedule");
+    }
 
     await loadPatrolPoints(patrolSite.id);
 
@@ -928,7 +931,6 @@ const saveRecurringPatrolSchedule = async () => {
     alert(err.message || "Failed to save patrol schedule");
   }
 };
-
 const addManualPatrolSchedule = async () => {
   if (!patrolSite) return;
 
