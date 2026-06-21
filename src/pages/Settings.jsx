@@ -21,6 +21,7 @@ const [patrolScheduleSaveStatus, setPatrolScheduleSaveStatus] = useState("");
 const [manualPatrolDate, setManualPatrolDate] = useState("");
 const [manualPatrolTime, setManualPatrolTime] = useState("");
 const [manualPatrolSaveStatus, setManualPatrolSaveStatus] = useState("");
+const [manualPatrolHistory, setManualPatrolHistory] = useState([]);
 const [patrolPoints, setPatrolPoints] = useState([]);
 
 const [newPatrolPoint, setNewPatrolPoint] = useState({
@@ -127,6 +128,24 @@ const loadPatrolPoints = async (siteId) => {
     setPatrolPoints(data.points || []);
   } catch (err) {
     console.error("Patrol points load error", err);
+  }
+};
+
+const loadManualPatrolHistory = async (siteId) => {
+  if (!siteId) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/manual-history?site_id=${siteId}`
+    );
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setManualPatrolHistory(data.manual_history || []);
+    }
+  } catch (err) {
+    console.error("Manual patrol history load error", err);
   }
 };
 
@@ -987,6 +1006,7 @@ const addManualPatrolSchedule = async () => {
     setManualPatrolSaveStatus("Saved");
 
     await loadPatrolPoints(patrolSite.id);
+    await loadManualPatrolHistory(patrolSite.id);
   } catch (err) {
     console.error("Add manual patrol error", err);
     setManualPatrolSaveStatus("Save failed");
@@ -1233,6 +1253,7 @@ Manage Recipients
   onClick={() => {
   setPatrolSite(site);
   loadPatrolPoints(site.id);
+  loadManualPatrolHistory(site.id);
 }}
 >
   Patrols
@@ -2784,6 +2805,7 @@ Delete
     );
 
     await loadPatrolPoints(patrolSite.id);
+    await loadManualPatrolHistory(patrolSite.id);
   }}
 >
   Deactivate
@@ -2911,16 +2933,71 @@ Delete
   Add Manual Patrol
 </button>
 
+<div style={{ marginTop: "22px" }}>
+  <h4>Manual Patrol History</h4>
+
+  {manualPatrolHistory.length === 0 ? (
+    <div className="patrol-empty-state">
+      No manual patrols found.
+    </div>
+  ) : (
+    <div
+      style={{
+        display: "grid",
+        gap: "10px",
+        marginTop: "12px",
+      }}
+    >
+      {manualPatrolHistory.slice(0, 6).map((item) => (
+        <div
+          key={item.id}
+          style={{
+            padding: "12px",
+            borderRadius: "12px",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <strong>{item.point_name || "Patrol Point"}</strong>
+
+          <div style={{ fontSize: "13px", color: "#9ca3af", marginTop: "6px" }}>
+            Scheduled:{" "}
+            {item.scheduled_at
+              ? new Date(item.scheduled_at).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </div>
+
+          <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+            Created By: {item.created_by_username || "-"}
+          </div>
+
+          <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+            Created At:{" "}
+            {item.created_at
+              ? new Date(item.created_at).toLocaleString("el-GR", {
+                  timeZone: "Europe/Athens",
+                })
+              : "-"}
+          </div>
+
+          <div style={{ fontSize: "13px", color: "#9ca3af" }}>
+            Status: {item.manual_status || "-"}
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
 {manualPatrolSaveStatus && (
   <div className="profile-save-status">
     {manualPatrolSaveStatus}
   </div>
 )}
 
-      <div className="patrol-empty-state">
-        No manual patrols configured.
-      </div>
-    </div>
+        </div>
   </>
 )}
 
