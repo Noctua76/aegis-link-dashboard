@@ -1338,34 +1338,57 @@ shift_label: patrol.shift_label,
 </div>
 
             <div
-              style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "10px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  loadMissedHistory({
-                    siteId: selectedMissedHistorySite.site_id,
-                    from: missedHistoryFrom,
-                    to: missedHistoryTo,
-                    pointId: missedHistoryPointId,
-                    type: missedHistoryType,
-                  })
-                }
-              >
-                View Results
-              </button>
-
-              <button
-  type="button"
-  onClick={openMissedReportPreview}
+  style={{
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "flex-start",
+    gap: "10px",
+  }}
 >
-  Print Report
-</button>
-            </div>
+  <button
+    type="button"
+    onClick={() =>
+      loadMissedHistory({
+        siteId: selectedMissedHistorySite.site_id,
+        from: missedHistoryFrom,
+        to: missedHistoryTo,
+        pointId: missedHistoryPointId,
+        type: missedHistoryType,
+      })
+    }
+    style={{
+      padding: "9px 14px",
+      borderRadius: "999px",
+      background: "rgba(96,165,250,0.16)",
+      border: "1px solid rgba(96,165,250,0.45)",
+      color: "#bfdbfe",
+      fontSize: "13px",
+      fontWeight: 800,
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+    }}
+  >
+    View Results
+  </button>
+
+  <button
+    type="button"
+    onClick={openMissedReportPreview}
+    style={{
+      padding: "9px 14px",
+      borderRadius: "999px",
+      background: "rgba(34,197,94,0.16)",
+      border: "1px solid rgba(34,197,94,0.45)",
+      color: "#bbf7d0",
+      fontSize: "13px",
+      fontWeight: 800,
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+    }}
+  >
+    Print Report
+  </button>
+</div>
           </div>
         </div>
 
