@@ -952,10 +952,14 @@ const addManualPatrolSchedule = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          scheduled_date: manualPatrolDate,
-          scheduled_time: manualPatrolTime,
-          reminder_minutes_before: Number(patrolReminderMinutes),
-        }),
+  scheduled_date: manualPatrolDate,
+  scheduled_time: manualPatrolTime,
+  reminder_minutes_before: Number(patrolReminderMinutes),
+
+  created_by_admin_id: JSON.parse(localStorage.getItem("user") || "{}")?.id || null,
+  created_by_username: JSON.parse(localStorage.getItem("user") || "{}")?.username || "unknown_admin",
+  created_by_role: JSON.parse(localStorage.getItem("user") || "{}")?.role || "admin",
+}),
       }
     );
 
