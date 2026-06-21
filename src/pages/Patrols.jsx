@@ -343,6 +343,8 @@ const openMissedReportPreview = () => {
   if (missedHistoryPointId) params.append("point_id", missedHistoryPointId);
   if (missedHistoryType) params.append("type", missedHistoryType);
 
+  params.append("preview", "true");
+
   const reportUrl = `${API_BASE_URL}/patrols/missed-history/report/pdf?${params.toString()}`;
 
   setMissedReportPreviewUrl(reportUrl);
@@ -1483,6 +1485,26 @@ shift_label: patrol.shift_label,
             background: "#fff",
           }}
         />
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+    marginTop: "16px",
+  }}
+>
+  <button
+    type="button"
+    onClick={() =>
+      window.open(
+        missedReportPreviewUrl.replace("&preview=true", ""),
+        "_blank"
+      )
+    }
+  >
+    Download / Print Report
+  </button>
+</div>
       </div>
     </div>
   </div>
