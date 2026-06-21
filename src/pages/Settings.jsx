@@ -941,6 +941,10 @@ const addManualPatrolSchedule = async () => {
     return;
   }
 
+  const currentUser = JSON.parse(
+  localStorage.getItem("aegis-current-user") || "{}"
+);
+
   setManualPatrolSaveStatus("Saving...");
 
   try {
@@ -952,14 +956,23 @@ const addManualPatrolSchedule = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  scheduled_date: manualPatrolDate,
-  scheduled_time: manualPatrolTime,
-  reminder_minutes_before: Number(patrolReminderMinutes),
+          scheduled_date: manualPatrolDate,
+          scheduled_time: manualPatrolTime,
+          reminder_minutes_before: Number(patrolReminderMinutes),
 
-  created_by_admin_id: JSON.parse(localStorage.getItem("user") || "{}")?.id || null,
-  created_by_username: JSON.parse(localStorage.getItem("user") || "{}")?.username || "unknown_admin",
-  created_by_role: JSON.parse(localStorage.getItem("user") || "{}")?.role || "admin",
-}),
+          created_by_admin_id:
+            currentUser?.user?.id || currentUser?.id || null,
+
+          created_by_username:
+            currentUser?.user?.username ||
+            currentUser?.username ||
+            "unknown_admin",
+
+          created_by_role:
+            currentUser?.user?.role ||
+            currentUser?.role ||
+            "admin",
+        }),
       }
     );
 
