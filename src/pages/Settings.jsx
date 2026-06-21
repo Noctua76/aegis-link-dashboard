@@ -1196,14 +1196,19 @@ Manage Recipients
         </button>
 
         <button
-          type="button"
-          className="secondary-button"
-          onClick={() => {
-            setProfileSite(site);
-          }}
-        >
-          Profile
-        </button>
+  type="button"
+  className="secondary-button"
+  onClick={() => {
+    setProfileSite({
+      ...site,
+      shift_rules:
+        site.shift_rules ||
+        createDefaultShiftRules(site.required_shifts || 1),
+    });
+  }}
+>
+  Profile
+</button>
 
         <button
   type="button"
