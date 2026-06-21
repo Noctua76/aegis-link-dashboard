@@ -1014,6 +1014,44 @@ const addManualPatrolSchedule = async () => {
   }
 };
 
+const cancelManualPatrol = async (item) => {
+  if (!item?.id || !patrolSite) return;
+
+  const confirmed = window.confirm(
+    "Cancel this manual patrol? The record will remain in history."
+  );
+
+  if (!confirmed) return;
+
+  const currentUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "{}"
+  );
+
+  try {
+    await fetch(
+      `${API_BASE_URL}/patrols/manual/${item.id}/cancel`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          cancelled_by_username:
+            currentUser?.user?.username ||
+            currentUser?.username ||
+            "unknown_admin",
+          cancel_reason: "Cancelled from Settings manual patrol history",
+        }),
+      }
+    );
+
+    await loadManualPatrolHistory(patrolSite.id);
+  } catch (err) {
+    console.error("Cancel manual patrol error", err);
+    alert("Failed to cancel manual patrol.");
+  }
+};
+
   return (
     <>
       <header style={{ marginBottom: "28px" }}>
@@ -2933,6 +2971,12 @@ Delete
   Add Manual Patrol
 </button>
 
+{manualPatrolSaveStatus && (
+  <div className="profile-save-status">
+    {manualPatrolSaveStatus}
+  </div>
+)}
+
 <div style={{ marginTop: "22px" }}>
   <h4>Manual Patrol History</h4>
 
@@ -2985,19 +3029,30 @@ Delete
           <div style={{ fontSize: "13px", color: "#9ca3af" }}>
             Status: {item.computed_status || item.manual_status || "-"}
           </div>
+
+          {item.computed_status === "pending" && (
+  <button
+    type="button"
+    className="secondary-button danger-button"
+    style={{ marginTop: "10px" }}
+    onClick={() => cancelManualPatrol(item)}
+  >
+    Cancel Manual Patrol
+  </button>
+)}
+
+{item.computed_status === "cancelled" && (
+  <div style={{ fontSize: "13px", color: "#9ca3af", marginTop: "6px" }}>
+    Cancelled By: {item.cancelled_by_username || "-"}
+  </div>
+)}
         </div>
       ))}
     </div>
   )}
 </div>
 
-{manualPatrolSaveStatus && (
-  <div className="profile-save-status">
-    {manualPatrolSaveStatus}
-  </div>
-)}
-
-        </div>
+      </div>
   </>
 )}
 
