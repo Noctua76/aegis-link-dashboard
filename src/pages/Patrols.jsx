@@ -20,6 +20,8 @@ const [missedHistoryFrom, setMissedHistoryFrom] = useState("");
 const [missedHistoryTo, setMissedHistoryTo] = useState("");
 const [missedHistoryPointId, setMissedHistoryPointId] = useState("");
 const [missedHistoryType, setMissedHistoryType] = useState("all");
+const [missedReportPreviewUrl, setMissedReportPreviewUrl] = useState("");
+const [missedReportPreviewOpen, setMissedReportPreviewOpen] = useState(false);
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -327,6 +329,24 @@ const loadMissedHistory = async ({
   } finally {
     setMissedHistoryLoading(false);
   }
+};
+
+const openMissedReportPreview = () => {
+  if (!selectedMissedHistorySite) return;
+
+  const params = new URLSearchParams();
+
+  params.append("site_id", selectedMissedHistorySite.site_id);
+
+  if (missedHistoryFrom) params.append("from", missedHistoryFrom);
+  if (missedHistoryTo) params.append("to", missedHistoryTo);
+  if (missedHistoryPointId) params.append("point_id", missedHistoryPointId);
+  if (missedHistoryType) params.append("type", missedHistoryType);
+
+  const reportUrl = `${API_BASE_URL}/patrols/missed-history/report/pdf?${params.toString()}`;
+
+  setMissedReportPreviewUrl(reportUrl);
+  setMissedReportPreviewOpen(true);
 };
 
   return (
@@ -1337,9 +1357,12 @@ shift_label: patrol.shift_label,
                 View Results
               </button>
 
-              <button type="button">
-                Print Report
-              </button>
+              <button
+  type="button"
+  onClick={openMissedReportPreview}
+>
+  Print Report
+</button>
             </div>
           </div>
         </div>
@@ -1426,6 +1449,40 @@ shift_label: patrol.shift_label,
             </p>
           )}
         </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{missedReportPreviewOpen && missedReportPreviewUrl && (
+  <div className="report-modal-overlay">
+    <div className="report-modal" style={{ maxWidth: "1100px", height: "90vh" }}>
+      <div className="report-modal-header">
+        <h2>Missed Patrol History Report Preview</h2>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMissedReportPreviewOpen(false);
+            setMissedReportPreviewUrl("");
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "16px", height: "calc(90vh - 80px)" }}>
+        <iframe
+          src={missedReportPreviewUrl}
+          title="Missed Patrol History Report Preview"
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "12px",
+            background: "#fff",
+          }}
+        />
       </div>
     </div>
   </div>
