@@ -3005,13 +3005,11 @@ Delete
           <strong>{item.point_name || "Patrol Point"}</strong>
 
           <div style={{ fontSize: "13px", color: "#9ca3af", marginTop: "6px" }}>
-            Scheduled:{" "}
-            {item.scheduled_at
-              ? new Date(item.scheduled_at).toLocaleString("el-GR", {
-                  timeZone: "Europe/Athens",
-                })
-              : "-"}
-          </div>
+  Scheduled:{" "}
+  {item.scheduled_date && item.scheduled_time
+    ? `${new Date(item.scheduled_date).toLocaleDateString("el-GR")}, ${item.scheduled_time}`
+    : "-"}
+</div>
 
           <div style={{ fontSize: "13px", color: "#9ca3af" }}>
             Created By: {item.created_by_username || "-"}
