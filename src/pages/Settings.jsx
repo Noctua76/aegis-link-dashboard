@@ -2983,7 +2983,7 @@ Delete
           </div>
 
           <div style={{ fontSize: "13px", color: "#9ca3af" }}>
-            Status: {item.manual_status || "-"}
+            Status: {item.computed_status || item.manual_status || "-"}
           </div>
         </div>
       ))}
