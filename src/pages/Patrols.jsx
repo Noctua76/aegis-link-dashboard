@@ -1919,6 +1919,28 @@ shift_label: patrol.shift_label,
           </p>
 
           <p>
+  <strong>Status:</strong>{" "}
+  {selectedHistoryPatrol.display_status === "missed_completed_late"
+    ? "Missed Completed Late"
+    : selectedHistoryPatrol.display_status === "completed_late"
+    ? "Completed Late"
+    : "Completed"}
+</p>
+
+<p>
+  <strong>Delay:</strong>{" "}
+  {selectedHistoryPatrol.delay_minutes !== null &&
+  selectedHistoryPatrol.delay_minutes !== undefined
+    ? `${selectedHistoryPatrol.delay_minutes} minutes`
+    : "-"}
+</p>
+
+<p>
+  <strong>Shift:</strong>{" "}
+  {selectedHistoryPatrol.shift_label || "-"}
+</p>
+
+          <p>
             <strong>GPS Accuracy:</strong>{" "}
             {selectedHistoryPatrol.accuracy
   ? `${Number(selectedHistoryPatrol.accuracy).toFixed(2)} m`
