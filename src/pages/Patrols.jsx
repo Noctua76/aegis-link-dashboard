@@ -57,7 +57,7 @@ const [qrImageUrl, setQrImageUrl] = useState("");
     setHistoryLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/patrols/history`);
+      const response = await fetch(`${API_BASE_URL}/patrols/completed-history`);
       const data = await response.json();
 
       if (data.status === "ok") {
@@ -446,9 +446,14 @@ const missedPatrols = (site.upcoming_patrols || []).filter((patrol) => {
 });
 
 const visibleMissedPatrols = missedPatrols.slice(-5).reverse();
-const completedPatrolsForSite = patrolHistory.filter(
-  (entry) => Number(entry.site_id) === Number(site.site_id)
-);
+const completedPatrolsForSite = patrolHistory.filter((entry) => {
+  if (Number(entry.site_id) !== Number(site.site_id)) return false;
+
+  const patrolTime = new Date(entry.patrol_time);
+  const diffHours = (now - patrolTime) / (1000 * 60 * 60);
+
+  return diffHours <= 24;
+});
 
 const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
 
