@@ -22,6 +22,15 @@ const [missedHistoryPointId, setMissedHistoryPointId] = useState("");
 const [missedHistoryType, setMissedHistoryType] = useState("all");
 const [missedReportPreviewUrl, setMissedReportPreviewUrl] = useState("");
 const [missedReportPreviewOpen, setMissedReportPreviewOpen] = useState(false);
+const [completedHistoryModalOpen, setCompletedHistoryModalOpen] = useState(false);
+const [selectedCompletedHistorySite, setSelectedCompletedHistorySite] = useState(null);
+const [completedHistory, setCompletedHistory] = useState([]);
+const [completedHistoryLoading, setCompletedHistoryLoading] = useState(false);
+const [completedHistoryFrom, setCompletedHistoryFrom] = useState("");
+const [completedHistoryTo, setCompletedHistoryTo] = useState("");
+const [completedHistoryPointId, setCompletedHistoryPointId] = useState("");
+const [completedHistoryType, setCompletedHistoryType] = useState("all");
+const [completedHistoryStatus, setCompletedHistoryStatus] = useState("all");
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -331,6 +340,42 @@ const loadMissedHistory = async ({
   }
 };
 
+const loadCompletedHistory = async ({
+  siteId,
+  from = "",
+  to = "",
+  pointId = "",
+  type = "all",
+  status = "all",
+}) => {
+  setCompletedHistoryLoading(true);
+
+  try {
+    const params = new URLSearchParams();
+
+    if (siteId) params.append("site_id", siteId);
+    if (from) params.append("from", from);
+    if (to) params.append("to", to);
+    if (pointId) params.append("point_id", pointId);
+    if (type) params.append("type", type);
+    if (status) params.append("status", status);
+
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/completed-history?${params.toString()}`
+    );
+
+    const data = await response.json();
+
+    if (data.status === "ok") {
+      setCompletedHistory(data.history || []);
+    }
+  } catch (err) {
+    console.error("Failed loading completed patrol history:", err);
+  } finally {
+    setCompletedHistoryLoading(false);
+  }
+};
+
 const openMissedReportPreview = () => {
   if (!selectedMissedHistorySite) return;
 
@@ -401,6 +446,11 @@ const missedPatrols = (site.upcoming_patrols || []).filter((patrol) => {
 });
 
 const visibleMissedPatrols = missedPatrols.slice(-5).reverse();
+const completedPatrolsForSite = patrolHistory.filter(
+  (entry) => Number(entry.site_id) === Number(site.site_id)
+);
+
+const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
 
   return (
             <div
@@ -998,6 +1048,145 @@ shift_label: patrol.shift_label,
       No missed patrols.
     </div>
   )}
+  <div
+  style={{
+    marginTop: "20px",
+    padding: "16px",
+    borderRadius: "16px",
+    background: "rgba(34,197,94,0.06)",
+    border: "1px solid rgba(34,197,94,0.25)",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: "14px",
+    }}
+  >
+    <div>
+      <h3 style={{ margin: 0 }}>Completed Patrols</h3>
+
+      <p
+        style={{
+          margin: "4px 0 0",
+          color: "#9ca3af",
+          fontSize: "13px",
+        }}
+      >
+        Completed patrols recorded within the last 24 hours.
+      </p>
+    </div>
+
+    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <button
+        type="button"
+        onClick={() => {
+          setSelectedCompletedHistorySite(site);
+          setCompletedHistoryModalOpen(true);
+          setCompletedHistoryType("all");
+          setCompletedHistoryStatus("all");
+          loadCompletedHistory({
+            siteId: site.site_id,
+            type: "all",
+            status: "all",
+          });
+        }}
+        style={{
+          padding: "6px 10px",
+          borderRadius: "999px",
+          background: "rgba(255,255,255,0.06)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          color: "#e5e7eb",
+          fontSize: "12px",
+          fontWeight: 800,
+          cursor: "pointer",
+        }}
+      >
+        View Completed
+      </button>
+
+      <span
+        style={{
+          padding: "6px 10px",
+          borderRadius: "999px",
+          background: "rgba(34,197,94,0.15)",
+          color: "#bbf7d0",
+          fontSize: "12px",
+          fontWeight: 800,
+        }}
+      >
+        {completedPatrolsForSite.length} Completed
+      </span>
+    </div>
+  </div>
+
+  {visibleCompletedPatrols.length ? (
+    <div style={{ display: "grid", gap: "10px" }}>
+      {visibleCompletedPatrols.map((entry) => (
+        <div
+          key={`completed-${entry.id}`}
+          onClick={() => setSelectedHistoryPatrol(entry)}
+          style={{
+            padding: "12px",
+            borderRadius: "14px",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(34,197,94,0.22)",
+            cursor: "pointer",
+          }}
+        >
+          <strong>{entry.point_name || "Patrol Point"}</strong>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#9ca3af",
+              fontSize: "13px",
+            }}
+          >
+            {new Date(entry.patrol_time).toLocaleString("el-GR", {
+              timeZone: "Europe/Athens",
+            })}
+          </div>
+
+          <div
+            style={{
+              marginTop: "6px",
+              color:
+                entry.display_status === "missed_completed_late"
+                  ? "#f59e0b"
+                  : entry.display_status === "completed_late"
+                  ? "#facc15"
+                  : "#22c55e",
+              fontSize: "12px",
+              fontWeight: 800,
+            }}
+          >
+            ●{" "}
+            {entry.display_status === "missed_completed_late"
+              ? "Missed Completed Late"
+              : entry.display_status === "completed_late"
+              ? "Completed Late"
+              : "Completed"}
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div
+      style={{
+        padding: "14px",
+        borderRadius: "14px",
+        color: "#9ca3af",
+        background: "rgba(255,255,255,0.03)",
+        border: "1px dashed rgba(255,255,255,0.12)",
+      }}
+    >
+      No completed patrols in the last 24 hours.
+    </div>
+  )}
+</div>
 </div>
 
 </div>
