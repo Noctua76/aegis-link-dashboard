@@ -83,7 +83,7 @@ const [qrImageUrl, setQrImageUrl] = useState("");
   const interval = setInterval(() => {
   loadPatrolSites();
   loadPatrolHistory();
-}, 15000);
+}, 5000);
 
   return () => clearInterval(interval);
 }, []);
