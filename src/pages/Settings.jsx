@@ -16,6 +16,7 @@ const [patrolSite, setPatrolSite] = useState(null);
 const [activePatrolTab, setActivePatrolTab] = useState("points");
 const [patrolScheduleScope, setPatrolScheduleScope] = useState("24_7");
 const [patrolIntervalHours, setPatrolIntervalHours] = useState("1");
+const [patrolStartTime, setPatrolStartTime] = useState("13:00");
 const [patrolReminderMinutes, setPatrolReminderMinutes] = useState("5");
 const [patrolScheduleSaveStatus, setPatrolScheduleSaveStatus] = useState("");
 const [manualPatrolDate, setManualPatrolDate] = useState("");
@@ -916,6 +917,9 @@ const formatGreekDateTime = (value) => {
 
 const saveRecurringPatrolSchedule = async () => {
   if (!patrolSite) return;
+  const currentUser = JSON.parse(
+  localStorage.getItem("aegis-current-user") || "{}"
+);
   console.log("Saving recurring schedule for site:", patrolSite);
 
   setPatrolScheduleSaveStatus("Saving...");
@@ -930,10 +934,24 @@ const saveRecurringPatrolSchedule = async () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          interval_hours: Number(patrolIntervalHours),
-          reminder_minutes_before: Number(patrolReminderMinutes),
-          schedule_scope: patrolScheduleScope,
-        }),
+  interval_hours: Number(patrolIntervalHours),
+  start_time: patrolStartTime,
+  reminder_minutes_before: Number(patrolReminderMinutes),
+  schedule_scope: patrolScheduleScope,
+
+  created_by_admin_id:
+    currentUser?.user?.id || currentUser?.id || null,
+
+  created_by_username:
+    currentUser?.user?.username ||
+    currentUser?.username ||
+    "unknown_admin",
+
+  created_by_role:
+    currentUser?.user?.role ||
+    currentUser?.role ||
+    "admin",
+}),
       }
     );
 
@@ -2872,6 +2890,15 @@ Delete
     <option value="24_7">24/7 Patrol</option>
     <option value="custom">Custom Days & Hours</option>
   </select>
+</label>
+
+<label className="settings-field">
+  <span>Start Time</span>
+  <input
+    type="time"
+    value={patrolStartTime}
+    onChange={(e) => setPatrolStartTime(e.target.value)}
+  />
 </label>
 
 <label className="settings-field">
