@@ -403,6 +403,27 @@ const openMissedReportPreview = () => {
   setMissedReportPreviewOpen(true);
 };
 
+const openCompletedReportPreview = () => {
+  if (!selectedCompletedHistorySite) return;
+
+  const params = new URLSearchParams();
+
+  params.append("site_id", selectedCompletedHistorySite.site_id);
+
+  if (completedHistoryFrom) params.append("from", completedHistoryFrom);
+  if (completedHistoryTo) params.append("to", completedHistoryTo);
+  if (completedHistoryPointId) params.append("point_id", completedHistoryPointId);
+  if (completedHistoryType) params.append("type", completedHistoryType);
+  if (completedHistoryStatus) params.append("status", completedHistoryStatus);
+
+  params.append("preview", "true");
+
+  const reportUrl = `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`;
+
+  setCompletedReportPreviewUrl(reportUrl);
+  setCompletedReportPreviewOpen(true);
+};
+
   return (
     <div className="page">
       <div className="page-header">
@@ -436,27 +457,6 @@ const openMissedReportPreview = () => {
   const activePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
 );
-
-const openCompletedReportPreview = () => {
-  if (!selectedCompletedHistorySite) return;
-
-  const params = new URLSearchParams();
-
-  params.append("site_id", selectedCompletedHistorySite.site_id);
-
-  if (completedHistoryFrom) params.append("from", completedHistoryFrom);
-  if (completedHistoryTo) params.append("to", completedHistoryTo);
-  if (completedHistoryPointId) params.append("point_id", completedHistoryPointId);
-  if (completedHistoryType) params.append("type", completedHistoryType);
-  if (completedHistoryStatus) params.append("status", completedHistoryStatus);
-
-  params.append("preview", "true");
-
-  const reportUrl = `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`;
-
-  setCompletedReportPreviewUrl(reportUrl);
-  setCompletedReportPreviewOpen(true);
-};
 
 const overduePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status === "overdue"
