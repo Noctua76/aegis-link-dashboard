@@ -2956,9 +2956,9 @@ Delete
     <div>
       Updated At:{" "}
       {activeRecurringSchedule.created_at
-        ? new Date(activeRecurringSchedule.created_at).toLocaleString("el-GR", {
-            timeZone: "Europe/Athens",
-          })
+        ? new Date(
+  activeRecurringSchedule.created_at.replace("Z", "")
+).toLocaleString("el-GR")
         : "-"}
     </div>
   </div>
