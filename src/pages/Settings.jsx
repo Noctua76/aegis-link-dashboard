@@ -19,6 +19,7 @@ const [patrolIntervalHours, setPatrolIntervalHours] = useState("1");
 const [patrolStartTime, setPatrolStartTime] = useState("13:00");
 const [patrolReminderMinutes, setPatrolReminderMinutes] = useState("5");
 const [patrolScheduleSaveStatus, setPatrolScheduleSaveStatus] = useState("");
+const [activeRecurringSchedule, setActiveRecurringSchedule] = useState(null);
 const [manualPatrolDate, setManualPatrolDate] = useState("");
 const [manualPatrolTime, setManualPatrolTime] = useState("");
 const [manualPatrolSaveStatus, setManualPatrolSaveStatus] = useState("");
@@ -962,6 +963,7 @@ const saveRecurringPatrolSchedule = async () => {
     }
 
     await loadPatrolPoints(patrolSite.id);
+    await loadActiveRecurringSchedule(patrolSite.id);
 
     setPatrolScheduleSaveStatus("Saved");
   } catch (err) {
@@ -970,6 +972,33 @@ const saveRecurringPatrolSchedule = async () => {
     alert(err.message || "Failed to save patrol schedule");
   }
 };
+
+const loadActiveRecurringSchedule = async (siteId) => {
+  if (!siteId) return;
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${siteId}/patrol-schedules`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "ok") {
+      throw new Error(data.message || "Failed to load patrol schedules");
+    }
+
+    const activeRecurring = (data.schedules || []).find(
+      (schedule) =>
+        schedule.schedule_type === "recurring" && schedule.active === true
+    );
+
+    setActiveRecurringSchedule(activeRecurring || null);
+  } catch (err) {
+    console.error("Load active recurring schedule error", err);
+    setActiveRecurringSchedule(null);
+  }
+};
+
 const addManualPatrolSchedule = async () => {
   if (!patrolSite) return;
 
@@ -1309,6 +1338,7 @@ Manage Recipients
   onClick={() => {
   setPatrolSite(site);
   loadPatrolPoints(site.id);
+  loadActiveRecurringSchedule(site.id);
   loadManualPatrolHistory(site.id);
 }}
 >
@@ -2879,6 +2909,60 @@ Delete
 
     <div className="patrol-schedule-box">
       <h4>Recurring Patrol</h4>
+      {activeRecurringSchedule && (
+  <div
+    style={{
+      padding: "12px",
+      borderRadius: "12px",
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      marginBottom: "14px",
+      fontSize: "13px",
+      color: "#9ca3af",
+    }}
+  >
+    <div>
+      <strong style={{ color: "#f9fafb" }}>Current Active Schedule</strong>
+    </div>
+
+    <div style={{ marginTop: "6px" }}>
+      Start Time: {activeRecurringSchedule.start_time || "-"}
+    </div>
+
+    <div>
+      Every:{" "}
+      {activeRecurringSchedule.interval_hours
+        ? `${activeRecurringSchedule.interval_hours} hour${
+            Number(activeRecurringSchedule.interval_hours) === 1 ? "" : "s"
+          }`
+        : "-"}
+    </div>
+
+    <div>
+      Reminder:{" "}
+      {activeRecurringSchedule.reminder_minutes_before
+        ? `${activeRecurringSchedule.reminder_minutes_before} minutes before`
+        : "-"}
+    </div>
+
+    <div style={{ marginTop: "8px" }}>
+      Last Updated By: {activeRecurringSchedule.created_by_username || "-"}
+    </div>
+
+    <div>
+      Role: {activeRecurringSchedule.created_by_role || "-"}
+    </div>
+
+    <div>
+      Updated At:{" "}
+      {activeRecurringSchedule.created_at
+        ? new Date(activeRecurringSchedule.created_at).toLocaleString("el-GR", {
+            timeZone: "Europe/Athens",
+          })
+        : "-"}
+    </div>
+  </div>
+)}
 
       <label className="settings-field">
   <span>Schedule Scope</span>
