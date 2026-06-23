@@ -992,12 +992,25 @@ shift_label: patrol.shift_label,
   <button
     type="button"
     onClick={() => {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const from = yesterday.toISOString().slice(0, 10);
+  const to = now.toISOString().slice(0, 10);
+
   setSelectedMissedHistorySite(site);
   setMissedHistoryModalOpen(true);
   setMissedHistoryType("all");
+  setMissedHistoryFrom(from);
+  setMissedHistoryTo(to);
+  setMissedHistoryPointId("");
+
   loadMissedHistory({
     siteId: site.site_id,
-    type: "all"
+    from,
+    to,
+    pointId: "",
+    type: "all",
   });
 }}
     style={{
