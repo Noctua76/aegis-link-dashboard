@@ -2,6 +2,11 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+const formatCompletedStatus = (status) => {
+  if (status === "missed_completed_late") return "Missed Completed Late";
+  if (status === "completed_late") return "Completed Late";
+  return "Completed";
+};
 
 function Patrols() {
   const [patrolSites, setPatrolSites] = useState([]);
@@ -1089,15 +1094,19 @@ shift_label: patrol.shift_label,
         type="button"
         onClick={() => {
           setSelectedCompletedHistorySite(site);
-          setCompletedHistoryModalOpen(true);
-          setCompletedHistoryType("all");
-          setCompletedHistoryStatus("all");
-          loadCompletedHistory({
-            siteId: site.site_id,
-            type: "all",
-            status: "all",
-          });
-        }}
+  setCompletedHistoryModalOpen(true);
+  setCompletedHistoryType("all");
+  setCompletedHistoryStatus("all");
+  setCompletedHistoryFrom("");
+  setCompletedHistoryTo("");
+  setCompletedHistoryPointId("");
+
+  loadCompletedHistory({
+    siteId: site.site_id,
+    type: "all",
+    status: "all",
+  });
+}}
         style={{
           padding: "6px 10px",
           borderRadius: "999px",
@@ -1673,6 +1682,358 @@ shift_label: patrol.shift_label,
           ) : (
             <p style={{ color: "#9ca3af" }}>
               Select filters and press View Results.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+{completedHistoryModalOpen && selectedCompletedHistorySite && (
+  <div className="report-modal-overlay">
+    <div className="report-modal">
+      <div className="report-modal-header">
+        <h2>
+          Completed Patrol History | SITE-
+          {String(selectedCompletedHistorySite.site_id).padStart(3, "0")} |{" "}
+          {selectedCompletedHistorySite.site_name}
+        </h2>
+
+        <button
+          type="button"
+          onClick={() => {
+            setCompletedHistoryModalOpen(false);
+            setSelectedCompletedHistorySite(null);
+            setCompletedHistory([]);
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div style={{ padding: "24px" }}>
+        <p style={{ color: "#9ca3af" }}>
+          {selectedCompletedHistorySite.site_location}
+        </p>
+
+        <div className="analytics-table-card">
+          <h3 style={{ marginBottom: "18px" }}>History Filters</h3>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, minmax(150px, 1fr))",
+              gap: "18px",
+              alignItems: "end",
+            }}
+          >
+            <div>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                From Date
+              </label>
+              <input
+                type="date"
+                value={completedHistoryFrom}
+                onChange={(e) => setCompletedHistoryFrom(e.target.value)}
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                To Date
+              </label>
+              <input
+                type="date"
+                value={completedHistoryTo}
+                onChange={(e) => setCompletedHistoryTo(e.target.value)}
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                Patrol Point
+              </label>
+              <select
+                value={completedHistoryPointId}
+                onChange={(e) => setCompletedHistoryPointId(e.target.value)}
+                style={{ width: "100%" }}
+              >
+                <option value="">All Points</option>
+                {(selectedCompletedHistorySite.upcoming_patrols || [])
+                  .filter(
+                    (patrol, index, arr) =>
+                      patrol.point_id &&
+                      arr.findIndex((p) => p.point_id === patrol.point_id) ===
+                        index
+                  )
+                  .map((patrol) => (
+                    <option key={patrol.point_id} value={patrol.point_id}>
+                      {patrol.point_name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                Patrol Type
+              </label>
+              <select
+                value={completedHistoryType}
+                onChange={(e) => setCompletedHistoryType(e.target.value)}
+                style={{ width: "100%" }}
+              >
+                <option value="all">All Patrols</option>
+                <option value="recurring">Routine Patrols</option>
+                <option value="manual">Manual Patrols</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: "8px" }}>
+                Completion Status
+              </label>
+              <select
+                value={completedHistoryStatus}
+                onChange={(e) => setCompletedHistoryStatus(e.target.value)}
+                style={{ width: "100%" }}
+              >
+                <option value="all">All Completed</option>
+                <option value="completed">Completed</option>
+                <option value="completed_late">Completed Late</option>
+                <option value="missed_completed_late">
+                  Missed Completed Late
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "12px",
+              marginTop: "22px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() =>
+                loadCompletedHistory({
+                  siteId: selectedCompletedHistorySite.site_id,
+                  from: completedHistoryFrom,
+                  to: completedHistoryTo,
+                  pointId: completedHistoryPointId,
+                  type: completedHistoryType,
+                  status: completedHistoryStatus,
+                })
+              }
+              style={{
+                padding: "9px 18px",
+                borderRadius: "999px",
+                background: "rgba(96,165,250,0.16)",
+                border: "1px solid rgba(96,165,250,0.45)",
+                color: "#bfdbfe",
+                fontSize: "13px",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              View Results
+            </button>
+
+            <button
+              type="button"
+              disabled
+              title="PDF report will be connected in the next step"
+              style={{
+                padding: "9px 18px",
+                borderRadius: "999px",
+                background: "rgba(34,197,94,0.10)",
+                border: "1px solid rgba(34,197,94,0.25)",
+                color: "#86efac",
+                fontSize: "13px",
+                fontWeight: 800,
+                opacity: 0.55,
+                cursor: "not-allowed",
+              }}
+            >
+              Print Report
+            </button>
+          </div>
+        </div>
+
+        <div className="analytics-table-card" style={{ marginTop: "18px" }}>
+          <h3>Completed Patrol Results</h3>
+
+          {completedHistoryLoading ? (
+            <p style={{ color: "#9ca3af" }}>
+              Loading completed patrol history...
+            </p>
+          ) : completedHistory.length ? (
+            <div
+              style={{
+                display: "grid",
+                gap: "10px",
+                marginTop: "14px",
+                maxHeight: "420px",
+                overflowY: "auto",
+                paddingRight: "6px",
+              }}
+            >
+              {completedHistory.map((entry) => (
+                <div
+                  key={entry.id}
+                  style={{
+                    padding: "14px",
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(34,197,94,0.22)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1.1fr 1.1fr 1fr",
+                      gap: "12px",
+                      alignItems: "start",
+                    }}
+                  >
+                    <div>
+                      <strong>{entry.point_name || "Patrol Point"}</strong>
+
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          color: "#9ca3af",
+                          fontSize: "13px",
+                        }}
+                      >
+                        Site: {entry.site_name || "-"}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "4px",
+                          color: "#9ca3af",
+                          fontSize: "13px",
+                        }}
+                      >
+                        Guard: {entry.guard_name || "-"}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        color: "#e5e7eb",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div>
+                        Completed:{" "}
+                        {entry.patrol_time
+                          ? new Date(entry.patrol_time).toLocaleString(
+                              "el-GR",
+                              {
+                                timeZone: "Europe/Athens",
+                              }
+                            )
+                          : "-"}
+                      </div>
+
+                      <div style={{ marginTop: "4px" }}>
+                        Delay:{" "}
+                        {entry.delay_minutes !== null &&
+                        entry.delay_minutes !== undefined
+                          ? `${entry.delay_minutes} minutes`
+                          : "-"}
+                      </div>
+
+                      <div style={{ marginTop: "4px" }}>
+                        Shift: {entry.shift_label || "-"}
+                      </div>
+
+                      <div style={{ marginTop: "4px" }}>
+                        Type:{" "}
+                        {entry.schedule_type === "manual"
+                          ? "Manual Patrol"
+                          : "Routine Patrol"}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        textAlign: "right",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          color:
+                            entry.display_status === "missed_completed_late"
+                              ? "#f59e0b"
+                              : entry.display_status === "completed_late"
+                              ? "#facc15"
+                              : "#22c55e",
+                          fontWeight: 800,
+                        }}
+                      >
+                        ● {formatCompletedStatus(entry.display_status)}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "8px",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        GPS Accuracy:{" "}
+                        {entry.accuracy
+                          ? `${Number(entry.accuracy).toFixed(2)} m`
+                          : "-"}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "4px",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        Lat: {entry.latitude || "-"}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "4px",
+                          color: "#9ca3af",
+                        }}
+                      >
+                        Lon: {entry.longitude || "-"}
+                      </div>
+
+                      {entry.latitude && entry.longitude && (
+                        <div style={{ marginTop: "10px" }}>
+                          <a
+                            href={`https://maps.google.com/?q=${entry.latitude},${entry.longitude}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="action-button"
+                          >
+                            View Location
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ color: "#9ca3af" }}>
+              No completed patrols found for the selected filters.
             </p>
           )}
         </div>
