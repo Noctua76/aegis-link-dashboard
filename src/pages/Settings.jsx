@@ -2895,10 +2895,12 @@ Delete
 <label className="settings-field">
   <span>Start Time</span>
   <input
-    type="time"
-    value={patrolStartTime}
-    onChange={(e) => setPatrolStartTime(e.target.value)}
-  />
+  type="time"
+  lang="en-GB"
+  value={patrolStartTime}
+  onChange={(e) => setPatrolStartTime(e.target.value)}
+  step="60"
+/>
 </label>
 
 <label className="settings-field">
