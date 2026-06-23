@@ -2895,11 +2895,12 @@ Delete
 <label className="settings-field">
   <span>Start Time</span>
   <input
-  type="time"
-  lang="en-GB"
+  type="text"
+  inputMode="numeric"
+  placeholder="13:45"
   value={patrolStartTime}
   onChange={(e) => setPatrolStartTime(e.target.value)}
-  step="60"
+  pattern="^([01]\d|2[0-3]):[0-5]\d$"
 />
 </label>
 
