@@ -36,6 +36,8 @@ const [completedHistoryTo, setCompletedHistoryTo] = useState("");
 const [completedHistoryPointId, setCompletedHistoryPointId] = useState("");
 const [completedHistoryType, setCompletedHistoryType] = useState("all");
 const [completedHistoryStatus, setCompletedHistoryStatus] = useState("all");
+const [completedReportPreviewUrl, setCompletedReportPreviewUrl] = useState("");
+const [completedReportPreviewOpen, setCompletedReportPreviewOpen] = useState(false);
   const [patrolHistory, setPatrolHistory] = useState([]);
 const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
@@ -434,6 +436,27 @@ const openMissedReportPreview = () => {
   const activePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status !== "overdue" && patrol.status !== "missed"
 );
+
+const openCompletedReportPreview = () => {
+  if (!selectedCompletedHistorySite) return;
+
+  const params = new URLSearchParams();
+
+  params.append("site_id", selectedCompletedHistorySite.site_id);
+
+  if (completedHistoryFrom) params.append("from", completedHistoryFrom);
+  if (completedHistoryTo) params.append("to", completedHistoryTo);
+  if (completedHistoryPointId) params.append("point_id", completedHistoryPointId);
+  if (completedHistoryType) params.append("type", completedHistoryType);
+  if (completedHistoryStatus) params.append("status", completedHistoryStatus);
+
+  params.append("preview", "true");
+
+  const reportUrl = `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`;
+
+  setCompletedReportPreviewUrl(reportUrl);
+  setCompletedReportPreviewOpen(true);
+};
 
 const overduePatrols = (site.upcoming_patrols || []).filter(
   (patrol) => patrol.status === "overdue"
@@ -1847,8 +1870,7 @@ shift_label: patrol.shift_label,
 
             <button
               type="button"
-              disabled
-              title="PDF report will be connected in the next step"
+              onClick={openCompletedReportPreview}
               style={{
                 padding: "9px 18px",
                 borderRadius: "999px",
@@ -1857,8 +1879,8 @@ shift_label: patrol.shift_label,
                 color: "#86efac",
                 fontSize: "13px",
                 fontWeight: 800,
-                opacity: 0.55,
-                cursor: "not-allowed",
+                opacity: 1,
+cursor: "pointer",
               }}
             >
               Print Report
@@ -2092,6 +2114,57 @@ shift_label: patrol.shift_label,
   </button>
 </div>
       </div>
+    </div>
+  </div>
+)}
+
+{completedReportPreviewOpen && (
+  <div className="modal-overlay">
+    <div
+      className="analytics-table-card"
+      style={{
+        width: "95%",
+        maxWidth: "1400px",
+        height: "90vh",
+        position: "relative",
+      }}
+    >
+      <button
+        onClick={() => setCompletedReportPreviewOpen(false)}
+        style={{
+          position: "absolute",
+          top: "16px",
+          right: "16px",
+          background: "transparent",
+          border: "none",
+          color: "#fff",
+          fontSize: "28px",
+          cursor: "pointer",
+        }}
+      >
+        ×
+      </button>
+
+      <h2
+        style={{
+          marginBottom: "16px",
+          textAlign: "center",
+        }}
+      >
+        Completed Patrol Report Preview
+      </h2>
+
+      <iframe
+        src={completedReportPreviewUrl}
+        title="Completed Patrol Report"
+        style={{
+          width: "100%",
+          height: "calc(100% - 70px)",
+          border: "none",
+          borderRadius: "12px",
+          background: "#fff",
+        }}
+      />
     </div>
   </div>
 )}
