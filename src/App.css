@@ -1308,3 +1308,61 @@
   border: none;
   background: #ffffff;
 }
+
+.patrol-summary-card {
+  width: 100%;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.patrol-summary-title {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #9ca3af;
+}
+
+.patrol-summary-date {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.patrol-summary-time {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.patrol-summary-status {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.patrol-summary-status.completed {
+  color: #22c55e;
+}
+
+.patrol-summary-status.scheduled {
+  color: #60a5fa;
+}
+
+.patrol-summary-status.due-soon {
+  color: #f59e0b;
+}
+
+.patrol-summary-status.overdue {
+  color: #ef4444;
+}
+
+.patrol-summary-empty {
+  color: #9ca3af;
+  font-size: 18px;
+  font-weight: 800;
+}

@@ -542,46 +542,33 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   }
   style={{ cursor: site.last_patrol ? "pointer" : "default" }}
 >
-  <h3 style={{ fontSize: "18px", lineHeight: "1.15" }}>Last Patrol</h3>
+  <div className="patrol-summary-card">
+  <div className="patrol-summary-title">LAST PATROL</div>
 
   {site.last_patrol ? (
-    <span
-      style={{
-        display: "grid",
-gap: "4px",
-fontSize: "14px",
-lineHeight: "1.25",
-textAlign: "center",
-      }}
-    >
-      <strong>
+    <>
+      <div className="patrol-summary-date">
         {new Date(site.last_patrol).toLocaleDateString("el-GR", {
-  timeZone: "Europe/Athens",
-})}
-      </strong>
+          timeZone: "Europe/Athens",
+        })}
+      </div>
 
-      <strong>
+      <div className="patrol-summary-time">
         {new Date(site.last_patrol).toLocaleTimeString("el-GR", {
-  timeZone: "Europe/Athens",
-  hour: "2-digit",
-  minute: "2-digit",
-})}
-      </strong>
+          timeZone: "Europe/Athens",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </div>
 
-      <small
-        style={{
-          marginTop: "4px",
-          color: "#22c55e",
-          fontSize: "12px",
-          fontWeight: 800,
-        }}
-      >
+      <div className="patrol-summary-status completed">
         ● Completed
-      </small>
-    </span>
+      </div>
+    </>
   ) : (
-    <span>-</span>
+    <div className="patrol-summary-empty">-</div>
   )}
+</div>
 </div>
 
                 <div
@@ -600,44 +587,33 @@ textAlign: "center",
   }
   style={{ cursor: site.next_patrol ? "pointer" : "default" }}
 >
-  <h3 style={{ fontSize: "18px", lineHeight: "1.15" }}>Next Patrol</h3>
+  <div className="patrol-summary-card">
+  <div className="patrol-summary-title">NEXT PATROL</div>
 
   {site.next_patrol ? (
-    <span
-      style={{
-        display: "grid",
-gap: "4px",
-fontSize: "14px",
-lineHeight: "1.25",
-textAlign: "center",
-      }}
-    >
-      <strong>
+    <>
+      <div className="patrol-summary-date">
         {new Date(site.next_patrol).toLocaleDateString("el-GR", {
-  timeZone: "Europe/Athens",
-})}
-      </strong>
+          timeZone: "Europe/Athens",
+        })}
+      </div>
 
-      <strong>
+      <div className="patrol-summary-time">
         {new Date(site.next_patrol).toLocaleTimeString("el-GR", {
-  timeZone: "Europe/Athens",
-  hour: "2-digit",
-  minute: "2-digit",
-})}
-      </strong>
+          timeZone: "Europe/Athens",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </div>
 
-      <small
-        style={{
-          marginTop: "4px",
-          color:
-            site.patrol_status === "overdue"
-              ? "#ef4444"
-              : site.patrol_status === "due_soon"
-              ? "#f59e0b"
-              : "#60a5fa",
-          fontSize: "12px",
-          fontWeight: 800,
-        }}
+      <div
+        className={
+          site.patrol_status === "overdue"
+            ? "patrol-summary-status overdue"
+            : site.patrol_status === "due_soon"
+            ? "patrol-summary-status due-soon"
+            : "patrol-summary-status scheduled"
+        }
       >
         ●{" "}
         {site.patrol_status === "overdue"
@@ -645,11 +621,12 @@ textAlign: "center",
           : site.patrol_status === "due_soon"
           ? "Due Soon"
           : "Scheduled"}
-      </small>
-    </span>
+      </div>
+    </>
   ) : (
-    <span>-</span>
+    <div className="patrol-summary-empty">-</div>
   )}
+</div>
 </div>
               </div>
 
