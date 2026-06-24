@@ -1366,3 +1366,10 @@
   font-size: 18px;
   font-weight: 800;
 }
+
+.patrol-kpi-value {
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
