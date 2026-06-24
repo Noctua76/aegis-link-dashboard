@@ -502,7 +502,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
                   gap: "12px",
                   marginTop: "18px",
                 }}
@@ -542,19 +542,16 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   }
   style={{ cursor: site.last_patrol ? "pointer" : "default" }}
 >
-  <h3>Last Patrol</h3>
+  <h3 style={{ fontSize: "18px", lineHeight: "1.15" }}>Last Patrol</h3>
 
   {site.last_patrol ? (
     <span
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "3px",
-        fontSize: "15px",
-        lineHeight: "1.25",
-        whiteSpace: "nowrap",
-        textAlign: "center",
+        display: "grid",
+gap: "4px",
+fontSize: "14px",
+lineHeight: "1.25",
+textAlign: "center",
       }}
     >
       <strong>
@@ -603,19 +600,16 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   }
   style={{ cursor: site.next_patrol ? "pointer" : "default" }}
 >
-  <h3>Next Patrol</h3>
+  <h3 style={{ fontSize: "18px", lineHeight: "1.15" }}>Next Patrol</h3>
 
   {site.next_patrol ? (
     <span
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "3px",
-        fontSize: "15px",
-        lineHeight: "1.25",
-        whiteSpace: "nowrap",
-        textAlign: "center",
+        display: "grid",
+gap: "4px",
+fontSize: "14px",
+lineHeight: "1.25",
+textAlign: "center",
       }}
     >
       <strong>
