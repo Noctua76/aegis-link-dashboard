@@ -512,8 +512,15 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   onClick={() => openSiteDetails(site.site_id)}
   style={{ cursor: "pointer" }}
 >
-  <h3>Patrol Points</h3>
-  <span>{site.active_points}</span>
+  <div className="patrol-summary-card">
+  <div className="patrol-summary-title">
+    PATROL POINTS
+  </div>
+
+  <div className="patrol-kpi-value">
+  {site.active_points}
+</div>
+</div>
 </div>
 
                 <div
@@ -521,8 +528,15 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   onClick={() => openQrSiteDetails(site.site_id)}
   style={{ cursor: "pointer" }}
 >
-  <h3>QR Codes</h3>
-  <span>{site.generated_qrs}</span>
+  <div className="patrol-summary-card">
+  <div className="patrol-summary-title">
+    QR CODES
+  </div>
+
+  <div className="patrol-kpi-value">
+  {site.generated_qrs}
+</div>
+</div>
 </div>
 
                 <div
