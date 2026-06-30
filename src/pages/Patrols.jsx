@@ -1183,6 +1183,18 @@ shift_label: patrol.shift_label,
             {new Date(entry.patrol_time).toLocaleString("el-GR", {
               timeZone: "Europe/Athens",
             })}
+
+            <div
+  style={{
+    marginTop: "6px",
+    color: entry.schedule_type === "manual" ? "#fcd34d" : "#bfdbfe",
+    fontSize: "12px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+  }}
+>
+  {entry.schedule_type === "manual" ? "Extra Patrol" : "Routine Patrol"}
+</div>
           </div>
 
           <div
@@ -2238,6 +2250,13 @@ cursor: "pointer",
             <strong>Guard:</strong>{" "}
             {selectedHistoryPatrol.guard_name || "-"}
           </p>
+
+          <p>
+  <strong>Patrol Type:</strong>{" "}
+  {selectedHistoryPatrol.schedule_type === "manual"
+    ? "Extra Patrol"
+    : "Routine Patrol"}
+</p>
 
           <p>
             <strong>Completed:</strong>{" "}
