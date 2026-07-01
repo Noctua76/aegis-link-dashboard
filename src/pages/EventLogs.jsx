@@ -27,13 +27,17 @@ function formatTime(value) {
   });
 }
 
-function calculateShiftDelay(start, login) {
-  if (!start || !login) return "—";
+function calculateShiftDelay(scheduledStart, loginTime) {
+  if (!scheduledStart || !loginTime) return "—";
 
-  const [sH, sM] = start.split(":").map(Number);
-  const [lH, lM] = login.split(":").map(Number);
+  const scheduled = new Date(scheduledStart);
+  const login = new Date(loginTime);
 
-  const diff = lH * 60 + lM - (sH * 60 + sM);
+  if (Number.isNaN(scheduled.getTime()) || Number.isNaN(login.getTime())) {
+    return "—";
+  }
+
+  const diff = Math.round((login - scheduled) / 60000);
 
   if (diff <= 0) return "On Time";
   return `+${diff}m`;
@@ -82,11 +86,11 @@ export default function EventLogs() {
             : "—",
           shift:
   shift.shift_start && shift.shift_end
-    ? `${shift.shift_start} – ${shift.shift_end}`
+    ? `${formatTime(shift.shift_start)} – ${formatTime(shift.shift_end)}`
     : "—",
-          loginAt: loginAt || "—",
-          logoutAt,
-          shiftDelay: calculateShiftDelay(shift.shift_start, loginAt),
+loginAt: loginAt || "—",
+logoutAt,
+shiftDelay: calculateShiftDelay(shift.shift_start, shift.check_in_time),
           status,
           notes:
             status === "On Duty"
