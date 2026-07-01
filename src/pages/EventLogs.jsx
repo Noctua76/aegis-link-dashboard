@@ -79,11 +79,11 @@ export default function EventLogs() {
         const logoutAt = formatTime(shift.check_out_time);
 
         const status =
-          shift.status === "abandoned"
-            ? "Missed Logout"
-            : shift.is_currently_online
-            ? "On Duty"
-            : "Logged Out";
+  shift.status === "abandoned" || shift.status === "auto_closed"
+    ? "Missed Logout"
+    : !shift.check_out_time
+    ? "On Duty"
+    : "Logged Out";
 
         return {
           id: shift.id,
