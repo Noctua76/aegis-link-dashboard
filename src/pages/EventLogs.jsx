@@ -81,9 +81,9 @@ export default function EventLogs() {
             ? new Date(shift.check_in_time).toISOString().split("T")[0]
             : "—",
           shift:
-            shift.shift_start && shift.shift_end
-              ? `${shift.shift_start} – ${shift.shift_end}`
-              : "—",
+  shift.shift_start && shift.shift_end
+    ? `${shift.shift_start} – ${shift.shift_end}`
+    : "—",
           loginAt: loginAt || "—",
           logoutAt,
           shiftDelay: calculateShiftDelay(shift.shift_start, loginAt),
