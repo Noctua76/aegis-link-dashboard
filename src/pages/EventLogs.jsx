@@ -37,10 +37,22 @@ function calculateShiftDelay(scheduledStart, loginTime) {
     return "—";
   }
 
-  const diff = Math.round((login - scheduled) / 60000);
+  const diffMs = login - scheduled;
 
-  if (diff <= 0) return "On Time";
-  return `+${diff}m`;
+  if (diffMs <= 0) return "On Time";
+
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+
+  if (totalMinutes < 60) {
+    return `+${totalMinutes}m`;
+  }
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return `+${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 export default function EventLogs() {
@@ -85,9 +97,10 @@ export default function EventLogs() {
             ? new Date(shift.check_in_time).toISOString().split("T")[0]
             : "—",
           shift:
-  shift.shift_start && shift.shift_end
+  shift.shift_label ||
+  (shift.shift_start && shift.shift_end
     ? `${formatTime(shift.shift_start)} – ${formatTime(shift.shift_end)}`
-    : "—",
+    : "—"),
 loginAt: loginAt || "—",
 logoutAt,
 shiftDelay: calculateShiftDelay(shift.shift_start, shift.check_in_time),
