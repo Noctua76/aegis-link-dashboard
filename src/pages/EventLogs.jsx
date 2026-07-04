@@ -21,9 +21,11 @@ function formatDateTime(date) {
 
 function formatTime(value) {
   if (!value) return null;
-  return new Date(value).toLocaleTimeString("en-GB", {
+  return new Date(value).toLocaleTimeString("el-GR", {
+    timeZone: "Europe/Athens",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
   });
 }
 
@@ -119,8 +121,20 @@ export default function EventLogs() {
       setSites(sitesData.sites || []);
 
       const mappedLogs = (logsData.shifts || []).map((shift) => {
-        const loginAt = formatTime(shift.check_in_time);
-        const logoutAt = formatTime(shift.check_out_time);
+        const latestSession =
+  shift.sessions && shift.sessions.length > 0
+    ? shift.sessions[shift.sessions.length - 1]
+    : null;
+
+const loginAt = latestSession
+  ? formatTime(latestSession.login_time)
+  : formatTime(shift.check_in_time);
+
+const logoutAt = latestSession
+  ? latestSession.logout_time
+    ? formatTime(latestSession.logout_time)
+    : null
+  : formatTime(shift.check_out_time);
 
         const status = getShiftDisplayStatus(shift);
 
