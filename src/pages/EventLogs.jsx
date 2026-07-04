@@ -57,6 +57,14 @@ function calculateDelayFromTimes(scheduledStart, loginTime) {
 
   const diffMinutes = Math.floor((login - start) / 60000);
 
+  console.log("SHIFT DELAY DEBUG", {
+  scheduledStart,
+  loginTime,
+  start,
+  login,
+  diffMinutes,
+});
+
   return formatMinutesDelay(diffMinutes);
 }
 
