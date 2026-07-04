@@ -44,17 +44,46 @@ function formatMinutesDelay(minutes) {
 }
 
 function getShiftDisplayStatus(shift) {
-  if (shift.coverage_status === "completed") return "Completed";
-  if (shift.coverage_status === "partial_coverage") return "Partial Coverage";
-  if (shift.coverage_status === "active") return "On Duty";
-  if (shift.coverage_status === "no_login") return "No Login";
+  const now = new Date();
+  const start = shift.shift_start ? new Date(shift.shift_start) : null;
+  const end = shift.shift_end ? new Date(shift.shift_end) : null;
 
-  if (!shift.check_in_time) return "Scheduled";
+  const coverageMinutes = Number(shift.coverage_minutes || 0);
+
+  if (start && now < start) return "Scheduled";
+
+  if (start && end && now >= start && now < end) {
+    if (shift.online) return "On Duty";
+    if (coverageMinutes > 0 || shift.check_in_time) return "In Progress";
+    return "No Guard";
+  }
+
+  if (end && now >= end) {
+    if (coverageMinutes === 0) return "Missed";
+    if (shift.coverage_status === "completed") return "Completed";
+    return "Partial Coverage";
+  }
 
   return "Scheduled";
 }
 
 function getShiftNotes(shift, status) {
+  if (status === "Scheduled") {
+    return "Scheduled shift awaiting start.";
+  }
+
+  if (status === "No Guard") {
+    return "Shift is currently active, but no guard is logged in.";
+  }
+
+  if (status === "On Duty") {
+    return "Guard is currently covering this scheduled shift.";
+  }
+
+  if (status === "In Progress") {
+    return `Shift has partial activity so far. Coverage: ${shift.coverage_minutes || 0} minutes / ${shift.coverage_percent || 0}%.`;
+  }
+
   if (status === "Completed") {
     return `Shift completed. Coverage: ${shift.coverage_percent || 0}%.`;
   }
@@ -63,15 +92,11 @@ function getShiftNotes(shift, status) {
     return `Shift partially covered. Coverage: ${shift.coverage_minutes || 0} minutes / ${shift.coverage_percent || 0}%.`;
   }
 
-  if (status === "On Duty") {
-    return "Guard is currently covering this scheduled shift.";
+  if (status === "Missed") {
+    return "Shift ended with no guard coverage.";
   }
 
-  if (status === "No Login") {
-    return "No guard login was recorded for this scheduled shift.";
-  }
-
-  return "Scheduled shift awaiting guard login.";
+  return "Shift status pending.";
 }
 
 export default function EventLogs() {
@@ -107,8 +132,8 @@ export default function EventLogs() {
             location: shift.site_location || "—",
           },
           siteId: shift.site_id,
-          date: shift.check_in_time
-            ? new Date(shift.check_in_time).toISOString().split("T")[0]
+          date: shift.shift_start
+            ? new Date(shift.shift_start).toISOString().split("T")[0]
             : "—",
           shift:
   shift.shift_label ||
@@ -120,6 +145,10 @@ logoutAt,
 shiftDelay: formatMinutesDelay(shift.login_delay_minutes),
           status,
           notes: getShiftNotes(shift, status),
+operationalStatus: shift.operational_status,
+evaluationStatus: shift.evaluation_status,
+displayStatus: shift.display_status,
+sessions: shift.sessions || [],
 coverageStatus: shift.coverage_status,
 coverageMinutes: shift.coverage_minutes,
 coveragePercent: shift.coverage_percent,
@@ -163,7 +192,9 @@ const lateLogins = filteredLogs.filter(
 ).length;
 
 const missedLogouts = filteredLogs.filter(
-  (log) => Number(log.earlyLogoutMinutes) > 0
+  (log) =>
+    ["Completed", "Partial Coverage", "Missed"].includes(log.status) &&
+    Number(log.earlyLogoutMinutes) > 0
 ).length;
 
   const selectedSite =
@@ -297,9 +328,8 @@ const missedLogouts = filteredLogs.filter(
               <p><span>Login Time</span>{selectedLog.loginAt}</p>
               <p>
                 <span>Logout Time</span>
-                {selectedLog.status === "Missed Logout"
-                  ? "Missed logout"
-                  : selectedLog.logoutAt || "Still active"}
+                {selectedLog.logoutAt ||
+  (selectedLog.status === "On Duty" ? "Still active" : "—")}
               </p>
               <p><span>Shift Delay</span>{selectedLog.shiftDelay}</p>
               <p><span>Status</span>{selectedLog.status}</p>
