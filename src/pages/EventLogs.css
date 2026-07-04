@@ -186,6 +186,9 @@
   padding: 24px;
   width: 850px;
   max-width: 95%;
+
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .event-log-modal-grid {
