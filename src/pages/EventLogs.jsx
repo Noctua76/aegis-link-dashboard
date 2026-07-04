@@ -27,32 +27,51 @@ function formatTime(value) {
   });
 }
 
-function calculateShiftDelay(scheduledStart, loginTime) {
-  if (!scheduledStart || !loginTime) return "—";
+function formatMinutesDelay(minutes) {
+  if (minutes === null || minutes === undefined) return "—";
 
-  const scheduled = new Date(scheduledStart);
-  const login = new Date(loginTime);
+  const value = Number(minutes);
 
-  if (Number.isNaN(scheduled.getTime()) || Number.isNaN(login.getTime())) {
-    return "—";
+  if (!Number.isFinite(value)) return "—";
+  if (value <= 0) return "On Time";
+
+  if (value < 60) return `+${value}m`;
+
+  const hours = Math.floor(value / 60);
+  const mins = value % 60;
+
+  return `+${hours}h ${mins}m`;
+}
+
+function getShiftDisplayStatus(shift) {
+  if (shift.coverage_status === "completed") return "Completed";
+  if (shift.coverage_status === "partial_coverage") return "Partial Coverage";
+  if (shift.coverage_status === "active") return "On Duty";
+  if (shift.coverage_status === "no_login") return "No Login";
+
+  if (!shift.check_in_time) return "Scheduled";
+
+  return "Scheduled";
+}
+
+function getShiftNotes(shift, status) {
+  if (status === "Completed") {
+    return `Shift completed. Coverage: ${shift.coverage_percent || 0}%.`;
   }
 
-  const diffMs = login - scheduled;
-
-  if (diffMs <= 0) return "On Time";
-
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const totalMinutes = Math.floor(totalSeconds / 60);
-
-  if (totalMinutes < 60) {
-    return `+${totalMinutes}m`;
+  if (status === "Partial Coverage") {
+    return `Shift partially covered. Coverage: ${shift.coverage_minutes || 0} minutes / ${shift.coverage_percent || 0}%.`;
   }
 
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  if (status === "On Duty") {
+    return "Guard is currently covering this scheduled shift.";
+  }
 
-  return `+${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  if (status === "No Login") {
+    return "No guard login was recorded for this scheduled shift.";
+  }
+
+  return "Scheduled shift awaiting guard login.";
 }
 
 export default function EventLogs() {
@@ -78,12 +97,7 @@ export default function EventLogs() {
         const loginAt = formatTime(shift.check_in_time);
         const logoutAt = formatTime(shift.check_out_time);
 
-        const status =
-  shift.status === "abandoned" || shift.status === "auto_closed"
-    ? "Missed Logout"
-    : !shift.check_out_time
-    ? "On Duty"
-    : "Logged Out";
+        const status = getShiftDisplayStatus(shift);
 
         return {
           id: shift.id,
@@ -103,14 +117,14 @@ export default function EventLogs() {
     : "—"),
 loginAt: loginAt || "—",
 logoutAt,
-shiftDelay: calculateShiftDelay(shift.shift_start, shift.check_in_time),
+shiftDelay: formatMinutesDelay(shift.login_delay_minutes),
           status,
-          notes:
-            status === "On Duty"
-              ? "Guard is currently on duty."
-              : status === "Missed Logout"
-              ? "Session was closed automatically after heartbeat timeout."
-              : "Shift completed.",
+          notes: getShiftNotes(shift, status),
+coverageStatus: shift.coverage_status,
+coverageMinutes: shift.coverage_minutes,
+coveragePercent: shift.coverage_percent,
+earlyLogoutMinutes: shift.early_logout_minutes,
+loginDelayMinutes: shift.login_delay_minutes,
         };
       });
 
@@ -137,20 +151,20 @@ shiftDelay: calculateShiftDelay(shift.shift_start, shift.check_in_time),
       : logs.filter((log) => String(log.siteId) === String(selectedSiteId));
 
   const activeSessionsCount = filteredLogs.filter(
-    (log) => log.status === "On Duty"
-  ).length;
+  (log) => log.status === "On Duty"
+).length;
 
-  const completedShifts = filteredLogs.filter(
-    (log) => log.status === "Logged Out"
-  ).length;
+const completedShifts = filteredLogs.filter(
+  (log) => log.status === "Completed"
+).length;
 
-  const lateLogins = filteredLogs.filter(
-    (log) => log.shiftDelay !== "On Time" && log.shiftDelay !== "—"
-  ).length;
+const lateLogins = filteredLogs.filter(
+  (log) => Number(log.loginDelayMinutes) > 0
+).length;
 
-  const missedLogouts = filteredLogs.filter(
-    (log) => log.status === "Missed Logout"
-  ).length;
+const missedLogouts = filteredLogs.filter(
+  (log) => Number(log.earlyLogoutMinutes) > 0
+).length;
 
   const selectedSite =
     selectedSiteId === "all"
