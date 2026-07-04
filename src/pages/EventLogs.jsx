@@ -45,6 +45,21 @@ function formatMinutesDelay(minutes) {
   return `+${hours}h ${mins}m`;
 }
 
+function calculateDelayFromTimes(scheduledStart, loginTime) {
+  if (!scheduledStart || !loginTime) return "—";
+
+  const start = new Date(scheduledStart);
+  const login = new Date(loginTime);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(login.getTime())) {
+    return "—";
+  }
+
+  const diffMinutes = Math.floor((login - start) / 60000);
+
+  return formatMinutesDelay(diffMinutes);
+}
+
 function getShiftDisplayStatus(shift) {
   const now = new Date();
   const start = shift.shift_start ? new Date(shift.shift_start) : null;
@@ -156,7 +171,9 @@ const logoutAt = latestSession
     : "—"),
 loginAt: loginAt || "—",
 logoutAt,
-shiftDelay: formatMinutesDelay(shift.login_delay_minutes),
+shiftDelay: latestSession?.login_time
+  ? calculateDelayFromTimes(shift.shift_start, latestSession.login_time)
+  : formatMinutesDelay(shift.login_delay_minutes),
           status,
           notes: getShiftNotes(shift, status),
 operationalStatus: shift.operational_status,
