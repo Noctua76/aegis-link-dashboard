@@ -339,6 +339,26 @@ const missedLogouts = filteredLogs.filter(
               <span>Notes</span>
               <p>{selectedLog.notes}</p>
             </div>
+            <div className="event-log-notes">
+  <span>Guard Sessions</span>
+
+  {selectedLog.sessions && selectedLog.sessions.length > 0 ? (
+    selectedLog.sessions.map((session, index) => (
+      <div key={session.guard_session_id || index} style={{ marginTop: "10px" }}>
+        <p><strong>Session {index + 1}</strong></p>
+        <p>Guard: {session.guard_name || "Unknown Guard"}</p>
+        <p>Login: {formatTime(session.login_time) || "—"}</p>
+        <p>
+          Logout:{" "}
+          {session.logout_time ? formatTime(session.logout_time) : "Active"}
+        </p>
+        <p>Coverage: {session.coverage_minutes ?? 0} min</p>
+      </div>
+    ))
+  ) : (
+    <p>No sessions recorded for this shift.</p>
+  )}
+</div>
           </div>
         </div>
       )}
