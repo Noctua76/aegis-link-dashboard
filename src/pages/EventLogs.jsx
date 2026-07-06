@@ -191,6 +191,8 @@ sessions: shift.sessions || [],
 coverageStatus: shift.coverage_status,
 coverageMinutes: shift.coverage_minutes,
 coveragePercent: shift.coverage_percent,
+shiftMinutes: shift.shift_minutes,
+uncoveredMinutes: shift.uncovered_minutes,
 earlyLogoutMinutes: shift.early_logout_minutes,
 loginDelayMinutes: shift.login_delay_minutes,
         };
@@ -384,13 +386,13 @@ const missedLogouts = filteredLogs.filter(
 
   <p>
     <strong>Total Coverage:</strong>{" "}
-    {selectedLog.coverageMinutes ?? 0} / 480 min (
+    {selectedLog.coverageMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min
     {selectedLog.coveragePercent ?? 0}%)
   </p>
 
   <p>
     <strong>Uncovered:</strong>{" "}
-    {480 - (selectedLog.coverageMinutes ?? 0)} / 480 min (
+    {selectedLog.uncoveredMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min (
     {(100 - Number(selectedLog.coveragePercent ?? 0)).toFixed(2)}%)
   </p>
 </div>
@@ -409,8 +411,12 @@ const missedLogouts = filteredLogs.filter(
           {session.logout_time ? formatTime(session.logout_time) : "Active"}
         </p>
         <p>
-  Coverage: {session.coverage_minutes ?? 0} / 480 min (
-  {(((session.coverage_minutes ?? 0) / 480) * 100).toFixed(2)}%)
+  Coverage: {session.coverage_minutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min (
+{(
+  ((session.coverage_minutes ?? 0) /
+    (selectedLog.shiftMinutes || 1)) *
+  100
+).toFixed(2)}%)
 </p>
 
 {index < selectedLog.sessions.length - 1 && <hr />}
