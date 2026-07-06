@@ -386,17 +386,35 @@ const missedLogouts = filteredLogs.filter(
 <div className="event-log-notes">
   <span>Coverage Summary</span>
 
-  <p>
-    <strong>Total Coverage:</strong>{" "}
-    {selectedLog.coverageMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min
-    {selectedLog.coveragePercent ?? 0}%)
-  </p>
+  <div className="coverage-summary-block">
 
-  <p>
-    <strong>Uncovered:</strong>{" "}
-    {selectedLog.uncoveredMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min (
-    {(100 - Number(selectedLog.coveragePercent ?? 0)).toFixed(2)}%)
-  </p>
+  <div className="coverage-item">
+    <div className="coverage-label">Total Coverage</div>
+
+    <div className="coverage-value">
+      {selectedLog.coverageMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min
+    </div>
+
+    <div className="coverage-percent">
+      {selectedLog.coveragePercent ?? 0}%
+    </div>
+  </div>
+
+  <hr />
+
+  <div className="coverage-item">
+    <div className="coverage-label">Uncovered</div>
+
+    <div className="coverage-value">
+      {selectedLog.uncoveredMinutes ?? 0} / {selectedLog.shiftMinutes ?? 0} min
+    </div>
+
+    <div className="coverage-percent">
+      {(100 - Number(selectedLog.coveragePercent ?? 0)).toFixed(2)}%
+    </div>
+  </div>
+
+</div>
 </div>
 
 <div className="event-log-notes">

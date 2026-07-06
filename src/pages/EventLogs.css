@@ -261,3 +261,41 @@
     min-width: 900px;
   }
 }
+
+.coverage-summary-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: center;
+}
+
+.coverage-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coverage-label {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.coverage-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.coverage-percent {
+  font-size: 15px;
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+.coverage-summary-block hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin: 2px 0;
+}
