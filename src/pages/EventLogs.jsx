@@ -189,10 +189,12 @@ evaluationStatus: shift.evaluation_status,
 displayStatus: shift.display_status,
 sessions: shift.sessions || [],
 coverageStatus: shift.coverage_status,
-coverageMinutes: shift.coverage_minutes,
-coveragePercent: shift.coverage_percent,
-shiftMinutes: shift.shift_minutes,
-uncoveredMinutes: shift.uncovered_minutes,
+coverageMinutes: shift.live_coverage_minutes ?? shift.coverage_minutes ?? 0,
+coveragePercent: shift.live_coverage_percent ?? shift.coverage_percent ?? 0,
+shiftMinutes: shift.shift_minutes ?? 0,
+uncoveredMinutes:
+  (shift.shift_minutes ?? 0) -
+  (shift.live_coverage_minutes ?? shift.coverage_minutes ?? 0),
 earlyLogoutMinutes: shift.early_logout_minutes,
 loginDelayMinutes: shift.login_delay_minutes,
         };
