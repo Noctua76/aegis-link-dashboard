@@ -41,6 +41,18 @@ const [isLoggingIn, setIsLoggingIn] = useState(false);
 const [recentAlerts, setRecentAlerts] = useState([]);
 const [recentAlertsCheckedAt, setRecentAlertsCheckedAt] = useState(null);
 
+const [showPasswordChange, setShowPasswordChange] = useState(false);
+const [passwordChangeUser, setPasswordChangeUser] = useState(null);
+
+const [passwordChangeForm, setPasswordChangeForm] = useState({
+  current_password: "",
+  new_password: "",
+  confirm_password: "",
+});
+
+const [passwordChangeError, setPasswordChangeError] = useState("");
+const [isChangingPassword, setIsChangingPassword] = useState(false);
+
 useEffect(() => {
   const loadRecentAlerts = async () => {
     try {
@@ -92,12 +104,91 @@ const handleLogin = async (event) => {
       throw new Error(data.message || "Login failed");
     }
 
+    if (data.user?.must_change_password) {
+      setPasswordChangeUser(data.user);
+      setShowPasswordChange(true);
+      setPasswordChangeForm({
+        current_password: loginForm.password,
+        new_password: "",
+        confirm_password: "",
+      });
+      return;
+    }
+
     localStorage.setItem("aegis-current-user", JSON.stringify(data));
     setCurrentUser(data);
   } catch (error) {
     setLoginError(error.message || "Invalid username or password");
   } finally {
     setIsLoggingIn(false);
+  }
+};
+
+const handlePasswordChange = async (event) => {
+  event.preventDefault();
+  setPasswordChangeError("");
+
+  if (!passwordChangeUser?.id) {
+    setPasswordChangeError("User session not found. Please login again.");
+    return;
+  }
+
+  if (!passwordChangeForm.new_password || !passwordChangeForm.confirm_password) {
+    setPasswordChangeError("Please enter and confirm your new password.");
+    return;
+  }
+
+  if (passwordChangeForm.new_password !== passwordChangeForm.confirm_password) {
+    setPasswordChangeError("New passwords do not match.");
+    return;
+  }
+
+  if (passwordChangeForm.new_password.length < 8) {
+    setPasswordChangeError("New password must be at least 8 characters.");
+    return;
+  }
+
+  setIsChangingPassword(true);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: passwordChangeUser.id,
+        current_password: passwordChangeForm.current_password,
+        new_password: passwordChangeForm.new_password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Password change failed");
+    }
+
+    const loginData = {
+      status: "ok",
+      message: "Login successful",
+      user: data.user,
+    };
+
+    localStorage.setItem("aegis-current-user", JSON.stringify(loginData));
+    setCurrentUser(loginData);
+
+    setShowPasswordChange(false);
+    setPasswordChangeUser(null);
+    setPasswordChangeForm({
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
+    });
+  } catch (error) {
+    setPasswordChangeError(error.message || "Password change failed");
+  } finally {
+    setIsChangingPassword(false);
   }
 };
 
@@ -568,31 +659,67 @@ if (!currentUser) {
         <h1>Aegis Link</h1>
         <p>Security Operations Access</p>
 
-        <form onSubmit={handleLogin} className="login-form">
-          <input
-            type="text"
-            placeholder="Username"
-            value={loginForm.username}
-            onChange={(e) =>
-              setLoginForm({ ...loginForm, username: e.target.value })
-            }
-          />
+        {showPasswordChange ? (
+  <form onSubmit={handlePasswordChange} className="login-form">
+    <input
+      type="password"
+      placeholder="New Password"
+      value={passwordChangeForm.new_password}
+      onChange={(e) =>
+        setPasswordChangeForm({
+          ...passwordChangeForm,
+          new_password: e.target.value,
+        })
+      }
+    />
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={loginForm.password}
-            onChange={(e) =>
-              setLoginForm({ ...loginForm, password: e.target.value })
-            }
-          />
+    <input
+      type="password"
+      placeholder="Confirm New Password"
+      value={passwordChangeForm.confirm_password}
+      onChange={(e) =>
+        setPasswordChangeForm({
+          ...passwordChangeForm,
+          confirm_password: e.target.value,
+        })
+      }
+    />
 
-          {loginError && <span className="login-error">{loginError}</span>}
+    {passwordChangeError && (
+      <span className="login-error">{passwordChangeError}</span>
+    )}
 
-          <button type="submit" disabled={isLoggingIn}>
-            {isLoggingIn ? "Checking..." : "Login"}
-          </button>
-        </form>
+    <button type="submit" disabled={isChangingPassword}>
+      {isChangingPassword ? "Updating..." : "Update Password"}
+    </button>
+  </form>
+) : (
+  <form onSubmit={handleLogin} className="login-form">
+    <input
+      type="text"
+      placeholder="Username"
+      value={loginForm.username}
+      onChange={(e) =>
+        setLoginForm({ ...loginForm, username: e.target.value })
+      }
+    />
+
+    <input
+      type="password"
+      placeholder="Password"
+      value={loginForm.password}
+      onChange={(e) =>
+        setLoginForm({ ...loginForm, password: e.target.value })
+      }
+    />
+
+    {loginError && <span className="login-error">{loginError}</span>}
+
+    <button type="submit" disabled={isLoggingIn}>
+      {isLoggingIn ? "Checking..." : "Login"}
+    </button>
+  </form>
+)}
       </div>
     </div>
   );
