@@ -318,6 +318,9 @@ font-size:13px;
 }
 
 .users-management-card {
+  max-height: 520px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -376,7 +379,7 @@ font-size:13px;
 }
 
 .users-list {
-  max-height: 430px;
+  max-height: 330px;
   overflow-y: auto;
   padding-right: 6px;
 }
