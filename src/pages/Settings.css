@@ -301,3 +301,31 @@ font-size:13px;
   color: #fecaca;
   background: rgba(239,68,68,0.12);
 }
+
+.settings-users-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.settings-side-stack {
+  display: grid;
+  grid-template-rows: 2fr 1fr;
+  gap: 22px;
+  height: 100%;
+}
+
+.users-management-card {
+  overflow: hidden;
+}
+
+.incident-rules-card {
+  overflow: hidden;
+}
+
+.settings-muted-text {
+  color: #9ca3af;
+  font-size: 14px;
+  line-height: 1.5;
+}
