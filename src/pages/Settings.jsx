@@ -169,6 +169,30 @@ const loadUserDetails = async (userId) => {
   }
 };
 
+const formatUserRole = (role) => {
+  if (!role) return "-";
+
+  return role
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const formatUserStatus = (status) => {
+  if (!status) return "-";
+
+  return status.charAt(0).toUpperCase() + status.slice(1);
+};
+
+const formatDateTime = (value) => {
+  if (!value) return "-";
+
+  return new Date(value).toLocaleString("el-GR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+};
+
 const loadPatrolPoints = async (siteId) => {
   try {
     const response = await fetch(
@@ -1875,12 +1899,16 @@ Manage Recipients
 
     <div className="settings-item">
       <span>Role</span>
-      <strong>{selectedUser.role || "-"}</strong>
+      <strong className="user-detail-badge">
+  {formatUserRole(selectedUser.role)}
+</strong>
     </div>
 
     <div className="settings-item">
       <span>Status</span>
-      <strong>{selectedUser.status || "-"}</strong>
+      <strong className="user-detail-badge">
+  {formatUserStatus(selectedUser.status)}
+</strong>
     </div>
   </div>
 
@@ -1918,13 +1946,36 @@ Manage Recipients
 
     <div className="settings-item">
       <span>Password Status</span>
-      <strong>
-        {selectedUser.must_change_password
-          ? "Password Reset Required"
-          : "Password OK"}
-      </strong>
+      <strong className="user-detail-badge">
+  {selectedUser.must_change_password
+    ? "Password Reset Required"
+    : "Password OK"}
+</strong>
     </div>
   </div>
+  <div className="user-details-section">
+  <h4>System Information</h4>
+
+  <div className="settings-item">
+    <span>User ID</span>
+    <strong>{selectedUser.id || "-"}</strong>
+  </div>
+
+  <div className="settings-item">
+    <span>Created At</span>
+    <strong>{formatUserDateTime(selectedUser.created_at)}</strong>
+  </div>
+
+  <div className="settings-item">
+    <span>Last Updated</span>
+    <strong>{formatUserDateTime(selectedUser.updated_at)}</strong>
+  </div>
+
+  <div className="settings-item">
+    <span>Company</span>
+    <strong>{selectedUser.company_name || selectedUser.company || "-"}</strong>
+  </div>
+</div>
 </div>
         </>
       )}
