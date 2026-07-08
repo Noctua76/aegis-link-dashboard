@@ -125,8 +125,11 @@ const loadGuards = async () => {
   }
 };
 
-const loadUsers = async () => {
-  setLoadingUsers(true);
+const loadUsers = async (showLoader = true) => {
+  if (showLoader) {
+    setLoadingUsers(true);
+  }
+
   setUsersError("");
 
   try {
@@ -144,7 +147,9 @@ const loadUsers = async () => {
     console.error("Users load error", err);
     setUsersError(err.message || "Users load failed");
   } finally {
-    setLoadingUsers(false);
+    if (showLoader) {
+      setLoadingUsers(false);
+    }
   }
 };
 
@@ -538,7 +543,7 @@ loadAlertConfiguration();
 loadRecipients();
 loadSites();
 loadGuards();
-loadUsers();
+loadUsers(false);
 }, 5000);
 
     
