@@ -184,7 +184,7 @@ const formatUserStatus = (status) => {
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
-const formatDateTime = (value) => {
+const formatUserDateTime = (value) => {
   if (!value) return "-";
 
   return new Date(value).toLocaleString("el-GR", {
