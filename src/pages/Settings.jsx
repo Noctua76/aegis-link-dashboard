@@ -1555,9 +1555,49 @@ Manage Recipients
   <div className="settings-card users-management-card">
     <h3>Users Management</h3>
 
-    <p className="settings-muted-text">
-      User accounts, roles, contact details and access settings will appear here.
-    </p>
+    <button type="button" className="secondary-button">
+  + New User
+</button>
+
+<hr />
+
+{loadingUsers && (
+  <p className="settings-muted-text">Loading users...</p>
+)}
+
+{usersError && (
+  <p className="settings-error-text">{usersError}</p>
+)}
+
+{!loadingUsers && !usersError && users.length === 0 && (
+  <p className="settings-muted-text">No users found.</p>
+)}
+
+{!loadingUsers &&
+  !usersError &&
+  [...users]
+    .sort((a, b) =>
+      (a.full_name || "").localeCompare(b.full_name || "")
+    )
+    .map((user) => (
+      <div
+        key={user.id}
+        className="settings-item"
+        style={{ cursor: "pointer" }}
+      >
+        <span>
+          {user.full_name}
+          <br />
+          <small>
+            {user.role} · {user.username}
+          </small>
+        </span>
+
+        <strong>
+          {user.status === "active" ? "● Active" : "● Inactive"}
+        </strong>
+      </div>
+    ))}
   </div>
 
 
