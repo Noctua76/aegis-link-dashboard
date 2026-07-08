@@ -330,3 +330,39 @@ font-size:13px;
   font-size: 14px;
   line-height: 1.5;
 }
+
+.settings-user-username {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-badge::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.status-badge.active {
+  color: #22c55e;
+}
+
+.status-badge.active::before {
+  background: #22c55e;
+}
+
+.status-badge.inactive {
+  color: #ef4444;
+}
+
+.status-badge.inactive::before {
+  background: #ef4444;
+}

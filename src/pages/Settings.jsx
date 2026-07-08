@@ -1586,23 +1586,35 @@ Manage Recipients
     style={{ cursor: "pointer" }}
   >
     <span>
-      {index + 1}. {user.full_name}
-      <br />
-      <small>
-        {user.role === "system_owner"
-          ? "System Owner"
-          : user.role === "supervisor"
-          ? "Supervisor"
-          : user.role === "guard"
-          ? "Guard"
-          : user.role}{" "}
-        · {user.username}
-      </small>
-    </span>
+  {index + 1}. {user.full_name}
+  <br />
 
-    <strong>
-      {user.status === "active" ? "🟢 Active" : "🔴 Inactive"}
-    </strong>
+  <small>
+    {user.role === "system_owner"
+      ? "System Owner"
+      : user.role === "supervisor"
+      ? "Supervisor"
+      : user.role === "guard"
+      ? "Guard"
+      : user.role}
+  </small>
+
+  <br />
+
+  <small className="settings-user-username">
+    Username: {user.username}
+  </small>
+</span>
+
+    <span
+  className={
+    user.status === "active"
+      ? "status-badge active"
+      : "status-badge inactive"
+  }
+>
+  {user.status === "active" ? "Active" : "Inactive"}
+</span>
   </div>
 ))}
   </div>
