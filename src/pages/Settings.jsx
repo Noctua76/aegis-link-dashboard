@@ -13,6 +13,9 @@ const [guards, setGuards] = useState([]);
 const [users, setUsers] = useState([]);
 const [loadingUsers, setLoadingUsers] = useState(false);
 const [usersError, setUsersError] = useState("");
+const [selectedUser, setSelectedUser] = useState(null);
+const [loadingSelectedUser, setLoadingSelectedUser] = useState(false);
+const [selectedUserError, setSelectedUserError] = useState("");
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
@@ -142,6 +145,27 @@ const loadUsers = async () => {
     setUsersError(err.message || "Users load failed");
   } finally {
     setLoadingUsers(false);
+  }
+};
+
+const loadUserDetails = async (userId) => {
+  setLoadingSelectedUser(true);
+  setSelectedUserError("");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "User details load failed");
+    }
+
+    setSelectedUser(data.user);
+  } catch (err) {
+    console.error("User details load error", err);
+    setSelectedUserError(err.message || "User details load failed");
+  } finally {
+    setLoadingSelectedUser(false);
   }
 };
 
@@ -1582,10 +1606,11 @@ Manage Recipients
     )
     .map((user, index) => (
   <div
-    key={user.id}
-    className="settings-item"
-    style={{ cursor: "pointer" }}
-  >
+  key={user.id}
+  className="settings-item"
+  style={{ cursor: "pointer" }}
+  onClick={() => loadUserDetails(user.id)}
+>
     <span>
   {index + 1}. {user.full_name}
   <br />
@@ -1806,6 +1831,88 @@ Manage Recipients
           </div>
         </div>
       </section>
+
+      {selectedUser && (
+  <div className="modal-overlay">
+    <div className="recipients-modal">
+      <div className="modal-header">
+        <h3>User Details</h3>
+
+        <button
+          className="modal-close"
+          onClick={() => setSelectedUser(null)}
+        >
+          ×
+        </button>
+      </div>
+
+      {loadingSelectedUser && (
+        <p className="settings-muted-text">Loading user details...</p>
+      )}
+
+      {selectedUserError && (
+        <p className="settings-error-text">{selectedUserError}</p>
+      )}
+
+      {!loadingSelectedUser && !selectedUserError && (
+        <>
+          <div className="settings-item">
+            <span>Full Name</span>
+            <strong>{selectedUser.full_name || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Username</span>
+            <strong>{selectedUser.username || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Role</span>
+            <strong>{selectedUser.role || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Status</span>
+            <strong>{selectedUser.status || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Email</span>
+            <strong>{selectedUser.email || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Secondary Email</span>
+            <strong>{selectedUser.secondary_email || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Phone</span>
+            <strong>{selectedUser.phone || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Mobile Phone</span>
+            <strong>{selectedUser.mobile_phone || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Backup Phone</span>
+            <strong>{selectedUser.backup_phone || "-"}</strong>
+          </div>
+
+          <div className="settings-item">
+            <span>Must Change Password</span>
+            <strong>
+              {selectedUser.must_change_password ? "Yes" : "No"}
+            </strong>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+)}
+
       {showRecipientsModal && (
 
 <div className="modal-overlay">
