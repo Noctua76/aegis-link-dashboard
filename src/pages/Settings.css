@@ -374,3 +374,9 @@ font-size:13px;
 .settings-item:hover {
   background-color: #1b1f29;
 }
+
+.users-list {
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
