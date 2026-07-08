@@ -1400,6 +1400,7 @@ Manage Recipients
 ))}
 </div>
 
+<div className="settings-users-layout">
 
 <div className="settings-card">
   <h3>Guards Management</h3>
@@ -1522,6 +1523,16 @@ Manage Recipients
   ))}
 </div>
 
+<div className="settings-side-stack">
+  <div className="settings-card users-management-card">
+    <h3>Users Management</h3>
+
+    <p className="settings-muted-text">
+      User accounts, roles, contact details and access settings will appear here.
+    </p>
+  </div>
+
+
         <div className="settings-card">
           <h3>Incident Rules</h3>
 
@@ -1540,6 +1551,8 @@ Manage Recipients
             <strong>Enabled</strong>
           </div>
         </div>
+        </div>
+</div>
 
         <div className="settings-card">
           <h3>Guard Sessions</h3>
