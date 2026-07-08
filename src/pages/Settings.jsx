@@ -14,6 +14,8 @@ const [users, setUsers] = useState([]);
 const [loadingUsers, setLoadingUsers] = useState(false);
 const [usersError, setUsersError] = useState("");
 const [selectedUser, setSelectedUser] = useState(null);
+const [isEditingUser, setIsEditingUser] = useState(false);
+const [editingUser, setEditingUser] = useState(null);
 const [loadingSelectedUser, setLoadingSelectedUser] = useState(false);
 const [selectedUserError, setSelectedUserError] = useState("");
 const [editingSite, setEditingSite] = useState(null);
@@ -166,11 +168,49 @@ const loadUserDetails = async (userId) => {
     }
 
     setSelectedUser(data.user);
+    setEditingUser(data.user);
+setIsEditingUser(false);
   } catch (err) {
     console.error("User details load error", err);
     setSelectedUserError(err.message || "User details load failed");
   } finally {
     setLoadingSelectedUser(false);
+  }
+};
+
+const saveUserChanges = async () => {
+  if (!editingUser?.id) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users/${editingUser.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: editingUser.full_name,
+        username: editingUser.username,
+        email: editingUser.email,
+        secondary_email: editingUser.secondary_email,
+        phone: editingUser.phone,
+        mobile_phone: editingUser.mobile_phone,
+        backup_phone: editingUser.backup_phone,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "User update failed");
+    }
+
+    setSelectedUser(data.user);
+    setEditingUser(data.user);
+    setIsEditingUser(false);
+    loadUsers(false);
+  } catch (err) {
+    console.error("User update error", err);
+    alert(err.message || "User update failed");
   }
 };
 
@@ -1872,10 +1912,47 @@ Manage Recipients
 
   <button
     className="modal-close"
-    onClick={() => setSelectedUser(null)}
+    onClick={() => {
+  setSelectedUser(null);
+  setEditingUser(null);
+  setIsEditingUser(false);
+}}
   >
     ×
   </button>
+
+  <div className="modal-actions">
+  {!isEditingUser ? (
+    <button
+      className="secondary-btn"
+      onClick={() => {
+        setEditingUser(selectedUser);
+        setIsEditingUser(true);
+      }}
+    >
+      Edit User
+    </button>
+  ) : (
+    <>
+      <button
+        className="secondary-btn"
+        onClick={() => {
+          setEditingUser(selectedUser);
+          setIsEditingUser(false);
+        }}
+      >
+        Cancel
+      </button>
+
+      <button
+        className="primary-btn"
+        onClick={saveUserChanges}
+      >
+        Save Changes
+      </button>
+    </>
+  )}
+</div>
 </div>
 
       {loadingSelectedUser && (
@@ -1893,14 +1970,42 @@ Manage Recipients
     <h4>Identity</h4>
 
     <div className="settings-item">
-      <span>Full Name</span>
-      <strong>{selectedUser.full_name || "-"}</strong>
-    </div>
+  <span>Full Name</span>
+
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      value={editingUser?.full_name || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          full_name: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.full_name || "-"}</strong>
+  )}
+</div>
 
     <div className="settings-item">
-      <span>Username</span>
-      <strong>{selectedUser.username || "-"}</strong>
-    </div>
+  <span>Username</span>
+
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      value={editingUser?.username || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          username: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.username || "-"}</strong>
+  )}
+</div>
 
     <div className="settings-item">
       <span>Role</span>
@@ -1921,29 +2026,101 @@ Manage Recipients
     <h4>Contact Information</h4>
 
     <div className="settings-item">
-      <span>Email</span>
-      <strong>{selectedUser.email || "-"}</strong>
-    </div>
+  <span>Email</span>
 
-    <div className="settings-item">
-      <span>Secondary Email</span>
-      <strong>{selectedUser.secondary_email || "-"}</strong>
-    </div>
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      type="email"
+      value={editingUser?.email || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          email: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.email || "-"}</strong>
+  )}
+</div>
 
-    <div className="settings-item">
-      <span>Phone</span>
-      <strong>{selectedUser.phone || "-"}</strong>
-    </div>
+<div className="settings-item">
+  <span>Secondary Email</span>
 
-    <div className="settings-item">
-      <span>Mobile Phone</span>
-      <strong>{selectedUser.mobile_phone || "-"}</strong>
-    </div>
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      type="email"
+      value={editingUser?.secondary_email || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          secondary_email: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.secondary_email || "-"}</strong>
+  )}
+</div>
 
-    <div className="settings-item">
-      <span>Backup Phone</span>
-      <strong>{selectedUser.backup_phone || "-"}</strong>
-    </div>
+<div className="settings-item">
+  <span>Phone</span>
+
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      value={editingUser?.phone || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          phone: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.phone || "-"}</strong>
+  )}
+</div>
+
+<div className="settings-item">
+  <span>Mobile Phone</span>
+
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      value={editingUser?.mobile_phone || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          mobile_phone: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.mobile_phone || "-"}</strong>
+  )}
+</div>
+
+<div className="settings-item">
+  <span>Backup Phone</span>
+
+  {isEditingUser ? (
+    <input
+      className="user-edit-input"
+      value={editingUser?.backup_phone || ""}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          backup_phone: e.target.value,
+        })
+      }
+    />
+  ) : (
+    <strong>{selectedUser.backup_phone || "-"}</strong>
+  )}
+</div>
   </div>
 
   <div className="user-details-section">
