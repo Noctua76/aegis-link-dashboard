@@ -1561,6 +1561,7 @@ Manage Recipients
 
 <hr />
 
+<div className="users-list">
 {loadingUsers && (
   <p className="settings-muted-text">Loading users...</p>
 )}
@@ -1617,28 +1618,30 @@ Manage Recipients
 </span>
   </div>
 ))}
+</div>
+
+</div>
+
+<div className="settings-card">
+  <h3>Incident Rules</h3>
+
+  <div className="settings-item">
+    <span>Timeline Reset</span>
+    <strong>1 hour</strong>
   </div>
 
+  <div className="settings-item">
+    <span>Default Priority</span>
+    <strong>High</strong>
+  </div>
 
-        <div className="settings-card">
-          <h3>Incident Rules</h3>
+  <div className="settings-item">
+    <span>AI Intake</span>
+    <strong>Enabled</strong>
+  </div>
+</div>
 
-          <div className="settings-item">
-            <span>Timeline Reset</span>
-            <strong>1 hour</strong>
-          </div>
-
-          <div className="settings-item">
-            <span>Default Priority</span>
-            <strong>High</strong>
-          </div>
-
-          <div className="settings-item">
-            <span>AI Intake</span>
-            <strong>Enabled</strong>
-          </div>
-        </div>
-        </div>
+</div>
 </div>
 
         <div className="settings-card">
