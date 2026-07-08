@@ -10,6 +10,9 @@ function Settings() {
   const [showRecipientsModal, setShowRecipientsModal] = useState(false);
   const [sites, setSites] = useState([]);
 const [guards, setGuards] = useState([]);
+const [users, setUsers] = useState([]);
+const [loadingUsers, setLoadingUsers] = useState(false);
+const [usersError, setUsersError] = useState("");
 const [editingSite, setEditingSite] = useState(null);
 const [profileSite, setProfileSite] = useState(null);
 const [patrolSite, setPatrolSite] = useState(null);
@@ -116,6 +119,29 @@ const loadGuards = async () => {
     setGuards(data.guards || []);
   } catch (err) {
     console.error("Guards load error", err);
+  }
+};
+
+const loadUsers = async () => {
+  setLoadingUsers(true);
+  setUsersError("");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/users`);
+    const data = await response.json();
+
+    console.log("Users API:", data);
+
+    if (!response.ok) {
+      throw new Error(data.message || "Users load failed");
+    }
+
+    setUsers(data.users || []);
+  } catch (err) {
+    console.error("Users load error", err);
+    setUsersError(err.message || "Users load failed");
+  } finally {
+    setLoadingUsers(false);
   }
 };
 
@@ -433,6 +459,7 @@ loadAlertConfiguration();
 loadRecipients();
 loadSites();
 loadGuards();
+loadUsers();
     async function loadSystemStatus() {
       try {
         const response = await fetch(`${API_BASE_URL}/system/status`);
@@ -463,6 +490,7 @@ loadAlertConfiguration();
 loadRecipients();
 loadSites();
 loadGuards();
+loadUsers();
 }, 5000);
 
     
