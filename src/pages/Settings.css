@@ -303,6 +303,7 @@ font-size:13px;
 }
 
 .settings-users-layout {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 22px;
