@@ -1579,25 +1579,32 @@ Manage Recipients
     .sort((a, b) =>
       (a.full_name || "").localeCompare(b.full_name || "")
     )
-    .map((user) => (
-      <div
-        key={user.id}
-        className="settings-item"
-        style={{ cursor: "pointer" }}
-      >
-        <span>
-          {user.full_name}
-          <br />
-          <small>
-            {user.role} · {user.username}
-          </small>
-        </span>
+    .map((user, index) => (
+  <div
+    key={user.id}
+    className="settings-item"
+    style={{ cursor: "pointer" }}
+  >
+    <span>
+      {index + 1}. {user.full_name}
+      <br />
+      <small>
+        {user.role === "system_owner"
+          ? "System Owner"
+          : user.role === "supervisor"
+          ? "Supervisor"
+          : user.role === "guard"
+          ? "Guard"
+          : user.role}{" "}
+        · {user.username}
+      </small>
+    </span>
 
-        <strong>
-          {user.status === "active" ? "● Active" : "● Inactive"}
-        </strong>
-      </div>
-    ))}
+    <strong>
+      {user.status === "active" ? "🟢 Active" : "🔴 Inactive"}
+    </strong>
+  </div>
+))}
   </div>
 
 
