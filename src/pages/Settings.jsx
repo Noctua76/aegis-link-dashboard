@@ -1836,15 +1836,18 @@ Manage Recipients
   <div className="modal-overlay">
     <div className="recipients-modal">
       <div className="modal-header">
-        <h3>User Details</h3>
+  <div>
+    <h3>{selectedUser.full_name || "User Details"}</h3>
+    <p className="modal-subtitle">User Details</p>
+  </div>
 
-        <button
-          className="modal-close"
-          onClick={() => setSelectedUser(null)}
-        >
-          ×
-        </button>
-      </div>
+  <button
+    className="modal-close"
+    onClick={() => setSelectedUser(null)}
+  >
+    ×
+  </button>
+</div>
 
       {loadingSelectedUser && (
         <p className="settings-muted-text">Loading user details...</p>
@@ -1856,57 +1859,73 @@ Manage Recipients
 
       {!loadingSelectedUser && !selectedUserError && (
         <>
-          <div className="settings-item">
-            <span>Full Name</span>
-            <strong>{selectedUser.full_name || "-"}</strong>
-          </div>
+          <div className="user-details-grid">
+  <div className="user-details-section">
+    <h4>Identity</h4>
 
-          <div className="settings-item">
-            <span>Username</span>
-            <strong>{selectedUser.username || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Full Name</span>
+      <strong>{selectedUser.full_name || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Role</span>
-            <strong>{selectedUser.role || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Username</span>
+      <strong>{selectedUser.username || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Status</span>
-            <strong>{selectedUser.status || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Role</span>
+      <strong>{selectedUser.role || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Email</span>
-            <strong>{selectedUser.email || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Status</span>
+      <strong>{selectedUser.status || "-"}</strong>
+    </div>
+  </div>
 
-          <div className="settings-item">
-            <span>Secondary Email</span>
-            <strong>{selectedUser.secondary_email || "-"}</strong>
-          </div>
+  <div className="user-details-section">
+    <h4>Contact Information</h4>
 
-          <div className="settings-item">
-            <span>Phone</span>
-            <strong>{selectedUser.phone || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Email</span>
+      <strong>{selectedUser.email || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Mobile Phone</span>
-            <strong>{selectedUser.mobile_phone || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Secondary Email</span>
+      <strong>{selectedUser.secondary_email || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Backup Phone</span>
-            <strong>{selectedUser.backup_phone || "-"}</strong>
-          </div>
+    <div className="settings-item">
+      <span>Phone</span>
+      <strong>{selectedUser.phone || "-"}</strong>
+    </div>
 
-          <div className="settings-item">
-            <span>Must Change Password</span>
-            <strong>
-              {selectedUser.must_change_password ? "Yes" : "No"}
-            </strong>
-          </div>
+    <div className="settings-item">
+      <span>Mobile Phone</span>
+      <strong>{selectedUser.mobile_phone || "-"}</strong>
+    </div>
+
+    <div className="settings-item">
+      <span>Backup Phone</span>
+      <strong>{selectedUser.backup_phone || "-"}</strong>
+    </div>
+  </div>
+
+  <div className="user-details-section">
+    <h4>Security</h4>
+
+    <div className="settings-item">
+      <span>Password Status</span>
+      <strong>
+        {selectedUser.must_change_password
+          ? "Password Reset Required"
+          : "Password OK"}
+      </strong>
+    </div>
+  </div>
+</div>
         </>
       )}
     </div>
