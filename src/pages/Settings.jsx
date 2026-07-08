@@ -1904,24 +1904,25 @@ Manage Recipients
       {selectedUser && (
   <div className="modal-overlay">
     <div className="recipients-modal">
-      <div className="modal-header">
+      <div className="modal-header user-modal-header">
   <div>
     <h3>{selectedUser.full_name || "User Details"}</h3>
     <p className="modal-subtitle">User Details</p>
   </div>
 
   <button
-    className="modal-close"
+    className="modal-close user-modal-close"
     onClick={() => {
-  setSelectedUser(null);
-  setEditingUser(null);
-  setIsEditingUser(false);
-}}
+      setSelectedUser(null);
+      setEditingUser(null);
+      setIsEditingUser(false);
+    }}
   >
     ×
   </button>
+</div>
 
-  <div className="modal-actions">
+<div className="user-modal-actions">
   {!isEditingUser ? (
     <button
       className="secondary-btn"
@@ -1952,7 +1953,6 @@ Manage Recipients
       </button>
     </>
   )}
-</div>
 </div>
 
       {loadingSelectedUser && (
