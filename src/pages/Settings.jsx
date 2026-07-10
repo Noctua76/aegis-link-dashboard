@@ -16,6 +16,11 @@ const [usersError, setUsersError] = useState("");
 const [selectedUser, setSelectedUser] = useState(null);
 const [isEditingUser, setIsEditingUser] = useState(false);
 const [editingUser, setEditingUser] = useState(null);
+const [showResetPasswordConfirm, setShowResetPasswordConfirm] = useState(false);
+const [showTemporaryPasswordModal, setShowTemporaryPasswordModal] = useState(false);
+const [temporaryPassword, setTemporaryPassword] = useState("");
+const [isResettingPassword, setIsResettingPassword] = useState(false);
+const [passwordCopied, setPasswordCopied] = useState(false);
 const [loadingSelectedUser, setLoadingSelectedUser] = useState(false);
 const [selectedUserError, setSelectedUserError] = useState("");
 const [editingSite, setEditingSite] = useState(null);
@@ -211,6 +216,58 @@ const saveUserChanges = async () => {
   } catch (err) {
     console.error("User update error", err);
     alert(err.message || "User update failed");
+  }
+};
+
+const resetUserPassword = async () => {
+  if (!selectedUser?.id) return;
+
+  try {
+    setIsResettingPassword(true);
+
+    const response = await fetch(
+      `${API_BASE_URL}/admin/users/${selectedUser.id}/reset-password`,
+      {
+        method: "PUT",
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Password reset failed");
+    }
+
+    setShowResetPasswordConfirm(false);
+
+    setTemporaryPassword(data.temporary_password);
+
+    setSelectedUser(data.user);
+    setEditingUser(data.user);
+
+    loadUsers(false);
+
+    setShowTemporaryPasswordModal(true);
+  } catch (err) {
+    console.error("Password reset error", err);
+    alert(err.message || "Password reset failed");
+  } finally {
+    setIsResettingPassword(false);
+  }
+};
+
+const copyTemporaryPassword = async () => {
+  if (!temporaryPassword) return;
+
+  try {
+    await navigator.clipboard.writeText(temporaryPassword);
+    setPasswordCopied(true);
+
+    setTimeout(() => {
+      setPasswordCopied(false);
+    }, 2000);
+  } catch (err) {
+    console.error("Password copy error", err);
   }
 };
 
@@ -1924,19 +1981,28 @@ Manage Recipients
 
 <div className="user-modal-actions">
   {!isEditingUser ? (
+  <>
     <button
-      className="secondary-btn"
+      className="secondary-button"
+      onClick={() => setShowResetPasswordConfirm(true)}
+    >
+      Reset Password
+    </button>
+
+    <button
+      className="primary-button"
       onClick={() => {
-        setEditingUser(selectedUser);
+        setEditingUser({ ...selectedUser });
         setIsEditingUser(true);
       }}
     >
       Edit User
     </button>
-  ) : (
+  </>
+) : (
     <>
       <button
-        className="secondary-btn"
+        className="secondary-button"
         onClick={() => {
           setEditingUser(selectedUser);
           setIsEditingUser(false);
@@ -1946,7 +2012,7 @@ Manage Recipients
       </button>
 
       <button
-        className="primary-btn"
+        className="primary-button"
         onClick={saveUserChanges}
       >
         Save Changes
@@ -2161,6 +2227,145 @@ Manage Recipients
 </div>
         </>
       )}
+    </div>
+  </div>
+)}
+
+{showResetPasswordConfirm && selectedUser && (
+  <div className="modal-overlay">
+    <div className="recipients-modal reset-password-modal">
+      <div className="modal-header">
+        <div>
+          <h3>Reset Password</h3>
+          <p className="settings-muted-text">
+            Confirm password reset for this user.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="user-modal-close"
+          onClick={() => setShowResetPasswordConfirm(false)}
+          disabled={isResettingPassword}
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="reset-password-user">
+        <div className="settings-item">
+          <span>Full Name</span>
+          <strong>{selectedUser.full_name || "-"}</strong>
+        </div>
+
+        <div className="settings-item">
+          <span>Username</span>
+          <strong>{selectedUser.username || "-"}</strong>
+        </div>
+
+        <div className="settings-item">
+          <span>Role</span>
+          <strong>{formatUserRole(selectedUser.role)}</strong>
+        </div>
+      </div>
+
+      <div className="reset-password-warning">
+        The current password will stop working immediately. A new temporary
+        password will be generated, and the user will be required to change it
+        after login.
+      </div>
+
+      <div className="user-modal-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => setShowResetPasswordConfirm(false)}
+          disabled={isResettingPassword}
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={resetUserPassword}
+          disabled={isResettingPassword}
+        >
+          {isResettingPassword ? "Resetting..." : "Reset Password"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{showTemporaryPasswordModal && selectedUser && (
+  <div className="modal-overlay">
+    <div className="recipients-modal reset-password-modal">
+      <div className="modal-header">
+        <div>
+          <h3>Password Reset Successfully</h3>
+          <p className="settings-muted-text">
+            A new temporary password has been generated.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="modal-close user-modal-close"
+          onClick={() => {
+            setShowTemporaryPasswordModal(false);
+            setTemporaryPassword("");
+            setPasswordCopied(false);
+          }}
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="reset-password-user">
+        <div className="settings-item">
+          <span>User</span>
+          <strong>{selectedUser.full_name || "-"}</strong>
+        </div>
+
+        <div className="settings-item">
+          <span>Username</span>
+          <strong>{selectedUser.username || "-"}</strong>
+        </div>
+      </div>
+
+      <div className="temporary-password-box">
+        <span>Temporary Password</span>
+
+        <strong>{temporaryPassword}</strong>
+      </div>
+
+      <p className="reset-password-warning">
+        Copy this password now. It will not be available again after this
+        window is closed.
+      </p>
+
+      <div className="user-modal-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={copyTemporaryPassword}
+        >
+          {passwordCopied ? "Password Copied" : "Copy Password"}
+        </button>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={() => {
+            setShowTemporaryPasswordModal(false);
+            setTemporaryPassword("");
+            setPasswordCopied(false);
+          }}
+        >
+          Close
+        </button>
+      </div>
     </div>
   </div>
 )}

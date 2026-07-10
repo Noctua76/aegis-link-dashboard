@@ -440,3 +440,76 @@ font-size:13px;
 .user-modal-actions button {
   white-space: nowrap;
 }
+
+.reset-password-modal {
+  width: min(520px, calc(100vw - 32px));
+}
+
+.reset-password-user {
+  margin-top: 18px;
+  padding: 4px 16px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+}
+
+.reset-password-user .settings-item:last-child {
+  border-bottom: none;
+}
+
+.reset-password-warning {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 12px;
+  background: rgba(245, 158, 11, 0.08);
+  color: #fbbf24;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.temporary-password-box {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #303030;
+  border-radius: 12px;
+  background: #111;
+  text-align: center;
+}
+
+.temporary-password-box span {
+  display: block;
+  margin-bottom: 10px;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.temporary-password-box strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #f9fafb;
+  font-family: "Courier New", monospace;
+  font-size: 24px;
+  letter-spacing: 0.08em;
+}
+
+.reset-password-modal .user-modal-actions {
+  margin-top: 22px;
+}
+
+@media (max-width: 600px) {
+  .temporary-password-box strong {
+    font-size: 20px;
+  }
+
+  .reset-password-modal .user-modal-actions {
+    flex-direction: column;
+  }
+
+  .reset-password-modal .user-modal-actions button {
+    width: 100%;
+  }
+}
