@@ -176,12 +176,21 @@ const loadUsers = async (showLoader = true) => {
   }
 };
 
-const loadUserDetails = async (userId) => {
-  setLoadingSelectedUser(true);
-  setSelectedUserError("");
+const loadUserDetails = async (
+  userId,
+  showLoader = true,
+  resetEditMode = true
+) => {
+  if (showLoader) {
+    setLoadingSelectedUser(true);
+    setSelectedUserError("");
+  }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/users/${userId}`);
+    const response = await fetch(
+      `${API_BASE_URL}/admin/users/${userId}`
+    );
+
     const data = await response.json();
 
     if (!response.ok) {
@@ -190,12 +199,22 @@ const loadUserDetails = async (userId) => {
 
     setSelectedUser(data.user);
     setEditingUser(data.user);
-setIsEditingUser(false);
+
+    if (resetEditMode) {
+      setIsEditingUser(false);
+    }
   } catch (err) {
     console.error("User details load error", err);
-    setSelectedUserError(err.message || "User details load failed");
+
+    if (showLoader) {
+      setSelectedUserError(
+        err.message || "User details load failed"
+      );
+    }
   } finally {
-    setLoadingSelectedUser(false);
+    if (showLoader) {
+      setLoadingSelectedUser(false);
+    }
   }
 };
 
@@ -209,14 +228,17 @@ const saveUserChanges = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        full_name: editingUser.full_name,
-        username: editingUser.username,
-        email: editingUser.email,
-        secondary_email: editingUser.secondary_email,
-        phone: editingUser.phone,
-        mobile_phone: editingUser.mobile_phone,
-        backup_phone: editingUser.backup_phone,
-      }),
+  full_name: editingUser.full_name,
+  username: editingUser.username,
+  email: editingUser.email,
+  secondary_email: editingUser.secondary_email,
+  phone: editingUser.phone,
+  mobile_phone: editingUser.mobile_phone,
+  backup_phone: editingUser.backup_phone,
+  role: editingUser.role,
+  status: editingUser.status,
+  company_id: editingUser.company_id,
+}),
     });
 
     const data = await response.json();
@@ -716,6 +738,18 @@ loadUsers(false);
     
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+  if (!selectedUser?.id || isEditingUser) {
+    return;
+  }
+
+  const selectedUserInterval = setInterval(() => {
+    loadUserDetails(selectedUser.id, false, false);
+  }, 5000);
+
+  return () => clearInterval(selectedUserInterval);
+}, [selectedUser?.id, isEditingUser]);
 
   const handleTestAlert = async () => {
   setIsTestingAlert(true);
@@ -2354,18 +2388,53 @@ Manage Recipients
 </div>
 
     <div className="settings-item">
-      <span>Role</span>
-      <strong className="user-detail-badge">
-  {formatUserRole(selectedUser.role)}
-</strong>
-    </div>
+  <span>Role</span>
+
+  {isEditingUser ? (
+    <select
+      className="user-edit-input"
+      value={editingUser?.role || "guard"}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          role: e.target.value,
+        })
+      }
+    >
+      <option value="guard">Guard</option>
+      <option value="supervisor">Supervisor</option>
+      <option value="system_owner">System Owner</option>
+    </select>
+  ) : (
+    <strong className="user-detail-badge">
+      {formatUserRole(selectedUser.role)}
+    </strong>
+  )}
+</div>
 
     <div className="settings-item">
-      <span>Status</span>
-      <strong className="user-detail-badge">
-  {formatUserStatus(selectedUser.status)}
-</strong>
-    </div>
+  <span>Status</span>
+
+  {isEditingUser ? (
+    <select
+      className="user-edit-input"
+      value={editingUser?.status || "active"}
+      onChange={(e) =>
+        setEditingUser({
+          ...editingUser,
+          status: e.target.value,
+        })
+      }
+    >
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
+  ) : (
+    <strong className="user-detail-badge">
+      {formatUserStatus(selectedUser.status)}
+    </strong>
+  )}
+</div>
   </div>
 
   <div className="user-details-section">
