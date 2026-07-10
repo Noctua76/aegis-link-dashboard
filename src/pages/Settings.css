@@ -513,3 +513,78 @@ font-size:13px;
     width: 100%;
   }
 }
+
+/* ===========================
+   New User Modal
+=========================== */
+
+.new-user-modal {
+  width: min(900px, calc(100vw - 40px));
+}
+
+.new-user-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.settings-field span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #bfc7d5;
+}
+
+.settings-field input,
+.settings-field select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  border: 1px solid #30374a;
+  background: #151c2c;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s ease,
+              box-shadow .2s ease;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+.new-user-modal .user-modal-actions {
+  margin-top: 26px;
+}
+
+.new-user-modal .settings-error-text {
+  margin-top: 18px;
+}
+
+@media (max-width: 768px) {
+  .new-user-modal {
+    width: calc(100vw - 24px);
+  }
+
+  .new-user-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .new-user-modal .user-modal-actions {
+    flex-direction: column;
+  }
+
+  .new-user-modal .user-modal-actions button {
+    width: 100%;
+  }
+}

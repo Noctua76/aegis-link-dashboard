@@ -21,6 +21,22 @@ const [showTemporaryPasswordModal, setShowTemporaryPasswordModal] = useState(fal
 const [temporaryPassword, setTemporaryPassword] = useState("");
 const [isResettingPassword, setIsResettingPassword] = useState(false);
 const [passwordCopied, setPasswordCopied] = useState(false);
+const [showNewUserModal, setShowNewUserModal] = useState(false);
+const [isCreatingUser, setIsCreatingUser] = useState(false);
+const [newUserError, setNewUserError] = useState("");
+
+const [newUser, setNewUser] = useState({
+  full_name: "",
+  username: "",
+  email: "",
+  secondary_email: "",
+  phone: "",
+  mobile_phone: "",
+  backup_phone: "",
+  role: "guard",
+  status: "active",
+  company_id: 1,
+});
 const [loadingSelectedUser, setLoadingSelectedUser] = useState(false);
 const [selectedUserError, setSelectedUserError] = useState("");
 const [editingSite, setEditingSite] = useState(null);
@@ -268,6 +284,60 @@ const copyTemporaryPassword = async () => {
     }, 2000);
   } catch (err) {
     console.error("Password copy error", err);
+  }
+};
+
+const createNewUser = async () => {
+  const fullName = newUser.full_name.trim();
+  const username = newUser.username.trim();
+
+  if (!fullName || !username) {
+    setNewUserError("Full name and username are required.");
+    return;
+  }
+
+  try {
+    setIsCreatingUser(true);
+    setNewUserError("");
+    setPasswordCopied(false);
+
+    const response = await fetch(`${API_BASE_URL}/admin/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        full_name: fullName,
+        username,
+        email: newUser.email.trim(),
+        secondary_email: newUser.secondary_email.trim(),
+        phone: newUser.phone.trim(),
+        mobile_phone: newUser.mobile_phone.trim(),
+        backup_phone: newUser.backup_phone.trim(),
+        role: newUser.role,
+        status: newUser.status,
+        company_id: Number(newUser.company_id) || 1,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "User creation failed");
+    }
+
+    setShowNewUserModal(false);
+    setTemporaryPassword(data.temporary_password);
+    setSelectedUser(data.user);
+    setEditingUser(data.user);
+    setShowTemporaryPasswordModal(true);
+
+    await loadUsers(false);
+  } catch (err) {
+    console.error("Create user error", err);
+    setNewUserError(err.message || "User creation failed");
+  } finally {
+    setIsCreatingUser(false);
   }
 };
 
@@ -1705,7 +1775,27 @@ Manage Recipients
   <div className="settings-card users-management-card">
     <h3>Users Management</h3>
 
-    <button type="button" className="secondary-button">
+    <button
+  type="button"
+  className="secondary-button"
+  onClick={() => {
+    setNewUser({
+      full_name: "",
+      username: "",
+      email: "",
+      secondary_email: "",
+      phone: "",
+      mobile_phone: "",
+      backup_phone: "",
+      role: "guard",
+      status: "active",
+      company_id: 1,
+    });
+
+    setNewUserError("");
+    setShowNewUserModal(true);
+  }}
+>
   + New User
 </button>
 
@@ -1957,6 +2047,196 @@ Manage Recipients
           </div>
         </div>
       </section>
+
+      {showNewUserModal && (
+  <div className="modal-overlay">
+    <div className="recipients-modal new-user-modal">
+      <div className="modal-header">
+        <div>
+          <h3>Create New User</h3>
+          <p className="settings-muted-text">
+            Add a new user to the Aegis Link platform.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="modal-close user-modal-close"
+          onClick={() => {
+            setShowNewUserModal(false);
+            setNewUserError("");
+          }}
+          disabled={isCreatingUser}
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="new-user-grid">
+        <div className="user-details-section">
+          <h4>Identity</h4>
+
+          <label className="settings-field">
+            <span>Full Name *</span>
+            <input
+              value={newUser.full_name}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  full_name: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Username *</span>
+            <input
+              value={newUser.username}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  username: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Role</span>
+            <select
+              value={newUser.role}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  role: e.target.value,
+                })
+              }
+            >
+              <option value="guard">Guard</option>
+              <option value="supervisor">Supervisor</option>
+              <option value="system_owner">System Owner</option>
+            </select>
+          </label>
+
+          <label className="settings-field">
+            <span>Status</span>
+            <select
+              value={newUser.status}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  status: e.target.value,
+                })
+              }
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </label>
+        </div>
+
+        <div className="user-details-section">
+          <h4>Contact Information</h4>
+
+          <label className="settings-field">
+            <span>Email</span>
+            <input
+              type="email"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  email: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Secondary Email</span>
+            <input
+              type="email"
+              value={newUser.secondary_email}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  secondary_email: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Phone</span>
+            <input
+              value={newUser.phone}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  phone: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Mobile Phone</span>
+            <input
+              value={newUser.mobile_phone}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  mobile_phone: e.target.value,
+                })
+              }
+            />
+          </label>
+
+          <label className="settings-field">
+            <span>Backup Phone</span>
+            <input
+              value={newUser.backup_phone}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  backup_phone: e.target.value,
+                })
+              }
+            />
+          </label>
+        </div>
+      </div>
+
+      {newUserError && (
+        <p className="settings-error-text">{newUserError}</p>
+      )}
+
+      <div className="user-modal-actions">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => {
+            setShowNewUserModal(false);
+            setNewUserError("");
+          }}
+          disabled={isCreatingUser}
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          className="primary-button"
+          onClick={createNewUser}
+          disabled={isCreatingUser}
+        >
+          {isCreatingUser ? "Creating..." : "Create User"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {selectedUser && (
   <div className="modal-overlay">
