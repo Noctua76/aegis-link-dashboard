@@ -105,9 +105,7 @@ const handleLogin = async (event) => {
     }
 
     if (data.user?.must_change_password) {
-  const sessionToken =
-    data.session_token ||
-    data.user?.session_token;
+  const sessionToken = data.session?.token;
 
   if (!sessionToken) {
     throw new Error("Login session token was not returned");
@@ -129,8 +127,17 @@ const handleLogin = async (event) => {
   return;
 }
 
-    localStorage.setItem("aegis-current-user", JSON.stringify(data));
-    setCurrentUser(data);
+    const loginData = {
+  ...data,
+  session_token: data.session?.token,
+};
+
+localStorage.setItem(
+  "aegis-current-user",
+  JSON.stringify(loginData)
+);
+
+setCurrentUser(loginData);
   } catch (error) {
     setLoginError(error.message || "Invalid username or password");
   } finally {
