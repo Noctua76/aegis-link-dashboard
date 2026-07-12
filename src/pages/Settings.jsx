@@ -3,6 +3,13 @@ import "./Settings.css";
 
 function Settings() {
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+  const getSessionToken = () => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "{}"
+  );
+
+  return currentUser?.session?.token || null;
+};
 
   const [systemStatus, setSystemStatus] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
@@ -156,7 +163,18 @@ const loadUsers = async (showLoader = true) => {
   setUsersError("");
 
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/users`);
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/admin/users`, {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    });
+
     const data = await response.json();
 
     console.log("Users API:", data);
@@ -187,8 +205,19 @@ const loadUserDetails = async (
   }
 
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
-      `${API_BASE_URL}/admin/users/${userId}`
+      `${API_BASE_URL}/admin/users/${userId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
     );
 
     const data = await response.json();
