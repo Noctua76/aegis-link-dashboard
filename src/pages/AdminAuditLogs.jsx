@@ -30,16 +30,33 @@ function AdminAuditLogs() {
   const [toDate, setToDate] = useState(todayISO());
 
   const loadSessions = () => {
-    fetch(
-      `${API_BASE_URL}/admin/sessions/history?from=${fromDate}&to=${toDate}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "ok") {
-          setSessions(data.sessions);
-        }
-      });
-  };
+  const storedUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "null"
+  );
+
+  const sessionToken =
+    storedUser?.session_token ||
+    storedUser?.session?.token;
+
+  if (!sessionToken) {
+    return;
+  }
+
+  fetch(
+    `${API_BASE_URL}/admin/sessions/history?from=${fromDate}&to=${toDate}`,
+    {
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
+    }
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.status === "ok") {
+        setSessions(data.sessions);
+      }
+    });
+};
 
   useEffect(() => {
   loadSessions();
@@ -60,8 +77,49 @@ function AdminAuditLogs() {
   return true;
 });
 
-  const exportUrl =
-    `${API_BASE_URL}/admin/sessions/export?from=${fromDate}&to=${toDate}`;
+  const exportSessions = async () => {
+  try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/admin/sessions/export?from=${fromDate}&to=${toDate}`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Session export failed");
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = "admin_sessions.csv";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (error) {
+    console.error("Admin session export error:", error);
+  }
+};
 
   return (
     <section style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
@@ -165,21 +223,21 @@ function AdminAuditLogs() {
   Closed
 </button>
 
-        <a
-          href={exportUrl}
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            marginLeft: "auto",
-            color: "#fff",
-            textDecoration: "none",
-            border: "1px solid #444",
-            padding: "10px 22px",
-            borderRadius: "8px",
-          }}
-        >
-          Export CSV
-        </a>
+        <button
+  type="button"
+  onClick={exportSessions}
+  style={{
+    marginLeft: "auto",
+    color: "#fff",
+    background: "transparent",
+    border: "1px solid #444",
+    padding: "10px 22px",
+    borderRadius: "8px",
+    cursor: "pointer",
+  }}
+>
+  Export CSV
+</button>
       </div>
 
       <div
