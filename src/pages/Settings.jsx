@@ -302,10 +302,19 @@ const resetUserPassword = async () => {
   try {
     setIsResettingPassword(true);
 
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/admin/users/${selectedUser.id}/reset-password`,
       {
         method: "PUT",
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
       }
     );
 
@@ -316,13 +325,11 @@ const resetUserPassword = async () => {
     }
 
     setShowResetPasswordConfirm(false);
-
     setTemporaryPassword(data.temporary_password);
-
     setSelectedUser(data.user);
     setEditingUser(data.user);
 
-    loadUsers(false);
+    await loadUsers(false);
 
     setShowTemporaryPasswordModal(true);
   } catch (err) {
