@@ -213,24 +213,35 @@ const [incidentTimeline, setIncidentTimeline] = useState({
 });
 
 const handleLogout = async () => {
-  const username =
-    currentUser?.user?.username ||
-    currentUser?.username;
+  const sessionToken = currentUser?.session?.token;
 
   try {
-    await fetch(`${API_BASE_URL}/admin/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username }),
-    });
+    if (sessionToken) {
+      const response = await fetch(
+        `${API_BASE_URL}/admin/logout`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+
+        console.error(
+          "Logout tracking failed:",
+          data.message || response.statusText
+        );
+      }
+    }
   } catch (err) {
     console.error("Logout tracking failed", err);
+  } finally {
+    localStorage.removeItem("aegis-current-user");
+    setCurrentUser(null);
   }
-
-  localStorage.removeItem("aegis-current-user");
-  setCurrentUser(null);
 };
   const [activeMenu, setActiveMenu] = useState(() => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
@@ -277,53 +288,40 @@ const menuItems = [
 
 }, []);
   useEffect(() => {
+  const sessionToken = currentUser?.session?.token;
 
-if (!currentUser) return;
+  if (!sessionToken) return;
 
-const sendHeartbeat = async () => {
+  const sendHeartbeat = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/admin/heartbeat`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
 
-try{
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
 
-await fetch(
-`${API_BASE_URL}/admin/heartbeat`,
-{
-method:"POST",
+        console.error(
+          "Heartbeat failed:",
+          data.message || response.statusText
+        );
+      }
+    } catch (err) {
+      console.error("Heartbeat failed", err);
+    }
+  };
 
-headers:{
-"Content-Type":"application/json"
-},
+  sendHeartbeat();
 
-body:JSON.stringify({
-username:
-currentUser?.user?.username ||
-currentUser?.username
-})
+  const interval = setInterval(sendHeartbeat, 30000);
 
-}
-);
-
-}catch(err){
-
-console.error(
-"Heartbeat failed",
-err
-);
-
-}
-
-};
-
-sendHeartbeat();
-
-const interval =
-setInterval(
-sendHeartbeat,
-30000
-);
-
-return () =>
-clearInterval(interval);
-
+  return () => clearInterval(interval);
 }, [currentUser]);
   useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
