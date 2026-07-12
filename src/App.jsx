@@ -321,9 +321,26 @@ const menuItems = [
   useEffect(() => {
     const loadAdmins = async () => {
     try {
-      const response = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/admin/active"
-      );
+      const storedUser = JSON.parse(
+  localStorage.getItem("aegis-current-user") || "null"
+);
+
+const sessionToken =
+  storedUser?.session_token ||
+  storedUser?.session?.token;
+
+if (!sessionToken) {
+  return;
+}
+
+const response = await fetch(
+  "https://noctua-panic-backend-production.up.railway.app/admin/active",
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
       const data = await response.json();
 
