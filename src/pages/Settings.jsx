@@ -251,24 +251,33 @@ const saveUserChanges = async () => {
   if (!editingUser?.id) return;
 
   try {
-    const response = await fetch(`${API_BASE_URL}/admin/users/${editingUser.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  full_name: editingUser.full_name,
-  username: editingUser.username,
-  email: editingUser.email,
-  secondary_email: editingUser.secondary_email,
-  phone: editingUser.phone,
-  mobile_phone: editingUser.mobile_phone,
-  backup_phone: editingUser.backup_phone,
-  role: editingUser.role,
-  status: editingUser.status,
-  company_id: editingUser.company_id,
-}),
-    });
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/admin/users/${editingUser.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          full_name: editingUser.full_name,
+          username: editingUser.username,
+          email: editingUser.email,
+          secondary_email: editingUser.secondary_email,
+          phone: editingUser.phone,
+          mobile_phone: editingUser.mobile_phone,
+          backup_phone: editingUser.backup_phone,
+          role: editingUser.role,
+          status: editingUser.status,
+        }),
+      }
+    );
 
     const data = await response.json();
 
@@ -279,7 +288,8 @@ const saveUserChanges = async () => {
     setSelectedUser(data.user);
     setEditingUser(data.user);
     setIsEditingUser(false);
-    loadUsers(false);
+
+    await loadUsers(false);
   } catch (err) {
     console.error("User update error", err);
     alert(err.message || "User update failed");
