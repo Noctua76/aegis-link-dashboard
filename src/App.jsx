@@ -105,15 +105,29 @@ const handleLogin = async (event) => {
     }
 
     if (data.user?.must_change_password) {
-      setPasswordChangeUser(data.user);
-      setShowPasswordChange(true);
-      setPasswordChangeForm({
-        current_password: loginForm.password,
-        new_password: "",
-        confirm_password: "",
-      });
-      return;
-    }
+  const sessionToken =
+    data.session_token ||
+    data.user?.session_token;
+
+  if (!sessionToken) {
+    throw new Error("Login session token was not returned");
+  }
+
+  setPasswordChangeUser({
+    ...data.user,
+    session_token: sessionToken,
+  });
+
+  setShowPasswordChange(true);
+
+  setPasswordChangeForm({
+    current_password: loginForm.password,
+    new_password: "",
+    confirm_password: "",
+  });
+
+  return;
+}
 
     localStorage.setItem("aegis-current-user", JSON.stringify(data));
     setCurrentUser(data);
@@ -133,60 +147,96 @@ const handlePasswordChange = async (event) => {
     return;
   }
 
-  if (!passwordChangeForm.new_password || !passwordChangeForm.confirm_password) {
+  if (
+    !passwordChangeForm.new_password ||
+    !passwordChangeForm.confirm_password
+  ) {
     setPasswordChangeError("Please enter and confirm your new password.");
     return;
   }
 
-  if (passwordChangeForm.new_password !== passwordChangeForm.confirm_password) {
+  if (
+    passwordChangeForm.new_password !==
+    passwordChangeForm.confirm_password
+  ) {
     setPasswordChangeError("New passwords do not match.");
     return;
   }
 
   if (passwordChangeForm.new_password.length < 8) {
-    setPasswordChangeError("New password must be at least 8 characters.");
+    setPasswordChangeError(
+      "New password must be at least 8 characters."
+    );
     return;
   }
 
   setIsChangingPassword(true);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: passwordChangeUser.id,
-        current_password: passwordChangeForm.current_password,
-        new_password: passwordChangeForm.new_password,
-      }),
-    });
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      passwordChangeUser?.session_token ||
+      storedUser?.session_token ||
+      storedUser?.user?.session_token;
+
+    if (!sessionToken) {
+      throw new Error("Authentication session is missing");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/auth/change-password`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          current_password:
+            passwordChangeForm.current_password,
+          new_password:
+            passwordChangeForm.new_password,
+        }),
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Password change failed");
+      throw new Error(
+        data.message || "Password change failed"
+      );
     }
 
     const loginData = {
       status: "ok",
       message: "Login successful",
+      session_token: sessionToken,
       user: data.user,
     };
 
-    localStorage.setItem("aegis-current-user", JSON.stringify(loginData));
+    localStorage.setItem(
+      "aegis-current-user",
+      JSON.stringify(loginData)
+    );
+
     setCurrentUser(loginData);
 
     setShowPasswordChange(false);
     setPasswordChangeUser(null);
+
     setPasswordChangeForm({
       current_password: "",
       new_password: "",
       confirm_password: "",
     });
   } catch (error) {
-    setPasswordChangeError(error.message || "Password change failed");
+    setPasswordChangeError(
+      error.message || "Password change failed"
+    );
   } finally {
     setIsChangingPassword(false);
   }
