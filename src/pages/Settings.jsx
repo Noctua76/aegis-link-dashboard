@@ -135,8 +135,34 @@ err
 
 const loadSites = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/settings/sites`);
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
+
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to load sites"
+      );
+    }
 
     setSites(data.sites || []);
   } catch (err) {
@@ -441,11 +467,28 @@ const formatUserDateTime = (value) => {
 
 const loadPatrolPoints = async (siteId) => {
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
-      `${API_BASE_URL}/settings/sites/${siteId}/patrol-points`
+      `${API_BASE_URL}/settings/sites/${siteId}/patrol-points`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
     );
 
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to load patrol points"
+      );
+    }
 
     setPatrolPoints(data.points || []);
   } catch (err) {
@@ -457,17 +500,35 @@ const loadManualPatrolHistory = async (siteId) => {
   if (!siteId) return;
 
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
-      `${API_BASE_URL}/patrols/manual-history?site_id=${siteId}`
+      `${API_BASE_URL}/patrols/manual-history?site_id=${siteId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
     );
 
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Failed to load manual patrol history"
+      );
+    }
 
     if (data.status === "ok") {
       setManualPatrolHistory(data.manual_history || []);
     }
   } catch (err) {
     console.error("Manual patrol history load error", err);
+    setManualPatrolHistory([]);
   }
 };
 
@@ -475,20 +536,35 @@ const addPatrolPoint = async () => {
   if (!patrolSite || !newPatrolPoint.point_name) return;
 
   try {
-    await fetch(
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(
       `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-points`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify(newPatrolPoint),
       }
     );
 
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to add patrol point"
+      );
+    }
+
     setNewPatrolPoint({
       point_name: "",
-      point_description: "",      
+      point_description: "",
     });
 
     await loadPatrolPoints(patrolSite.id);
@@ -534,13 +610,37 @@ err
 
 const addSite = async () => {
   try {
-    await fetch(`${API_BASE_URL}/settings/sites`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newSite),
-    });
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify(newSite),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to create site"
+      );
+    }
 
     setNewSite({
       name: "",
@@ -558,13 +658,37 @@ const updateSite = async () => {
   if (!editingSite) return;
 
   try {
-    await fetch(`${API_BASE_URL}/settings/sites/${editingSite.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(editingSite),
-    });
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${editingSite.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify(editingSite),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to update site"
+      );
+    }
 
     setEditingSite(null);
     await loadSites();
@@ -579,6 +703,18 @@ const uploadSopFile = async () => {
   try {
     setIsUploadingSop(true);
 
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      throw new Error("Authentication session is missing");
+    }
+
     const formData = new FormData();
     formData.append("sop_file", sopFile);
 
@@ -586,6 +722,9 @@ const uploadSopFile = async () => {
       `${API_BASE_URL}/settings/sites/${profileSite.id}/sop/upload`,
       {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
         body: formData,
       }
     );
@@ -593,7 +732,9 @@ const uploadSopFile = async () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "SOP upload failed");
+      throw new Error(
+        data.message || "SOP upload failed"
+      );
     }
 
     setProfileSite({
@@ -622,6 +763,18 @@ const uploadSiteDocument = async (slot, file) => {
       setIsUploadingDocument2(true);
     }
 
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      throw new Error("Authentication session is missing");
+    }
+
     const formData = new FormData();
     formData.append("site_document", file);
 
@@ -629,6 +782,9 @@ const uploadSiteDocument = async (slot, file) => {
       `${API_BASE_URL}/settings/sites/${profileSite.id}/documents/${slot}/upload`,
       {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
         body: formData,
       }
     );
@@ -636,7 +792,9 @@ const uploadSiteDocument = async (slot, file) => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Upload failed");
+      throw new Error(
+        data.message || "Upload failed"
+      );
     }
 
     setProfileSite({
@@ -647,7 +805,7 @@ const uploadSiteDocument = async (slot, file) => {
     await loadSites();
   } catch (err) {
     console.error("Document upload error:", err);
-    alert(err.message);
+    alert(err.message || "Upload failed");
   } finally {
     setIsUploadingDocument1(false);
     setIsUploadingDocument2(false);
@@ -658,13 +816,37 @@ const updateSiteProfile = async () => {
   if (!profileSite) return;
 
   try {
-    await fetch(`${API_BASE_URL}/settings/sites/${profileSite.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(profileSite),
-    });
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      return;
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/sites/${profileSite.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify(profileSite),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to update site profile"
+      );
+    }
 
     setProfileSite(null);
     await loadSites();
@@ -1252,48 +1434,39 @@ const formatGreekDateTime = (value) => {
 
 const saveRecurringPatrolSchedule = async () => {
   if (!patrolSite) return;
-  const currentUser = JSON.parse(
-  localStorage.getItem("aegis-current-user") || "{}"
-);
-  console.log("Saving recurring schedule for site:", patrolSite);
 
   setPatrolScheduleSaveStatus("Saving...");
 
   try {
-    console.log("Calling recurring endpoint:", `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/recurring`);
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/recurring`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
-  interval_hours: Number(patrolIntervalHours),
-  start_time: patrolStartTime,
-  reminder_minutes_before: Number(patrolReminderMinutes),
-  schedule_scope: patrolScheduleScope,
-
-  created_by_admin_id:
-    currentUser?.user?.id || currentUser?.id || null,
-
-  created_by_username:
-    currentUser?.user?.username ||
-    currentUser?.username ||
-    "unknown_admin",
-
-  created_by_role:
-    currentUser?.user?.role ||
-    currentUser?.role ||
-    "admin",
-}),
+          interval_hours: Number(patrolIntervalHours),
+          start_time: patrolStartTime,
+          reminder_minutes_before: Number(patrolReminderMinutes),
+          schedule_scope: patrolScheduleScope,
+        }),
       }
     );
 
     const data = await response.json();
 
     if (!response.ok || data.status !== "ok") {
-      throw new Error(data.message || "Failed to save patrol schedule");
+      throw new Error(
+        data.message || "Failed to save patrol schedule"
+      );
     }
 
     await loadPatrolPoints(patrolSite.id);
@@ -1311,19 +1484,33 @@ const loadActiveRecurringSchedule = async (siteId) => {
   if (!siteId) return;
 
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
-      `${API_BASE_URL}/settings/sites/${siteId}/patrol-schedules`
+      `${API_BASE_URL}/settings/sites/${siteId}/patrol-schedules`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
     );
 
     const data = await response.json();
 
     if (!response.ok || data.status !== "ok") {
-      throw new Error(data.message || "Failed to load patrol schedules");
+      throw new Error(
+        data.message || "Failed to load patrol schedules"
+      );
     }
 
     const activeRecurring = (data.schedules || []).find(
       (schedule) =>
-        schedule.schedule_type === "recurring" && schedule.active === true
+        schedule.schedule_type === "recurring" &&
+        schedule.active === true
     );
 
     setActiveRecurringSchedule(activeRecurring || null);
@@ -1341,37 +1528,27 @@ const addManualPatrolSchedule = async () => {
     return;
   }
 
-  const currentUser = JSON.parse(
-  localStorage.getItem("aegis-current-user") || "{}"
-);
-
   setManualPatrolSaveStatus("Saving...");
 
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/settings/sites/${patrolSite.id}/patrol-schedules/manual`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           scheduled_date: manualPatrolDate,
           scheduled_time: manualPatrolTime,
           reminder_minutes_before: Number(patrolReminderMinutes),
-
-          created_by_admin_id:
-            currentUser?.user?.id || currentUser?.id || null,
-
-          created_by_username:
-            currentUser?.user?.username ||
-            currentUser?.username ||
-            "unknown_admin",
-
-          created_by_role:
-            currentUser?.user?.role ||
-            currentUser?.role ||
-            "admin",
         }),
       }
     );
@@ -1379,7 +1556,9 @@ const addManualPatrolSchedule = async () => {
     const data = await response.json();
 
     if (!response.ok || data.status !== "ok") {
-      throw new Error(data.message || "Failed to add manual patrol.");
+      throw new Error(
+        data.message || "Failed to add manual patrol."
+      );
     }
 
     setManualPatrolDate("");
@@ -1404,32 +1583,40 @@ const cancelManualPatrol = async (item) => {
 
   if (!confirmed) return;
 
-  const currentUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "{}"
-  );
-
   try {
-    await fetch(
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await fetch(
       `${API_BASE_URL}/patrols/manual/${item.id}/cancel`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
-          cancelled_by_username:
-            currentUser?.user?.username ||
-            currentUser?.username ||
-            "unknown_admin",
-          cancel_reason: "Cancelled from Settings manual patrol history",
+          cancel_reason:
+            "Cancelled from Settings manual patrol history",
         }),
       }
     );
 
+    const data = await response.json();
+
+    if (!response.ok || data.status !== "ok") {
+      throw new Error(
+        data.message || "Failed to cancel manual patrol."
+      );
+    }
+
     await loadManualPatrolHistory(patrolSite.id);
   } catch (err) {
     console.error("Cancel manual patrol error", err);
-    alert("Failed to cancel manual patrol.");
+    alert(err.message || "Failed to cancel manual patrol.");
   }
 };
 
@@ -1680,54 +1867,77 @@ Manage Recipients
 </button>
 
         <button
-          type="button"
-          className="secondary-button"
-          onClick={async () => {
-            try {
-              await fetch(
-                `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
-                {
-                  method: "PUT",
-                }
-              );
+  type="button"
+  className="secondary-button"
+  onClick={async () => {
+    try {
+      await fetch(
+        `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
+        {
+          method: "PUT",
+        }
+      );
 
-              await loadSites();
-            } catch (err) {
-              console.error("Toggle site active error", err);
-            }
-          }}
-        >
-          {site.status === "active"
-            ? "Deactivate"
-            : "Activate"}
-        </button>
+      await loadSites();
+    } catch (err) {
+      console.error("Toggle site active error", err);
+    }
+  }}
+>
+  {site.status === "active"
+    ? "Deactivate"
+    : "Activate"}
+</button>
 
         <button
-          type="button"
-          className="secondary-button danger-button"
-          onClick={async () => {
-            const confirmed = window.confirm(
-              "Archive this site? It will be removed from operational views, but historical incidents and reports will remain available."
-            );
+  type="button"
+  className="secondary-button danger-button"
+  onClick={async () => {
+    const confirmed = window.confirm(
+      "Archive this site? It will be removed from operational views, but historical incidents and reports will remain available."
+    );
 
-            if (!confirmed) return;
+    if (!confirmed) return;
 
-            try {
-              await fetch(
-                `${API_BASE_URL}/settings/sites/${site.id}/archive`,
-                {
-                  method: "PUT",
-                }
-              );
+    try {
+      const storedUser = JSON.parse(
+        localStorage.getItem("aegis-current-user") || "null"
+      );
 
-              await loadSites();
-            } catch (err) {
-              console.error("Archive site error", err);
-            }
-          }}
-        >
-          Archive
-        </button>
+      const sessionToken =
+        storedUser?.session_token ||
+        storedUser?.session?.token;
+
+      if (!sessionToken) {
+        return;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/settings/sites/${site.id}/archive`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to archive site"
+        );
+      }
+
+      await loadSites();
+    } catch (err) {
+      console.error("Archive site error", err);
+    }
+  }}
+>
+  Archive
+</button>
       </div>
     )}
   </div>
@@ -3953,13 +4163,36 @@ Delete
   type="button"
   className="patrol-point-action danger"
   onClick={async () => {
-    await fetch(
-      `${API_BASE_URL}/settings/patrol-points/${point.id}/deactivate`,
-      { method: "PUT" }
-    );
+    try {
+      const sessionToken = getSessionToken();
 
-    await loadPatrolPoints(patrolSite.id);
-    await loadManualPatrolHistory(patrolSite.id);
+      if (!sessionToken) {
+        throw new Error("Authentication required");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/settings/patrol-points/${point.id}/deactivate`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to deactivate patrol point"
+        );
+      }
+
+      await loadPatrolPoints(patrolSite.id);
+      await loadManualPatrolHistory(patrolSite.id);
+    } catch (err) {
+      console.error("Deactivate patrol point error", err);
+    }
   }}
 >
   Deactivate
@@ -4267,26 +4500,43 @@ Delete
           </div>
 
           <button
-            className="primary-button"
-            onClick={async () => {
-              try {
-                await fetch(
-                  `${API_BASE_URL}/settings/patrol-points/${point.id}/generate-qr`,
-                  {
-                    method: "POST",
-                  }
-                );
+  className="primary-button"
+  onClick={async () => {
+    try {
+      const sessionToken = getSessionToken();
 
-                await loadPatrolPoints(patrolSite.id);
-              } catch (err) {
-                console.error("Generate QR error", err);
-              }
-            }}
-          >
-            {point.qr_token
-              ? "Regenerate QR"
-              : "Generate QR"}
-          </button>
+      if (!sessionToken) {
+        throw new Error("Authentication required");
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/settings/patrol-points/${point.id}/generate-qr`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Unable to generate QR token"
+        );
+      }
+
+      await loadPatrolPoints(patrolSite.id);
+    } catch (err) {
+      console.error("Generate QR error", err);
+    }
+  }}
+>
+  {point.qr_token
+    ? "Regenerate QR"
+    : "Generate QR"}
+</button>
         </div>
       ))
     )}
