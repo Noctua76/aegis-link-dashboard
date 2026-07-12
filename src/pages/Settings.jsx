@@ -339,35 +339,33 @@ const copyTemporaryPassword = async () => {
 };
 
 const createNewUser = async () => {
-  const fullName = newUser.full_name.trim();
-  const username = newUser.username.trim();
-
-  if (!fullName || !username) {
-    setNewUserError("Full name and username are required.");
-    return;
-  }
-
   try {
-    setIsCreatingUser(true);
-    setNewUserError("");
-    setPasswordCopied(false);
+    setCreatingUser(true);
+    setCreateUserError("");
+    setCreatedTemporaryPassword("");
+
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
 
     const response = await fetch(`${API_BASE_URL}/admin/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionToken}`,
       },
       body: JSON.stringify({
-        full_name: fullName,
-        username,
-        email: newUser.email.trim(),
-        secondary_email: newUser.secondary_email.trim(),
-        phone: newUser.phone.trim(),
-        mobile_phone: newUser.mobile_phone.trim(),
-        backup_phone: newUser.backup_phone.trim(),
+        full_name: newUser.full_name,
+        username: newUser.username,
+        email: newUser.email,
+        secondary_email: newUser.secondary_email,
+        phone: newUser.phone,
+        mobile_phone: newUser.mobile_phone,
+        backup_phone: newUser.backup_phone,
         role: newUser.role,
         status: newUser.status,
-        company_id: Number(newUser.company_id) || 1,
       }),
     });
 
@@ -377,18 +375,26 @@ const createNewUser = async () => {
       throw new Error(data.message || "User creation failed");
     }
 
-    setShowNewUserModal(false);
-    setTemporaryPassword(data.temporary_password);
-    setSelectedUser(data.user);
-    setEditingUser(data.user);
-    setShowTemporaryPasswordModal(true);
+    setCreatedTemporaryPassword(data.temporary_password || "");
+
+    setNewUser({
+      full_name: "",
+      username: "",
+      email: "",
+      secondary_email: "",
+      phone: "",
+      mobile_phone: "",
+      backup_phone: "",
+      role: "supervisor",
+      status: "active",
+    });
 
     await loadUsers(false);
   } catch (err) {
     console.error("Create user error", err);
-    setNewUserError(err.message || "User creation failed");
+    setCreateUserError(err.message || "User creation failed");
   } finally {
-    setIsCreatingUser(false);
+    setCreatingUser(false);
   }
 };
 
