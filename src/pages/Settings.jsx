@@ -339,10 +339,18 @@ const copyTemporaryPassword = async () => {
 };
 
 const createNewUser = async () => {
+  const fullName = newUser.full_name.trim();
+  const username = newUser.username.trim();
+
+  if (!fullName || !username) {
+    setNewUserError("Full name and username are required.");
+    return;
+  }
+
   try {
-    setCreatingUser(true);
-    setCreateUserError("");
-    setCreatedTemporaryPassword("");
+    setIsCreatingUser(true);
+    setNewUserError("");
+    setPasswordCopied(false);
 
     const sessionToken = getSessionToken();
 
@@ -357,13 +365,13 @@ const createNewUser = async () => {
         Authorization: `Bearer ${sessionToken}`,
       },
       body: JSON.stringify({
-        full_name: newUser.full_name,
-        username: newUser.username,
-        email: newUser.email,
-        secondary_email: newUser.secondary_email,
-        phone: newUser.phone,
-        mobile_phone: newUser.mobile_phone,
-        backup_phone: newUser.backup_phone,
+        full_name: fullName,
+        username,
+        email: newUser.email.trim(),
+        secondary_email: newUser.secondary_email.trim(),
+        phone: newUser.phone.trim(),
+        mobile_phone: newUser.mobile_phone.trim(),
+        backup_phone: newUser.backup_phone.trim(),
         role: newUser.role,
         status: newUser.status,
       }),
@@ -375,26 +383,18 @@ const createNewUser = async () => {
       throw new Error(data.message || "User creation failed");
     }
 
-    setCreatedTemporaryPassword(data.temporary_password || "");
-
-    setNewUser({
-      full_name: "",
-      username: "",
-      email: "",
-      secondary_email: "",
-      phone: "",
-      mobile_phone: "",
-      backup_phone: "",
-      role: "supervisor",
-      status: "active",
-    });
+    setShowNewUserModal(false);
+    setTemporaryPassword(data.temporary_password);
+    setSelectedUser(data.user);
+    setEditingUser(data.user);
+    setShowTemporaryPasswordModal(true);
 
     await loadUsers(false);
   } catch (err) {
     console.error("Create user error", err);
-    setCreateUserError(err.message || "User creation failed");
+    setNewUserError(err.message || "User creation failed");
   } finally {
-    setCreatingUser(false);
+    setIsCreatingUser(false);
   }
 };
 
