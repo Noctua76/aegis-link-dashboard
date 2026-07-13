@@ -172,11 +172,17 @@ const loadSites = async () => {
 
 const loadGuards = async () => {
   try {
-    const token = localStorage.getItem("admin_session_token");
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
 
     const response = await fetch(`${API_BASE_URL}/settings/guards`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${sessionToken}`,
       },
     });
 
