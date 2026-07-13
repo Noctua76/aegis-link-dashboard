@@ -591,38 +591,50 @@ const addPatrolPoint = async () => {
 };
 
 const addRecipient = async () => {
+  try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
 
-try{
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
 
-await fetch(
-`${API_BASE_URL}/settings/alert-recipients`,
-{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-},
-body:JSON.stringify(newRecipient),
-}
-);
+    if (!sessionToken) {
+      return;
+    }
 
-setNewRecipient({
-full_name:"",
-phone:"",
-sms_enabled:true,
-voice_enabled:true,
-});
+    const response = await fetch(
+      `${API_BASE_URL}/settings/alert-recipients`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify(newRecipient),
+      }
+    );
 
-await loadRecipients();
+    const data = await response.json();
 
-}catch(err){
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to add alert recipient"
+      );
+    }
 
-console.error(
-"Add recipient error",
-err
-);
+    setNewRecipient({
+      full_name: "",
+      phone: "",
+      sms_enabled: true,
+      voice_enabled: true,
+    });
 
-}
-
+    await loadRecipients();
+  } catch (err) {
+    console.error("Add recipient error", err);
+  }
 };
 
 const addSite = async () => {
