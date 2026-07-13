@@ -132,11 +132,21 @@ export default function EventLogs() {
   const [now, setNow] = useState(new Date());
 
   const loadData = async () => {
-    try {
-      const [sitesRes, logsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/sites`),
-        fetch(`${API_BASE_URL}/guards/shifts/history`),
-      ]);
+  try {
+    const currentUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "{}"
+    );
+
+    const sessionToken = currentUser.session_token;
+
+    const [sitesRes, logsRes] = await Promise.all([
+      fetch(`${API_BASE_URL}/sites`),
+      fetch(`${API_BASE_URL}/guards/shifts/history`, {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }),
+    ]);
 
       const sitesData = await sitesRes.json();
       const logsData = await logsRes.json();
