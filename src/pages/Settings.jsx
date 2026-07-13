@@ -911,19 +911,19 @@ const saveGuardProfile = async () => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Failed to save guard profile");
+      throw new Error(
+        data.message || "Failed to save guard profile"
+      );
     }
 
     await loadGuards();
 
     setProfileGuard(data.guard);
-
     setGuardProfileSaveStatus("Saved");
   } catch (err) {
-    console.error(err);
+    console.error("Guard profile save error:", err);
 
     setGuardProfileSaveStatus("Save failed");
-
     alert(err.message);
   }
 };
