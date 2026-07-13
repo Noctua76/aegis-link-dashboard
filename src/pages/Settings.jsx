@@ -113,24 +113,40 @@ voice_enabled:true,
 };
 
 const loadRecipients = async () => {
-try{
+  try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
 
-const response = await fetch(
-`${API_BASE_URL}/settings/alert-recipients`
-);
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
 
-const data = await response.json();
+    if (!sessionToken) {
+      return;
+    }
 
-setRecipients(data.recipients || []);
+    const response = await fetch(
+      `${API_BASE_URL}/settings/alert-recipients`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
 
-}catch(err){
+    const data = await response.json();
 
-console.error(
-"Recipients load error",
-err
-);
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to load alert recipients"
+      );
+    }
 
-}
+    setRecipients(data.recipients || []);
+  } catch (err) {
+    console.error("Recipients load error", err);
+  }
 };
 
 const loadSites = async () => {
@@ -3119,28 +3135,42 @@ recipient-row-modal
 <button
 className="danger-btn"
 
-onClick={async()=>{
+onClick={async () => {
+  try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
 
-try{
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
 
-await fetch(
-`${API_BASE_URL}/settings/alert-recipients/${item.id}`,
-{
-method:
-"DELETE"
-}
-);
+    if (!sessionToken) {
+      return;
+    }
 
-loadRecipients();
+    const response = await fetch(
+      `${API_BASE_URL}/settings/alert-recipients/${item.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
 
-}catch(err){
+    const data = await response.json();
 
-console.error(
-err
-);
+    if (!response.ok) {
+      throw new Error(
+        data.message || "Unable to delete alert recipient"
+      );
+    }
 
-}
-
+    await loadRecipients();
+  } catch (err) {
+    console.error("Delete recipient error", err);
+  }
 }}
 >
 
