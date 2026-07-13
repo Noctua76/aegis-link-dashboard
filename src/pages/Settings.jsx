@@ -875,23 +875,36 @@ const updateSiteProfile = async () => {
 const saveGuardProfile = async () => {
   if (!profileGuard) return;
 
-  setGuardProfileSaveStatus("Saving...");
+  setGuardProfileSaveStatus("Saving.");
 
   try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      throw new Error("Authentication session is missing");
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/guards/${profileGuard.id}/profile`,
       {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
-  ...profileGuard,
-  mobile_phone:
-    profileGuard.mobile_phone || profileGuard.phone || "",
-  phone:
-    profileGuard.mobile_phone || profileGuard.phone || "",
-}),
+          ...profileGuard,
+          mobile_phone:
+            profileGuard.mobile_phone || profileGuard.phone || "",
+          phone:
+            profileGuard.mobile_phone || profileGuard.phone || "",
+        }),
       }
     );
 
@@ -903,15 +916,15 @@ const saveGuardProfile = async () => {
 
     await loadGuards();
 
-setProfileGuard(data.guard);
+    setProfileGuard(data.guard);
 
-setGuardProfileSaveStatus("Saved");
+    setGuardProfileSaveStatus("Saved");
   } catch (err) {
     console.error(err);
 
-setGuardProfileSaveStatus("Save failed");
+    setGuardProfileSaveStatus("Save failed");
 
-alert(err.message);
+    alert(err.message);
   }
 };
 
