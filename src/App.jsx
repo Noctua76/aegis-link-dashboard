@@ -25,6 +25,17 @@ import {
 function App() {
   const [onlineAdmins, setOnlineAdmins] = useState([]);
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+  const getSessionToken = () => {
+  const storedUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "null"
+  );
+
+  return (
+    storedUser?.session_token ||
+    storedUser?.session?.token ||
+    null
+  );
+};
 
 const [currentUser, setCurrentUser] = useState(() => {
   const savedUser = localStorage.getItem("aegis-current-user");
@@ -401,8 +412,17 @@ const response = await fetch(
   localStorage.setItem("aegis-active-menu", activeMenu);
     const fetchActiveGuards = async () => {
   try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) return;
+
     const response = await fetch(
-      "https://noctua-panic-backend-production.up.railway.app/guards/active"
+      `${API_BASE_URL}/guards/active`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
     );
 
     const data = await response.json();
@@ -454,9 +474,18 @@ const [resolvedFilters, setResolvedFilters] = useState({
 useEffect(() => {
   async function loadDashboardMetrics() {
     try {
-      const res = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/dashboard/metrics"
-      );
+      const sessionToken = getSessionToken();
+
+if (!sessionToken) return;
+
+const res = await fetch(
+  `${API_BASE_URL}/dashboard/metrics`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
       const data = await res.json();
 
@@ -478,9 +507,18 @@ useEffect(() => {
 useEffect(() => {
   async function loadIncidentTimeline() {
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/dashboard/incident-timeline`
-      );
+      const sessionToken = getSessionToken();
+
+if (!sessionToken) return;
+
+const res = await fetch(
+  `${API_BASE_URL}/dashboard/incident-timeline`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
       const data = await res.json();
 
@@ -510,18 +548,27 @@ useEffect(() => {
 
 useEffect(() => {
   async function loadSites() {
-    try {
-      const res = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/sites"
-      );
+  try {
+    const sessionToken = getSessionToken();
 
-      const data = await res.json();
+    if (!sessionToken) return;
 
-      setLiveSites(data.sites || []);
-    } catch (err) {
-      console.error("Sites load error:", err);
-    }
+    const res = await fetch(
+      `${API_BASE_URL}/sites`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    setLiveSites(data.sites || []);
+  } catch (err) {
+    console.error("Sites load error:", err);
   }
+}
 
   loadSites();
 
@@ -533,7 +580,18 @@ useEffect(() => {
 useEffect(() => {
   const loadResolvedIncidents = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/incidents/resolved`);
+      const sessionToken = getSessionToken();
+
+if (!sessionToken) return;
+
+const response = await fetch(
+  `${API_BASE_URL}/incidents/resolved`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
       const data = await response.json();
 
       if (data.status === "ok") {
@@ -554,9 +612,18 @@ useEffect(() => {
 useEffect(() => {
   const loadSiteMonitoring = async () => {
     try {
-      const response = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/incidents/site-monitoring"
-      );
+      const sessionToken = getSessionToken();
+
+if (!sessionToken) return;
+
+const response = await fetch(
+  `${API_BASE_URL}/incidents/site-monitoring`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
       const data = await response.json();
 
