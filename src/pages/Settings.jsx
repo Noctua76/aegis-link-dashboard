@@ -2087,24 +2087,49 @@ Manage Recipients
   </strong>
 
   <button
-    type="button"
-    className="secondary-button"
-    onClick={async (e) => {
-  e.stopPropagation();
-      try {
-        await fetch(
-          `${API_BASE_URL}/settings/guards/${guard.id}/toggle-active`,
-          {
-            method: "PUT",
-          }
-        );
+  type="button"
+  className="secondary-button"
+  onClick={async (e) => {
+    e.stopPropagation();
 
-        await loadGuards();
-      } catch (err) {
-        console.error("Toggle guard active error", err);
+    try {
+      const storedUser = JSON.parse(
+        localStorage.getItem("aegis-current-user") || "null"
+      );
+
+      const sessionToken =
+        storedUser?.session_token ||
+        storedUser?.session?.token;
+
+      if (!sessionToken) {
+        throw new Error("Authentication session is missing");
       }
-    }}
-  >
+
+      const response = await fetch(
+        `${API_BASE_URL}/settings/guards/${guard.id}/toggle-active`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update guard status"
+        );
+      }
+
+      await loadGuards();
+    } catch (err) {
+      console.error("Toggle guard active error", err);
+      alert(err.message);
+    }
+  }}
+>
     {guard.active ? "Deactivate" : "Activate"}
   </button>
 </div>
