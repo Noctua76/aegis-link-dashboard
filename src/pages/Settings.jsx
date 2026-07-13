@@ -3132,51 +3132,50 @@ recipient-row-modal
 
 </div>
 
-<button
-className="danger-btn"
+{item.source !== "env" && Number.isInteger(Number(item.id)) && (
+  <button
+    className="danger-btn"
+    onClick={async () => {
+      try {
+        const storedUser = JSON.parse(
+          localStorage.getItem("aegis-current-user") || "null"
+        );
 
-onClick={async () => {
-  try {
-    const storedUser = JSON.parse(
-      localStorage.getItem("aegis-current-user") || "null"
-    );
+        const sessionToken =
+          storedUser?.session_token ||
+          storedUser?.session?.token;
 
-    const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+        if (!sessionToken) {
+          return;
+        }
 
-    if (!sessionToken) {
-      return;
-    }
+        const response = await fetch(
+          `${API_BASE_URL}/settings/alert-recipients/${item.id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          }
+        );
 
-    const response = await fetch(
-      `${API_BASE_URL}/settings/alert-recipients/${item.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-        },
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Unable to delete alert recipient"
+          );
+        }
+
+        await loadRecipients();
+      } catch (err) {
+        console.error("Delete recipient error", err);
       }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.message || "Unable to delete alert recipient"
-      );
-    }
-
-    await loadRecipients();
-  } catch (err) {
-    console.error("Delete recipient error", err);
-  }
-}}
->
-
-Delete
-
-</button>
+    }}
+  >
+    Delete
+  </button>
+)}
 
 </div>
 
