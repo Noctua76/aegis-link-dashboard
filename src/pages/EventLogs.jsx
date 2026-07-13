@@ -139,15 +139,18 @@ export default function EventLogs() {
 
     const sessionToken = currentUser.session_token;
 
-    const [sitesRes, logsRes] = await Promise.all([
-      fetch(`${API_BASE_URL}/sites`),
-      fetch(`${API_BASE_URL}/guards/shifts/history`, {
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-        },
-      }),
-    ]);
-
+const [sitesRes, logsRes] = await Promise.all([
+  fetch(`${API_BASE_URL}/sites`, {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }),
+  fetch(`${API_BASE_URL}/guards/shifts/history`, {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }),
+]);
       const sitesData = await sitesRes.json();
       const logsData = await logsRes.json();
 
