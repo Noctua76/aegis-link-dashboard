@@ -3,6 +3,18 @@ import "./Sites.css";
 
 const API_BASE_URL =
   "https://noctua-panic-backend-production.up.railway.app";
+  
+  function getSessionToken() {
+  const storedUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "null"
+  );
+
+  return (
+    storedUser?.session_token ||
+    storedUser?.session?.token ||
+    null
+  );
+}
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
@@ -75,34 +87,65 @@ const [shiftHistory, setShiftHistory] = useState([]);
 const [liveLocations, setLiveLocations] = useState([]);
 
   const loadData = async () => {
-    try {
-      const [sitesRes, guardsRes, activeRes, shiftsRes, incidentsRes, locationsRes] =
-  await Promise.all([
-    fetch(`${API_BASE_URL}/sites`),
-    fetch(`${API_BASE_URL}/guards`),
-    fetch(`${API_BASE_URL}/guards/active`),
-    fetch(`${API_BASE_URL}/guards/shifts/history`),
-    fetch(`${API_BASE_URL}/incidents/site-monitoring`),
-    fetch(`${API_BASE_URL}/guards/live-locations`),
-  ]);
+  try {
+    const sessionToken = getSessionToken();
 
-      const sitesData = await sitesRes.json();
-const guardsData = await guardsRes.json();
-const activeData = await activeRes.json();
-const shiftsData = await shiftsRes.json();
-const incidentsData = await incidentsRes.json();
-const locationsData = await locationsRes.json();
+    if (!sessionToken) return;
 
-      setSites(sitesData.sites || []);
-setGuards(guardsData.guards || []);
-setActiveGuards(activeData.guards || []);
-setShiftHistory(shiftsData.shifts || []);
-setIncidents(incidentsData.cards || []);
-setLiveLocations(locationsData.locations || []);
-    } catch (err) {
-      console.error("Sites load error:", err);
-    }
-  };
+    const authHeaders = {
+      Authorization: `Bearer ${sessionToken}`,
+    };
+
+    const [
+      sitesRes,
+      guardsRes,
+      activeRes,
+      shiftsRes,
+      incidentsRes,
+      locationsRes,
+    ] = await Promise.all([
+      fetch(`${API_BASE_URL}/sites`, {
+        headers: authHeaders,
+      }),
+
+      fetch(`${API_BASE_URL}/guards`, {
+        headers: authHeaders,
+      }),
+
+      fetch(`${API_BASE_URL}/guards/active`, {
+        headers: authHeaders,
+      }),
+
+      fetch(`${API_BASE_URL}/guards/shifts/history`, {
+        headers: authHeaders,
+      }),
+
+      fetch(`${API_BASE_URL}/incidents/site-monitoring`, {
+        headers: authHeaders,
+      }),
+
+      fetch(`${API_BASE_URL}/guards/live-locations`, {
+        headers: authHeaders,
+      }),
+    ]);
+
+    const sitesData = await sitesRes.json();
+    const guardsData = await guardsRes.json();
+    const activeData = await activeRes.json();
+    const shiftsData = await shiftsRes.json();
+    const incidentsData = await incidentsRes.json();
+    const locationsData = await locationsRes.json();
+
+    setSites(sitesData.sites || []);
+    setGuards(guardsData.guards || []);
+    setActiveGuards(activeData.guards || []);
+    setShiftHistory(shiftsData.shifts || []);
+    setIncidents(incidentsData.cards || []);
+    setLiveLocations(locationsData.locations || []);
+  } catch (err) {
+    console.error("Sites load error:", err);
+  }
+};
 
   useEffect(() => {
     loadData();
