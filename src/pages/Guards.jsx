@@ -2,6 +2,17 @@ import { useEffect, useState } from "react";
 import "./Guards.css";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+function getSessionToken() {
+  const storedUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "null"
+  );
+
+  return (
+    storedUser?.session_token ||
+    storedUser?.session?.token ||
+    null
+  );
+}
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-").replaceAll("_", "-");
@@ -24,28 +35,45 @@ export default function Guards() {
   const [systemStatus, setSystemStatus] = useState(null);
 
   const loadData = async () => {
-    try {
-      const [guardsRes, sitesRes, activeRes, statusRes] =
-  await Promise.all([
-    fetch(`${API_BASE_URL}/guards`),
-    fetch(`${API_BASE_URL}/sites`),
-    fetch(`${API_BASE_URL}/guards/active`),
-    fetch(`${API_BASE_URL}/system/status`)
-  ]);
+  try {
+    const sessionToken = getSessionToken();
 
-      const statusData = await statusRes.json();
-      const guardsData = await guardsRes.json();
-      const sitesData = await sitesRes.json();
-      const activeData = await activeRes.json();
+    if (!sessionToken) return;
 
-      setGuards(guardsData.guards || []);
-      setSites(sitesData.sites || []);
-      setActiveGuards(activeData.guards || []);
-      setSystemStatus(statusData);
-    } catch (err) {
-      console.error("Failed loading guards data:", err);
-    }
-  };
+    const authHeaders = {
+      Authorization: `Bearer ${sessionToken}`,
+    };
+
+    const [guardsRes, sitesRes, activeRes, statusRes] =
+      await Promise.all([
+        fetch(`${API_BASE_URL}/guards`, {
+          headers: authHeaders,
+        }),
+
+        fetch(`${API_BASE_URL}/sites`, {
+          headers: authHeaders,
+        }),
+
+        fetch(`${API_BASE_URL}/guards/active`, {
+          headers: authHeaders,
+        }),
+
+        fetch(`${API_BASE_URL}/system/status`),
+      ]);
+
+    const statusData = await statusRes.json();
+    const guardsData = await guardsRes.json();
+    const sitesData = await sitesRes.json();
+    const activeData = await activeRes.json();
+
+    setGuards(guardsData.guards || []);
+    setSites(sitesData.sites || []);
+    setActiveGuards(activeData.guards || []);
+    setSystemStatus(statusData);
+  } catch (err) {
+    console.error("Failed loading guards data:", err);
+  }
+};
 
   useEffect(() => {
     loadData();
@@ -251,17 +279,21 @@ export default function Guards() {
     <>
       <p>
         Last Sync:{" "}
-        {new Date(systemStatus.timestamp).toLocaleString("el-GR")}
+        {systemStatus.checked_at
+  ? new Date(systemStatus.checked_at).toLocaleString("el-GR", {
+      timeZone: "Europe/Athens",
+    })
+  : "—"}
       </p>
 
       <div className="backend-grid">
 
         <code>
-          Backend API · {systemStatus.backend}
+          Backend API · {systemStatus?.services?.backend_api?.status || "unknown"}
         </code>
 
         <code>
-          Database · {systemStatus.database}
+          Database · {systemStatus?.services?.database?.status || "unknown"}
         </code>
 
         <code>
