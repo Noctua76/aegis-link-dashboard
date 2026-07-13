@@ -1062,8 +1062,23 @@ loadUsers(false);
   setIsTestingAlert(true);
 
   try {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    if (!sessionToken) {
+      throw new Error("Authentication required");
+    }
+
     const response = await fetch(`${API_BASE_URL}/alerts/test`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+      },
     });
 
     const data = await response.json();
