@@ -917,18 +917,33 @@ alert(err.message);
 
 const addGuard = async () => {
   try {
-    await fetch(`${API_BASE_URL}/settings/guards`, {
+    const storedUser = JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+
+    const sessionToken =
+      storedUser?.session_token ||
+      storedUser?.session?.token;
+
+    const response = await fetch(`${API_BASE_URL}/settings/guards`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionToken}`,
       },
       body: JSON.stringify({
-  ...newGuard,
-  site_id: newGuard.site_id === "trial" ? null : newGuard.site_id,
-  assignment_status:
-    newGuard.site_id === "trial" ? "trial" : "assigned",
-}),
+        ...newGuard,
+        site_id: newGuard.site_id === "trial" ? null : newGuard.site_id,
+        assignment_status:
+          newGuard.site_id === "trial" ? "trial" : "assigned",
+      }),
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to add guard");
+    }
 
     setNewGuard({
       full_name: "",
