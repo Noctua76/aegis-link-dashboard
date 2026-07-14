@@ -931,6 +931,45 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
   }
 };
 
+const handleDownloadIncidentReport = async (incident) => {
+  try {
+    const sessionToken = getSessionToken();
+
+    if (!sessionToken) {
+      throw new Error("Authentication session is missing");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/incidents/${incident.id}/report/pdf`,
+      {
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("PDF download failed");
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `${incident.incident_ref || "incident-report"}.pdf`;
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    console.error("Incident PDF download failed:", err);
+    alert("Failed to download PDF");
+  }
+};
+
 const handlePreviewIncidentReport = async (incident) => {
   try {
     const sessionToken = getSessionToken();
@@ -2096,12 +2135,7 @@ const renderIncidentLocation = (incident) => {
 
   <button
   type="button"
-  onClick={() =>
-    window.open(
-      `${API_BASE_URL}/incidents/${incident.id}/report/pdf`,
-      "_blank"
-    )
-  }
+  onClick={() => handleDownloadIncidentReport(incident)}
 >
   ⬇ Download PDF
 </button>
