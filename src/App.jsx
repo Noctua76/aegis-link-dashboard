@@ -1300,39 +1300,40 @@ const handleResolveIncident = async (incident) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${currentUser?.session_token}`,
       },
       body: JSON.stringify({
-  supervisor_notified: true,
-  supervisor_name:
-    form.supervisor_name ||
-    currentUser?.user?.username ||
-    currentUser?.username ||
-    "",
+        supervisor_notified: true,
+        supervisor_name:
+          form.supervisor_name ||
+          currentUser?.user?.username ||
+          currentUser?.username ||
+          "",
 
-  supervisor_notes: form.supervisor_notes || "",
+        supervisor_notes: form.supervisor_notes || "",
 
-  guard_contacted: true,
-  guard_contacted_name:
-    form.guard_contacted_name ||
-    incident.guard ||
-    "",
+        guard_contacted: true,
+        guard_contacted_name:
+          form.guard_contacted_name ||
+          incident.guard ||
+          "",
 
-  guard_notes: form.guard_notes || "",
+        guard_notes: form.guard_notes || "",
 
-  residence_contacted: true,
-  residence_contacted_name:
-    form.residence_contacted_name ||
-    incident.site ||
-    "",
+        residence_contacted: true,
+        residence_contacted_name:
+          form.residence_contacted_name ||
+          incident.site ||
+          "",
 
-  residence_notes: form.residence_notes || "",
+        residence_notes: form.residence_notes || "",
 
-  admin_notes: form.admin_notes || "",
-  approved_by:
-    currentUser?.user?.username ||
-    currentUser?.username ||
-    "Unknown admin",
-}),
+        admin_notes: form.admin_notes || "",
+        approved_by:
+          currentUser?.user?.username ||
+          currentUser?.username ||
+          "Unknown admin",
+      }),
     });
 
     setDashboardIncidents((prev) =>
