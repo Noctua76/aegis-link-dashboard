@@ -105,7 +105,6 @@ const handleLogin = async (event) => {
       method: "POST",
       headers: {
   "Content-Type": "application/json",
-  Authorization: `Bearer ${sessionToken}`,
 },
       body: JSON.stringify(loginForm),
     });
