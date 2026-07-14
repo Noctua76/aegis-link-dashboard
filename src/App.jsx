@@ -933,9 +933,20 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
 
 const handlePreviewIncidentReport = async (incident) => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/incidents/${incident.id}/report`
-    );
+    const sessionToken = getSessionToken();
+
+if (!sessionToken) {
+  throw new Error("Authentication session is missing");
+}
+
+const response = await fetch(
+  `${API_BASE_URL}/incidents/${incident.id}/report`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
     const data = await response.json();
 
