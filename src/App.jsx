@@ -908,8 +908,13 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/incidents/${incidentDbId}/guard-responses`
-    );
+  `${API_BASE_URL}/incidents/${incidentDbId}/guard-responses`,
+  {
+    headers: {
+      Authorization: `Bearer ${currentUser?.session_token}`,
+    },
+  }
+);
 
     const data = await response.json();
 
@@ -1947,8 +1952,13 @@ const renderIncidentLocation = (incident) => {
   onFocus={async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/incidents/${incident.incidentDbId}/guard-responses`
-      );
+  `${API_BASE_URL}/incidents/${incident.incidentDbId}/guard-responses`,
+  {
+    headers: {
+      Authorization: `Bearer ${currentUser?.session_token}`,
+    },
+  }
+);
 
       const data = await response.json();
 
