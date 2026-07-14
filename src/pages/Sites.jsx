@@ -156,26 +156,49 @@ const [liveLocations, setLiveLocations] = useState([]);
   }, []);
 
   const siteOverview = sites.map((site) => {
-    const assignedGuards = guards.filter(
-      (guard) => guard.site_id === site.id
-    );
+  const assignedGuards = guards.filter(
+    (guard) => guard.site_id === site.id
+  );
 
-    const currentSession = activeGuards.find(
-      (session) =>
-        session.site_id === site.id &&
-        session.is_currently_online
-    );
+  const currentSession = activeGuards.find(
+    (session) =>
+      session.site_id === site.id &&
+      session.is_currently_online
+  );
 
-    const liveLocation = liveLocations.find(
-  (location) => location.site_id === site.id
-);
+  const currentShift = shiftHistory.find(
+    (shift) =>
+      shift.site_id === site.id &&
+      ["active", "no_guard"].includes(shift.operational_status)
+  );
 
-    return {
+  const hasValidShiftCoverage =
+    currentShift?.operational_status === "active" &&
+    currentShift?.guard_session_id &&
+    currentShift?.is_currently_online;
+
+  const coverageStatus = hasValidShiftCoverage
+    ? "Covered"
+    : currentShift?.operational_status === "no_guard"
+      ? "No Guard"
+      : "Uncovered";
+
+  const currentGuard = hasValidShiftCoverage
+    ? currentShift.full_name
+    : "No guard";
+
+  const liveLocation = liveLocations.find(
+    (location) => location.site_id === site.id
+  );
+
+  return {
       ...site,
       assignedGuards,
       currentSession: currentSession || null,
-      liveLocation: liveLocation || null,
-      coverageStatus: site.coverage_status || "Uncovered",
+currentShift: currentShift || null,
+liveLocation: liveLocation || null,
+coverageStatus,
+currentGuard,
       activeIncidents: incidents.filter(
   (incident) =>
     incident.siteId === site.id &&
@@ -269,7 +292,7 @@ recentSessions: shiftHistory
 
               <div>
                 <span>Current Guard</span>
-                <strong>{site.active_guard || "No guard"}</strong>
+                <strong>{site.currentGuard}</strong>
               </div>
 
               <div>
@@ -367,12 +390,16 @@ recentSessions: shiftHistory
 
               <p>
                 <span>Current Guard</span>
-                {selectedSite.active_guard || "No active guard"}
+                {selectedSite.currentGuard}
               </p>
 
               <p>
                 <span>Check In Time</span>
-                {selectedSite.currentSession?.check_in_time || "—"}
+                {selectedSite.currentShift?.check_in_time
+  ? new Date(selectedSite.currentShift.check_in_time).toLocaleString("el-GR", {
+      timeZone: "Europe/Athens",
+    })
+  : "—"}
               </p>
 
               <p>
