@@ -104,8 +104,9 @@ const handleLogin = async (event) => {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-      },
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${sessionToken}`,
+},
       body: JSON.stringify(loginForm),
     });
 
