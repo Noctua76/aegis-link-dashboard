@@ -2,6 +2,15 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+const getAuthHeaders = () => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "{}"
+  );
+
+  return {
+    Authorization: `Bearer ${currentUser.session_token}`,
+  };
+};
 const formatCompletedStatus = (status) => {
   if (status === "missed_completed_late") return "Missed Completed Late";
   if (status === "completed_late") return "Completed Late";
@@ -47,7 +56,9 @@ const [qrImageUrl, setQrImageUrl] = useState("");
   useEffect(() => {
   const loadPatrolSites = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/patrols/sites`);
+      const response = await fetch(`${API_BASE_URL}/patrols/sites`, {
+  headers: getAuthHeaders(),
+});
       const data = await response.json();
 
       if (data.status === "ok") {
@@ -64,7 +75,9 @@ const [qrImageUrl, setQrImageUrl] = useState("");
     setHistoryLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/patrols/completed-history`);
+      const response = await fetch(`${API_BASE_URL}/patrols/completed-history`, {
+  headers: getAuthHeaders(),
+});
       const data = await response.json();
 
       if (data.status === "ok") {
@@ -92,7 +105,12 @@ const [qrImageUrl, setQrImageUrl] = useState("");
   setDetailsLoading(true);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/patrols/sites/${siteId}/details`);
+    const response = await fetch(
+  `${API_BASE_URL}/patrols/sites/${siteId}/details`,
+  {
+    headers: getAuthHeaders(),
+  }
+);
     const data = await response.json();
 
     if (data.status === "ok") {
