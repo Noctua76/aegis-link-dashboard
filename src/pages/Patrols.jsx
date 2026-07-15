@@ -127,7 +127,13 @@ const openQrSiteDetails = async (siteId) => {
   setDetailsLoading(true);
 
   try {
-    const response = await fetch(`${API_BASE_URL}/patrols/sites/${siteId}/details`);
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/sites/${siteId}/details`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
     const data = await response.json();
 
     if (data.status === "ok") {
