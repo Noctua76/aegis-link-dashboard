@@ -356,8 +356,11 @@ const loadMissedHistory = async ({
 });
 
     const response = await fetch(
-      `${API_BASE_URL}/patrols/missed-history?${params.toString()}`
-    );
+  `${API_BASE_URL}/patrols/missed-history?${params.toString()}`,
+  {
+    headers: getAuthHeaders(),
+  }
+);
 
     const data = await response.json();
 
