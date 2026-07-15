@@ -410,24 +410,95 @@ const loadCompletedHistory = async ({
   }
 };
 
-const openMissedReportPreview = () => {
+const openMissedReportPreview = async () => {
   if (!selectedMissedHistorySite) return;
 
-  const params = new URLSearchParams();
+  try {
+    const params = new URLSearchParams();
 
-  params.append("site_id", selectedMissedHistorySite.site_id);
+    params.append("site_id", selectedMissedHistorySite.site_id);
 
-  if (missedHistoryFrom) params.append("from", missedHistoryFrom);
-  if (missedHistoryTo) params.append("to", missedHistoryTo);
-  if (missedHistoryPointId) params.append("point_id", missedHistoryPointId);
-  if (missedHistoryType) params.append("type", missedHistoryType);
+    if (missedHistoryFrom) params.append("from", missedHistoryFrom);
+    if (missedHistoryTo) params.append("to", missedHistoryTo);
+    if (missedHistoryPointId) {
+      params.append("point_id", missedHistoryPointId);
+    }
+    if (missedHistoryType) {
+      params.append("type", missedHistoryType);
+    }
 
-  params.append("preview", "true");
+    params.append("preview", "true");
 
-  const reportUrl = `${API_BASE_URL}/patrols/missed-history/report/pdf?${params.toString()}`;
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/missed-history/report/pdf?${params.toString()}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
 
-  setMissedReportPreviewUrl(reportUrl);
-  setMissedReportPreviewOpen(true);
+    if (!response.ok) {
+      throw new Error("Failed to load missed patrol report");
+    }
+
+    const pdfBlob = await response.blob();
+    const previewUrl = URL.createObjectURL(pdfBlob);
+
+    if (missedReportPreviewUrl) {
+      URL.revokeObjectURL(missedReportPreviewUrl);
+    }
+
+    setMissedReportPreviewUrl(previewUrl);
+    setMissedReportPreviewOpen(true);
+  } catch (err) {
+    console.error("Failed loading missed patrol report:", err);
+    alert("Failed to load missed patrol report");
+  }
+};
+
+const downloadMissedReport = async () => {
+  if (!selectedMissedHistorySite) return;
+
+  try {
+    const params = new URLSearchParams();
+
+    params.append("site_id", selectedMissedHistorySite.site_id);
+
+    if (missedHistoryFrom) params.append("from", missedHistoryFrom);
+    if (missedHistoryTo) params.append("to", missedHistoryTo);
+    if (missedHistoryPointId) {
+      params.append("point_id", missedHistoryPointId);
+    }
+    if (missedHistoryType) {
+      params.append("type", missedHistoryType);
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/missed-history/report/pdf?${params.toString()}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to download missed patrol report");
+    }
+
+    const pdfBlob = await response.blob();
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = "missed-patrol-history-report.pdf";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    console.error("Failed downloading missed patrol report:", err);
+    alert("Failed to download missed patrol report");
+  }
 };
 
 const openCompletedReportPreview = () => {
@@ -2008,9 +2079,13 @@ cursor: "pointer",
         <button
           type="button"
           onClick={() => {
-            setMissedReportPreviewOpen(false);
-            setMissedReportPreviewUrl("");
-          }}
+  if (missedReportPreviewUrl) {
+    URL.revokeObjectURL(missedReportPreviewUrl);
+  }
+
+  setMissedReportPreviewOpen(false);
+  setMissedReportPreviewUrl("");
+}}
         >
           ✕
         </button>
@@ -2038,12 +2113,7 @@ cursor: "pointer",
 >
   <button
     type="button"
-    onClick={() =>
-      window.open(
-        missedReportPreviewUrl.replace("&preview=true", ""),
-        "_blank"
-      )
-    }
+    onClick={downloadMissedReport}
   >
     Download / Print Report
   </button>
