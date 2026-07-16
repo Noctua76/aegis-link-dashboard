@@ -395,8 +395,11 @@ const loadCompletedHistory = async ({
     if (status) params.append("status", status);
 
     const response = await fetch(
-      `${API_BASE_URL}/patrols/completed-history?${params.toString()}`
-    );
+  `${API_BASE_URL}/patrols/completed-history?${params.toString()}`,
+  {
+    headers: getAuthHeaders(),
+  }
+);
 
     const data = await response.json();
 
@@ -501,25 +504,147 @@ const downloadMissedReport = async () => {
   }
 };
 
-const openCompletedReportPreview = () => {
+const openCompletedReportPreview = async () => {
   if (!selectedCompletedHistorySite) return;
 
-  const params = new URLSearchParams();
+  try {
+    const params = new URLSearchParams();
 
-  params.append("site_id", selectedCompletedHistorySite.site_id);
+    params.append(
+      "site_id",
+      selectedCompletedHistorySite.site_id
+    );
 
-  if (completedHistoryFrom) params.append("from", completedHistoryFrom);
-  if (completedHistoryTo) params.append("to", completedHistoryTo);
-  if (completedHistoryPointId) params.append("point_id", completedHistoryPointId);
-  if (completedHistoryType) params.append("type", completedHistoryType);
-  if (completedHistoryStatus) params.append("status", completedHistoryStatus);
+    if (completedHistoryFrom) {
+      params.append("from", completedHistoryFrom);
+    }
 
-  params.append("preview", "true");
+    if (completedHistoryTo) {
+      params.append("to", completedHistoryTo);
+    }
 
-  const reportUrl = `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`;
+    if (completedHistoryPointId) {
+      params.append(
+        "point_id",
+        completedHistoryPointId
+      );
+    }
 
-  setCompletedReportPreviewUrl(reportUrl);
-  setCompletedReportPreviewOpen(true);
+    if (completedHistoryType) {
+      params.append("type", completedHistoryType);
+    }
+
+    if (completedHistoryStatus) {
+      params.append("status", completedHistoryStatus);
+    }
+
+    params.append("preview", "true");
+
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Failed to load completed patrol report"
+      );
+    }
+
+    const pdfBlob = await response.blob();
+    const previewUrl = URL.createObjectURL(pdfBlob);
+
+    if (completedReportPreviewUrl) {
+      URL.revokeObjectURL(
+        completedReportPreviewUrl
+      );
+    }
+
+    setCompletedReportPreviewUrl(previewUrl);
+    setCompletedReportPreviewOpen(true);
+  } catch (err) {
+    console.error(
+      "Failed loading completed patrol report:",
+      err
+    );
+
+    alert("Failed to load completed patrol report");
+  }
+};
+
+const downloadCompletedReport = async () => {
+  if (!selectedCompletedHistorySite) return;
+
+  try {
+    const params = new URLSearchParams();
+
+    params.append(
+      "site_id",
+      selectedCompletedHistorySite.site_id
+    );
+
+    if (completedHistoryFrom) {
+      params.append("from", completedHistoryFrom);
+    }
+
+    if (completedHistoryTo) {
+      params.append("to", completedHistoryTo);
+    }
+
+    if (completedHistoryPointId) {
+      params.append(
+        "point_id",
+        completedHistoryPointId
+      );
+    }
+
+    if (completedHistoryType) {
+      params.append("type", completedHistoryType);
+    }
+
+    if (completedHistoryStatus) {
+      params.append("status", completedHistoryStatus);
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/completed-history/report/pdf?${params.toString()}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        "Failed to download completed patrol report"
+      );
+    }
+
+    const pdfBlob = await response.blob();
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+
+    const link = document.createElement("a");
+
+    link.href = downloadUrl;
+    link.download =
+      "completed-patrol-history-report.pdf";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(downloadUrl);
+  } catch (err) {
+    console.error(
+      "Failed downloading completed patrol report:",
+      err
+    );
+
+    alert(
+      "Failed to download completed patrol report"
+    );
+  }
 };
 
   return (
@@ -2135,7 +2260,17 @@ cursor: "pointer",
       }}
     >
       <button
-        onClick={() => setCompletedReportPreviewOpen(false)}
+        onClick={() => {
+  if (completedReportPreviewUrl) {
+    URL.revokeObjectURL(
+      completedReportPreviewUrl
+    );
+  }
+
+  setCompletedReportPreviewOpen(false);
+  setCompletedReportPreviewUrl("");
+}}
+
         style={{
           position: "absolute",
           top: "16px",
@@ -2170,6 +2305,21 @@ cursor: "pointer",
           background: "#fff",
         }}
       />
+      <div
+  style={{
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "12px",
+    marginTop: "16px",
+  }}
+>
+  <button
+    type="button"
+    onClick={downloadCompletedReport}
+  >
+    Download / Print Report
+  </button>
+</div>
     </div>
   </div>
 )}
