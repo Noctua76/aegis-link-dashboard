@@ -67,9 +67,20 @@ const [isChangingPassword, setIsChangingPassword] = useState(false);
 useEffect(() => {
   const loadRecentAlerts = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/event-logs`
-      );
+      const currentUser = JSON.parse(
+  localStorage.getItem("aegis-current-user") || "{}"
+);
+
+const sessionToken = currentUser.session_token;
+
+const response = await fetch(
+  `${API_BASE_URL}/event-logs`,
+  {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  }
+);
 
       const data = await response.json();
 
