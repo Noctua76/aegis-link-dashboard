@@ -4,6 +4,16 @@ import "./Analytics.css";
 function Analytics() {
   const API_BASE_URL =
     "https://noctua-panic-backend-production.up.railway.app";
+  
+  const getAuthHeaders = () => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "{}"
+  );
+
+  return {
+    Authorization: `Bearer ${currentUser.session_token}`,
+  };
+};
 
   const [analytics, setAnalytics] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);
@@ -11,8 +21,11 @@ function Analytics() {
   const loadAnalytics = async () => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/analytics/summary`
-      );
+  `${API_BASE_URL}/analytics/summary`,
+  {
+    headers: getAuthHeaders(),
+  }
+);
 
       const data = await response.json();
 
@@ -61,8 +74,10 @@ function Analytics() {
 
       <section className="analytics-overview">
         <div className="analytics-card">
-          <span>Site</span>
-          <strong>{analytics?.site?.name || "No Data"}</strong>
+          <span>Company</span>
+          <strong>
+  {analytics?.company?.total_sites ?? "No Data"} Sites
+</strong>
         </div>
 
         <div className={`analytics-card ${riskLevel.toLowerCase().replace(" ", "-")}`}>
@@ -86,7 +101,7 @@ function Analytics() {
 
         <div className="analytics-table">
           <div className="analytics-row analytics-row-head">
-            <span>Site</span>
+            <span>Company</span>
             <span>Alerts</span>
             <span>Guards</span>
             <span>Shifts</span>
@@ -97,7 +112,9 @@ function Analytics() {
           </div>
 
           <div className="analytics-row">
-            <span>{analytics?.site?.name || "No Data"}</span>
+            <span>
+  {analytics?.company?.total_sites ?? "No Data"} Sites
+</span>
 
             <span>{analytics?.alerts?.count ?? "No Data"}</span>
 
