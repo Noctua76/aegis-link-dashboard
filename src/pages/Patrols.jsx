@@ -1846,7 +1846,13 @@ shift_label: patrol.shift_label,
 
 {completedHistoryModalOpen && selectedCompletedHistorySite && (
   <div className="report-modal-overlay">
-    <div className="report-modal">
+    <div
+  className="report-modal"
+  style={{
+    maxHeight: "90vh",
+    overflowY: "auto",
+  }}
+>
       <div className="report-modal-header">
         <h2>
           Completed Patrol History | SITE-
