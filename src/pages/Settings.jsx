@@ -1960,11 +1960,12 @@ Manage Recipients
   onClick={async () => {
     try {
       await fetch(
-        `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
-        {
-          method: "PUT",
-        }
-      );
+  `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
+  {
+    method: "PUT",
+    headers: getAuthHeaders(),
+  }
+);
 
       await loadSites();
     } catch (err) {
