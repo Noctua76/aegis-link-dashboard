@@ -3,6 +3,15 @@ import "./Settings.css";
 
 function Settings() {
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+  const getAuthHeaders = () => {
+  const currentUser = JSON.parse(
+    localStorage.getItem("aegis-current-user") || "{}"
+  );
+
+  return {
+    Authorization: `Bearer ${currentUser.session_token}`,
+  };
+};
   const getSessionToken = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
