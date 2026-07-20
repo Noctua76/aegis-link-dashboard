@@ -3300,6 +3300,61 @@ recipient-row-modal
         </button>
       </div>
 
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
+  <h2 style={{ marginBottom: "10px" }}>
+    SITE-{String(profileSite.id).padStart(3, "0")} | {profileSite.name}
+  </h2>
+
+  <div
+    style={{
+      display: "inline-block",
+      padding: "6px 14px",
+      borderRadius: "999px",
+      fontWeight: "600",
+      marginBottom: "14px",
+      background:
+        profileSite.status === "active"
+          ? "rgba(34, 197, 94, 0.15)"
+          : "rgba(239, 68, 68, 0.15)",
+      color:
+        profileSite.status === "active"
+          ? "#22c55e"
+          : "#ef4444",
+    }}
+  >
+    {profileSite.status === "active" ? "Active" : "Inactive"}
+  </div>
+
+  {profileSite.active_changed_at && (
+    <div style={{ marginTop: "10px", lineHeight: "1.6" }}>
+      <div>
+        <strong>
+          {profileSite.status === "active"
+            ? "Active since:"
+            : "Inactive since:"}
+        </strong>
+      </div>
+
+      <div>
+        {new Date(profileSite.active_changed_at).toLocaleString("el-GR", {
+          timeZone: "Europe/Athens",
+        })}
+      </div>
+
+      <div style={{ marginTop: "8px" }}>
+        <strong>Changed by:</strong>
+      </div>
+
+      <div>
+        {profileSite.active_changed_by_name || "Unknown user"}
+        {profileSite.active_changed_by_role
+          ? ` (${profileSite.active_changed_by_role})`
+          : ""}
+      </div>
+    </div>
+  )}
+</div>
+
       <h4>Site Information</h4>
 
 <label className="settings-field">
