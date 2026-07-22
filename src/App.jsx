@@ -12,6 +12,7 @@ import EventLogs from "./pages/EventLogs";
 import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import Analytics from "./pages/Analytics";
+import { formatDateTime } from "./utils/dateTime";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -1446,9 +1447,7 @@ const renderIncidentLocation = (incident) => {
 
       <p>
         <strong>Snapshot Time:</strong>{" "}
-        {incident.incidentLocationTimestamp
-          ? new Date(incident.incidentLocationTimestamp).toLocaleString("el-GR")
-          : "-"}
+        {formatDateTime(incident.incidentLocationTimestamp)}
       </p>
 
       <button
@@ -2129,7 +2128,10 @@ const renderIncidentLocation = (incident) => {
   incidentAddress: incident.incident_address,
   incidentLocationTimestamp: incident.incident_location_timestamp,
 })}
-        <p><strong>Resolved:</strong> {incident.resolved_time ? new Date(incident.resolved_time).toLocaleString("el-GR") : "-"}</p>
+        <p>
+  <strong>Resolved:</strong>{" "}
+  {incident.resolved_time_display || "-"}
+</p>
         <p><strong>Approved By:</strong> {incident.approved_by || "-"}</p>
         <p><strong>Supervisor:</strong> {incident.supervisor_name || "-"}</p>
         <p><strong>Guard Contact:</strong> {incident.guard_contacted_name || "-"}</p>
