@@ -1799,9 +1799,7 @@ shift_label: patrol.shift_label,
                         fontSize: "13px",
                       }}
                     >
-                      {new Date(entry.scheduled_at).toLocaleString("el-GR", {
-                        timeZone: "Europe/Athens",
-                      })}
+                      {entry.scheduled_at_display}
                     </div>
                   </div>
 
