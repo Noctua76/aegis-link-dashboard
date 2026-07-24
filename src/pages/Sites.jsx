@@ -167,10 +167,10 @@ const [liveLocations, setLiveLocations] = useState([]);
   );
 
   const currentShift = shiftHistory.find(
-    (shift) =>
-      shift.site_id === site.id &&
-      ["active", "no_guard"].includes(shift.operational_status)
-  );
+  (shift) =>
+    shift.site_id === site.id &&
+    ["active", "on_duty", "no_guard"].includes(shift.operational_status)
+);
 
   const hasValidShiftCoverage =
     currentShift?.operational_status === "active" &&
