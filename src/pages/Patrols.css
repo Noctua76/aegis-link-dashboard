@@ -38,3 +38,21 @@
   }
 
 }
+
+@media (max-width: 768px) {
+
+  .analytics-table-card {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+  }
+
+  .analytics-table-card h3,
+  .analytics-table-card h2,
+  .analytics-table-card h4,
+  .analytics-table-card p {
+    word-break: break-word;
+  }
+
+}
