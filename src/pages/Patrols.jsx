@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
+import "./Patrols.css";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 const getAuthHeaders = () => {
@@ -723,13 +724,14 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
               </p>
 
               <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                  gap: "12px",
-                  marginTop: "18px",
-                }}
-              >
+  className="patrol-summary-grid"
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+    gap: "12px",
+    marginTop: "18px",
+  }}
+>
                 <div
   className="system-status-card"
   onClick={() => openSiteDetails(site.site_id)}

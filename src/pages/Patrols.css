@@ -1,0 +1,12 @@
+/* ==========================================================
+   PATROLS PAGE
+   Mobile Responsive Styles
+   Desktop layout remains unchanged.
+========================================================== */
+
+@media (max-width: 768px) {
+    .patrol-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+}
