@@ -177,14 +177,17 @@ const [liveLocations, setLiveLocations] = useState([]);
     currentShift?.guard_session_id &&
     currentShift?.is_currently_online;
 
-  const coverageStatus = hasValidShiftCoverage
+  const coverageStatus =
+  site.status_label === "Covered"
     ? "Covered"
-    : currentShift?.operational_status === "no_guard"
+    : site.status_label === "No Guard"
       ? "No Guard"
       : "Uncovered";
 
-  const currentGuard = hasValidShiftCoverage
-    ? currentShift.full_name
+const currentGuard =
+  site.active_guard &&
+  site.active_guard !== "No active guard"
+    ? site.active_guard
     : "No guard";
 
   const liveLocation = liveLocations.find(
