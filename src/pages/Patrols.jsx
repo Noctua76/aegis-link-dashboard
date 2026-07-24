@@ -728,6 +728,8 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
               <div
   className="patrol-summary-grid"
   style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
     gap: "12px",
     marginTop: "18px",
   }}
