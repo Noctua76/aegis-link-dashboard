@@ -208,9 +208,7 @@ currentGuard,
     incident.status !== "normal" &&
     incident.status !== "inactive"
 ),
-recentSessions: shiftHistory
-  .filter((session) => session.site_id === site.id)
-  .slice(0, 5),
+recentSessions: currentShift?.sessions || [],
     };
   });
 
@@ -496,13 +494,21 @@ recentSessions: shiftHistory
     <p>No recent sessions</p>
   ) : (
     selectedSite.recentSessions.map((session) => (
-      <p key={session.id}>
-        {session.full_name} · {session.status} ·{" "}
-        {session.check_in_time
-          ? new Date(session.check_in_time).toLocaleString("el-GR", {
+      <p key={session.guard_session_id}>
+        <strong>{session.guard_name}</strong>{" · "}
+        {session.login_time
+          ? new Date(session.login_time).toLocaleString("el-GR", {
               timeZone: "Europe/Athens",
             })
           : "—"}
+        {" · "}
+        {session.logout_time
+          ? `Logout ${new Date(session.logout_time).toLocaleTimeString("el-GR", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone: "Europe/Athens",
+            })}`
+          : "Active"}
       </p>
     ))
   )}
