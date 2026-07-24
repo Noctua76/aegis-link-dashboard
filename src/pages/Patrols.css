@@ -24,7 +24,7 @@
   }
 
   .patrol-summary-grid > .system-status-card {
-    flex: 0 0 220px;
-  }
+  flex: 0 0 160px;
+}
 
 }
