@@ -886,6 +886,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
     }}
   >
     <div
+    className="patrol-section-header"
       style={{
         display: "flex",
         justifyContent: "space-between",
@@ -927,6 +928,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
         {activePatrols.map((patrol, index) => (
           <div
             key={`active-${patrol.schedule_type}-${patrol.point_id}-${index}`}
+            className="patrol-queue-row"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(90px, 120px) 1fr auto",
