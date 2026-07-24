@@ -6,19 +6,22 @@
 
 @media (max-width: 768px) {
 
-    .patrol-summary-grid {
-        display: flex !important;
-        overflow-x: auto;
-        overflow-y: hidden;
-        gap: 12px;
-        padding-bottom: 8px;
+    .patrol-summary-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 8px;
+}
 
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-    }
+.patrol-summary-grid {
+  display: flex !important;
+  width: max-content;
+  gap: 12px;
+}
 
-    .patrol-summary-grid > * {
-        flex: 0 0 180px;
-    }
+.patrol-summary-grid > * {
+  flex: 0 0 180px;
+}
 
 }
