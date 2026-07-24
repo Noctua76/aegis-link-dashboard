@@ -3,16 +3,22 @@
    Mobile Responsive Styles
 ========================================================== */
 
+.patrol-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 @media (max-width: 768px) {
 
   .patrol-summary-scroll {
+    width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
   }
 
   .patrol-summary-grid {
-    display: flex !important;
+    display: flex;
     width: max-content;
     gap: 12px;
   }
