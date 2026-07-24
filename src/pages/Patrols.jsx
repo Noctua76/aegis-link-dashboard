@@ -1027,6 +1027,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
     }}
   >
     <div
+      className="patrol-section-header"
       style={{
         display: "flex",
         justifyContent: "space-between",
@@ -1180,6 +1181,7 @@ shift_label: patrol.shift_label,
   }}
 >
   <div
+  className="patrol-section-header"
     style={{
       display: "flex",
       justifyContent: "space-between",
@@ -1317,6 +1319,7 @@ shift_label: patrol.shift_label,
   }}
 >
   <div
+  className="patrol-section-header"
     style={{
       display: "flex",
       justifyContent: "space-between",
