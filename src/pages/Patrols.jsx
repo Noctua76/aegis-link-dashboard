@@ -723,6 +723,8 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
                 {site.site_location} · {site.site_status}
               </p>
 
+
+              <div className="patrol-summary-scroll">
               <div
   className="patrol-summary-grid"
   style={{
@@ -867,6 +869,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   )}
 </div>
 </div>
+              </div>
               </div>
 
               <div
