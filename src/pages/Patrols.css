@@ -15,16 +15,26 @@
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+
+    /* δεν εμφανίζεται scrollbar */
+    scrollbar-width: none;
+  }
+
+  .patrol-summary-scroll::-webkit-scrollbar {
+    display: none;
   }
 
   .patrol-summary-grid {
-    display: flex;
-    width: max-content;
+    display: inline-flex;
     gap: 12px;
+    padding-bottom: 4px;
   }
 
   .patrol-summary-grid > .system-status-card {
-  flex: 0 0 160px;
-}
+    width: 170px;
+    min-width: 170px;
+    max-width: 170px;
+    flex: none;
+  }
 
 }
