@@ -5,23 +5,32 @@
 ========================================================== */
 
 @media (max-width: 768px) {
+  .patrol-summary-scroll {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    touch-action: pan-x;
+  }
 
-    .patrol-summary-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  padding-bottom: 8px;
-}
+  .patrol-summary-grid {
+    display: flex !important;
+    width: max-content !important;
+    min-width: max-content;
+    grid-template-columns: none !important;
+    gap: 12px !important;
+  }
 
-.patrol-summary-grid {
-  display: flex !important;
-  width: max-content;
-  gap: 12px;
-}
-
-.patrol-summary-grid > * {
-  flex: 0 0 180px;
-}
+  .patrol-summary-grid > .system-status-card {
+    flex: 0 0 220px !important;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
 
 }
