@@ -43,6 +43,165 @@ const [currentUser, setCurrentUser] = useState(() => {
   return savedUser ? JSON.parse(savedUser) : null;
 });
 
+const isReadOnlyAccess =
+  currentUser?.user?.access_mode === "read_only";
+
+const readOnlyExpiresAt =
+  currentUser?.user?.access_expires_at || null;
+
+const [readOnlyNotice, setReadOnlyNotice] =
+  useState("");
+
+  useEffect(() => {
+  if (!isReadOnlyAccess) {
+    return undefined;
+  }
+
+  const originalFetch = window.fetch;
+
+  const safeMethods = new Set([
+    "GET",
+    "HEAD",
+    "OPTIONS",
+  ]);
+
+  const allowedMutationPaths = new Set([
+    "/admin/heartbeat",
+    "/admin/logout",
+  ]);
+
+  window.fetch = async (input, init = {}) => {
+    const requestMethod = (
+      init.method ||
+      (
+        input instanceof Request
+          ? input.method
+          : "GET"
+      )
+    ).toUpperCase();
+
+    const requestUrl =
+      input instanceof Request
+        ? input.url
+        : String(input);
+
+    const requestPath = new URL(
+      requestUrl,
+      window.location.origin
+    ).pathname;
+
+    if (
+      !safeMethods.has(requestMethod) &&
+      !allowedMutationPaths.has(requestPath)
+    ) {
+      setReadOnlyNotice(
+        "Read-only preview: changes are disabled."
+      );
+
+      window.setTimeout(() => {
+        setReadOnlyNotice("");
+      }, 3000);
+
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          code: "READ_ONLY_ACCESS",
+          message:
+            "This temporary account has read-only access",
+        }),
+        {
+          status: 403,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    const response = await originalFetch.call(
+      window,
+      input,
+      init
+    );
+
+    if (response.status === 403) {
+      const responseData = await response
+        .clone()
+        .json()
+        .catch(() => null);
+
+      if (
+        responseData?.code ===
+        "TEMPORARY_ACCESS_EXPIRED"
+      ) {
+        localStorage.removeItem(
+          "aegis-current-user"
+        );
+
+        setCurrentUser(null);
+
+        setLoginError(
+          "Temporary access has expired."
+        );
+      }
+    }
+
+    return response;
+  };
+
+  return () => {
+    window.fetch = originalFetch;
+  };
+}, [isReadOnlyAccess]);
+
+useEffect(() => {
+  if (
+    !isReadOnlyAccess ||
+    !readOnlyExpiresAt
+  ) {
+    return undefined;
+  }
+
+  const expiryTime =
+    new Date(readOnlyExpiresAt).getTime();
+
+  if (!Number.isFinite(expiryTime)) {
+    return undefined;
+  }
+
+  const remainingMs =
+    expiryTime - Date.now();
+
+  const expireLocalSession = () => {
+    localStorage.removeItem(
+      "aegis-current-user"
+    );
+
+    setCurrentUser(null);
+
+    setLoginError(
+      "Temporary access has expired."
+    );
+  };
+
+  if (remainingMs <= 0) {
+    expireLocalSession();
+    return undefined;
+  }
+
+  const timer = window.setTimeout(
+    expireLocalSession,
+    remainingMs
+  );
+
+  return () => {
+    window.clearTimeout(timer);
+  };
+}, [
+  isReadOnlyAccess,
+  readOnlyExpiresAt,
+]);
+
 const [loginForm, setLoginForm] = useState({
   username: "",
   password: "",
@@ -1546,6 +1705,34 @@ const renderIncidentLocation = (incident) => {
           boxSizing: "border-box",
         }}
       >
+
+{isReadOnlyAccess && (
+  <div className="read-only-access-banner">
+    <strong>Read-only preview</strong>
+
+    <span>
+      All pages are available. Changes and
+      operational actions are disabled.
+    </span>
+
+    {readOnlyExpiresAt && (
+      <small>
+        Access expires:{" "}
+        {formatDateTime(readOnlyExpiresAt)}
+      </small>
+    )}
+  </div>
+)}
+
+{readOnlyNotice && (
+  <div
+    className="read-only-access-notice"
+    role="status"
+  >
+    {readOnlyNotice}
+  </div>
+)}
+
         {activeMenu === "Dashboard" && (
   <>
         <header style={{ marginBottom: "28px" }}>

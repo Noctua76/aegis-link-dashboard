@@ -3,6 +3,21 @@ import "./Settings.css";
 
 function Settings() {
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+  const storedCurrentUser = (() => {
+  try {
+    return JSON.parse(
+      localStorage.getItem(
+        "aegis-current-user"
+      ) || "null"
+    );
+  } catch {
+    return null;
+  }
+})();
+
+const isSystemOwner =
+  storedCurrentUser?.user?.role ===
+  "system_owner";
   const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
@@ -17,7 +32,11 @@ function Settings() {
     localStorage.getItem("aegis-current-user") || "{}"
   );
 
-  return currentUser?.session?.token || null;
+  return (
+  currentUser?.session_token ||
+  currentUser?.session?.token ||
+  null
+);
 };
 
   const [systemStatus, setSystemStatus] = useState(null);
@@ -40,6 +59,47 @@ const [passwordCopied, setPasswordCopied] = useState(false);
 const [showNewUserModal, setShowNewUserModal] = useState(false);
 const [isCreatingUser, setIsCreatingUser] = useState(false);
 const [newUserError, setNewUserError] = useState("");
+const [
+  temporaryAccessList,
+  setTemporaryAccessList,
+] = useState([]);
+
+const [
+  temporaryAccessResult,
+  setTemporaryAccessResult,
+] = useState(null);
+
+const [
+  temporaryAccessError,
+  setTemporaryAccessError,
+] = useState("");
+
+const [
+  isCreatingTemporaryAccess,
+  setIsCreatingTemporaryAccess,
+] = useState(false);
+
+const [
+  revokingTemporaryAccessId,
+  setRevokingTemporaryAccessId,
+] = useState(null);
+
+const [
+  temporaryAccessCopied,
+  setTemporaryAccessCopied,
+] = useState(false);
+
+const [
+  temporaryAccessForm,
+  setTemporaryAccessForm,
+] = useState({
+  label: "External Preview",
+  site_id: "1",
+  duration_hours: "48",
+  dashboard_username:
+    "preview.dashboard",
+  guard_username: "preview.guard",
+});
 
 const [newUser, setNewUser] = useState({
   full_name: "",
@@ -259,6 +319,209 @@ const loadUsers = async (showLoader = true) => {
     if (showLoader) {
       setLoadingUsers(false);
     }
+  }
+};
+
+const loadTemporaryAccess = async () => {
+  if (!isSystemOwner) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/temporary-access`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          "Unable to load temporary access"
+      );
+    }
+
+    setTemporaryAccessList(
+      data.temporary_access || []
+    );
+  } catch (err) {
+    console.error(
+      "Temporary access load error",
+      err
+    );
+  }
+};
+
+const createTemporaryAccess = async () => {
+  setTemporaryAccessError("");
+  setTemporaryAccessResult(null);
+  setTemporaryAccessCopied(false);
+
+  if (!temporaryAccessForm.site_id) {
+    setTemporaryAccessError(
+      "Select a site."
+    );
+    return;
+  }
+
+  setIsCreatingTemporaryAccess(true);
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/temporary-access`,
+      {
+        method: "POST",
+
+        headers: {
+          ...getAuthHeaders(),
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          ...temporaryAccessForm,
+
+          site_id: Number(
+            temporaryAccessForm.site_id
+          ),
+
+          duration_hours: Number(
+            temporaryAccessForm.duration_hours
+          ),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          "Unable to create temporary access"
+      );
+    }
+
+    setTemporaryAccessResult(data);
+
+    await loadTemporaryAccess();
+  } catch (err) {
+    console.error(
+      "Temporary access creation error",
+      err
+    );
+
+    setTemporaryAccessError(
+      err.message ||
+        "Unable to create temporary access"
+    );
+  } finally {
+    setIsCreatingTemporaryAccess(false);
+  }
+};
+
+const copyTemporaryAccessCredentials =
+  async () => {
+    if (
+      !temporaryAccessResult?.credentials
+    ) {
+      return;
+    }
+
+    const dashboard =
+      temporaryAccessResult.credentials
+        .dashboard;
+
+    const webApp =
+      temporaryAccessResult.credentials
+        .web_app;
+
+    const duration =
+      temporaryAccessResult.duration_hours;
+
+    const credentialsText = [
+      "Aegis Link — Temporary read-only preview",
+      "",
+      "Dashboard",
+      "https://noctua76.github.io/aegis-link-dashboard/",
+      `Username: ${dashboard.username}`,
+      `Password: ${dashboard.password}`,
+      "",
+      "Guard Web App",
+      "https://noctua76.github.io/noctua-panic-webapp/",
+      `Username: ${webApp.username}`,
+      `Password: ${webApp.password}`,
+      "",
+      `Access duration: ${duration} hours for each account, starting from its own first successful login.`,
+      "Read-only access. Operational actions are disabled.",
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(
+        credentialsText
+      );
+
+      setTemporaryAccessCopied(true);
+    } catch (err) {
+      console.error(
+        "Temporary credentials copy error",
+        err
+      );
+
+      setTemporaryAccessError(
+        "Unable to copy credentials."
+      );
+    }
+  };
+
+  const revokeTemporaryAccess = async (
+  groupId
+) => {
+  const confirmed = window.confirm(
+    "Revoke both temporary accounts immediately?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  setRevokingTemporaryAccessId(groupId);
+  setTemporaryAccessError("");
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/admin/temporary-access/${groupId}/revoke`,
+      {
+        method: "POST",
+        headers: getAuthHeaders(),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          "Unable to revoke temporary access"
+      );
+    }
+
+    setTemporaryAccessResult(null);
+
+    await loadTemporaryAccess();
+  } catch (err) {
+    console.error(
+      "Temporary access revoke error",
+      err
+    );
+
+    setTemporaryAccessError(
+      err.message ||
+        "Unable to revoke temporary access"
+    );
+  } finally {
+    setRevokingTemporaryAccessId(null);
   }
 };
 
@@ -1056,6 +1319,23 @@ loadUsers(false);
   }, []);
 
   useEffect(() => {
+  if (!isSystemOwner) {
+    return undefined;
+  }
+
+  loadTemporaryAccess();
+
+  const interval = setInterval(
+    loadTemporaryAccess,
+    30000
+  );
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [isSystemOwner]);
+
+  useEffect(() => {
   if (!selectedUser?.id || isEditingUser) {
     return;
   }
@@ -1734,6 +2014,285 @@ const cancelManualPatrol = async (item) => {
           Operational configuration and system controls
         </p>
       </header>
+
+      {isSystemOwner && (
+  <section className="temporary-access-panel">
+    <div className="temporary-access-heading">
+      <div>
+        <span className="temporary-access-eyebrow">
+          System Owner
+        </span>
+
+        <h2>Temporary Preview Access</h2>
+
+        <p>
+          Create a linked Dashboard and Guard
+          Web App account. The timer starts on
+          the first successful login.
+        </p>
+      </div>
+
+      <span className="temporary-access-security-badge">
+        Read only
+      </span>
+    </div>
+
+    <div className="temporary-access-form-grid">
+      <label className="settings-field">
+        <span>Viewer label</span>
+
+        <input
+          value={temporaryAccessForm.label}
+          onChange={(event) =>
+            setTemporaryAccessForm({
+              ...temporaryAccessForm,
+              label: event.target.value,
+            })
+          }
+          placeholder="External Preview"
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Guard site</span>
+
+        <select
+          value={temporaryAccessForm.site_id}
+          onChange={(event) =>
+            setTemporaryAccessForm({
+              ...temporaryAccessForm,
+              site_id: event.target.value,
+            })
+          }
+        >
+          <option value="">
+            Select site
+          </option>
+
+          {sites.map((site) => (
+            <option
+              key={site.id}
+              value={site.id}
+            >
+              {site.name}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="settings-field">
+        <span>Duration in hours</span>
+
+        <input
+          type="number"
+          min="1"
+          max="168"
+          value={
+            temporaryAccessForm.duration_hours
+          }
+          onChange={(event) =>
+            setTemporaryAccessForm({
+              ...temporaryAccessForm,
+              duration_hours:
+                event.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Dashboard username</span>
+
+        <input
+          value={
+            temporaryAccessForm.dashboard_username
+          }
+          onChange={(event) =>
+            setTemporaryAccessForm({
+              ...temporaryAccessForm,
+              dashboard_username:
+                event.target.value,
+            })
+          }
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>Web App username</span>
+
+        <input
+          value={
+            temporaryAccessForm.guard_username
+          }
+          onChange={(event) =>
+            setTemporaryAccessForm({
+              ...temporaryAccessForm,
+              guard_username:
+                event.target.value,
+            })
+          }
+        />
+      </label>
+    </div>
+
+    <button
+      type="button"
+      onClick={createTemporaryAccess}
+      disabled={isCreatingTemporaryAccess}
+    >
+      {isCreatingTemporaryAccess
+        ? "Creating..."
+        : "Create Temporary Access"}
+    </button>
+
+    {temporaryAccessError && (
+      <p className="settings-error-text">
+        {temporaryAccessError}
+      </p>
+    )}
+
+    {temporaryAccessResult?.credentials && (
+  <div className="temporary-credentials-result">
+    <div className="temporary-credentials-warning">
+      Save these passwords now. They will not
+      be displayed again.
+    </div>
+
+    <div className="temporary-credentials-grid">
+      <div>
+        <strong>Dashboard</strong>
+
+        <span>
+          Username:{" "}
+          {
+            temporaryAccessResult
+              .credentials.dashboard.username
+          }
+        </span>
+
+        <span>
+          Password:{" "}
+          {
+            temporaryAccessResult
+              .credentials.dashboard.password
+          }
+        </span>
+      </div>
+
+      <div>
+        <strong>Guard Web App</strong>
+
+        <span>
+          Username:{" "}
+          {
+            temporaryAccessResult
+              .credentials.web_app.username
+          }
+        </span>
+
+        <span>
+          Password:{" "}
+          {
+            temporaryAccessResult
+              .credentials.web_app.password
+          }
+        </span>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={
+        copyTemporaryAccessCredentials
+      }
+    >
+      {temporaryAccessCopied
+        ? "Credentials copied"
+        : "Copy message with credentials"}
+    </button>
+  </div>
+)}
+
+{temporaryAccessList.length > 0 && (
+  <div className="temporary-access-list">
+    <h3>Issued Preview Access</h3>
+
+    {temporaryAccessList.map((access) => (
+      <div
+        className="temporary-access-list-item"
+        key={access.group_id}
+      >
+        <div>
+          <strong>{access.label}</strong>
+
+          <span>
+            {access.company_name} ·{" "}
+            {access.site_name}
+          </span>
+
+          <small>
+            {access.dashboard.username} /{" "}
+            {access.web_app?.username}
+          </small>
+
+          <small>
+            Dashboard:{" "}
+            {access.dashboard.expires_at
+              ? `expires ${formatGreekDateTime(
+                  access.dashboard.expires_at
+                )}`
+              : `pending first login · ${access.duration_hours} hours`}
+          </small>
+
+          <small>
+            Web App:{" "}
+            {access.web_app?.expires_at
+              ? `expires ${formatGreekDateTime(
+                  access.web_app.expires_at
+                )}`
+              : `pending first login · ${access.duration_hours} hours`}
+          </small>
+        </div>
+
+        <div className="temporary-access-list-actions">
+          <span
+            className={
+              `temporary-access-status ${access.status}`
+            }
+          >
+            {access.status}
+          </span>
+
+          {(access.status === "pending" ||
+            access.status === "active") && (
+            <button
+              type="button"
+              className="secondary-button"
+              disabled={
+                revokingTemporaryAccessId ===
+                access.group_id
+              }
+              onClick={() =>
+                revokeTemporaryAccess(
+                  access.group_id
+                )
+              }
+            >
+              {revokingTemporaryAccessId ===
+              access.group_id
+                ? "Revoking..."
+                : "Revoke"}
+            </button>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
+  </section>
+)}
 
       <section className="settings-grid">
         <div className="settings-card">
