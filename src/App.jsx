@@ -124,27 +124,34 @@ const [readOnlyNotice, setReadOnlyNotice] =
       init
     );
 
-    if (response.status === 403) {
-      const responseData = await response
-        .clone()
-        .json()
-        .catch(() => null);
+    if (
+  response.status === 401 ||
+  response.status === 403
+) {
+  const responseData = await response
+    .clone()
+    .json()
+    .catch(() => null);
 
-      if (
-        responseData?.code ===
+  if (
+    response.status === 401 ||
+    responseData?.code ===
+      "TEMPORARY_ACCESS_EXPIRED"
+  ) {
+    localStorage.removeItem(
+      "aegis-current-user"
+    );
+
+    setCurrentUser(null);
+
+    setLoginError(
+      responseData?.code ===
         "TEMPORARY_ACCESS_EXPIRED"
-      ) {
-        localStorage.removeItem(
-          "aegis-current-user"
-        );
-
-        setCurrentUser(null);
-
-        setLoginError(
-          "Temporary access has expired."
-        );
-      }
-    }
+        ? "Temporary access has expired."
+        : "Temporary access is no longer active."
+    );
+  }
+}
 
     return response;
   };
