@@ -90,6 +90,11 @@ const [
 ] = useState(false);
 
 const [
+  temporaryAccessFieldCopied,
+  setTemporaryAccessFieldCopied,
+] = useState("");
+
+const [
   temporaryAccessForm,
   setTemporaryAccessForm,
 ] = useState({
@@ -359,6 +364,7 @@ const createTemporaryAccess = async () => {
   setTemporaryAccessError("");
   setTemporaryAccessResult(null);
   setTemporaryAccessCopied(false);
+  setTemporaryAccessFieldCopied("");
 
   if (!temporaryAccessForm.site_id) {
     setTemporaryAccessError(
@@ -474,6 +480,38 @@ const copyTemporaryAccessCredentials =
       );
     }
   };
+
+const copyTemporaryAccessValue = async (
+  value,
+  fieldKey
+) => {
+  if (!value) {
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(value);
+    setTemporaryAccessFieldCopied(fieldKey);
+
+    setTimeout(() => {
+      setTemporaryAccessFieldCopied(
+        (currentField) =>
+          currentField === fieldKey
+            ? ""
+            : currentField
+      );
+    }, 2000);
+  } catch (err) {
+    console.error(
+      "Temporary credential value copy error",
+      err
+    );
+
+    setTemporaryAccessError(
+      "Unable to copy credential."
+    );
+  }
+};
 
   const revokeTemporaryAccess = async (
   groupId
@@ -2162,47 +2200,143 @@ const cancelManualPatrol = async (item) => {
       <div>
         <strong>Dashboard</strong>
 
-        <span>
-          Username:{" "}
-          {
-            temporaryAccessResult
-              .credentials.dashboard.username
-          }
-        </span>
+        <div className="temporary-credential-row">
+          <span>
+            Username:{" "}
+            <code>
+              {
+                temporaryAccessResult
+                  .credentials.dashboard
+                  .username
+              }
+            </code>
+          </span>
 
-        <span>
-          Password:{" "}
-          {
-            temporaryAccessResult
-              .credentials.dashboard.password
-          }
-        </span>
+          <button
+            type="button"
+            className="temporary-credential-copy-button"
+            aria-label="Copy Dashboard username"
+            onClick={() =>
+              copyTemporaryAccessValue(
+                temporaryAccessResult
+                  .credentials.dashboard
+                  .username,
+                "dashboard-username"
+              )
+            }
+          >
+            {temporaryAccessFieldCopied ===
+            "dashboard-username"
+              ? "Copied"
+              : "Copy"}
+          </button>
+        </div>
+
+        <div className="temporary-credential-row">
+          <span>
+            Password:{" "}
+            <code>
+              {
+                temporaryAccessResult
+                  .credentials.dashboard
+                  .password
+              }
+            </code>
+          </span>
+
+          <button
+            type="button"
+            className="temporary-credential-copy-button"
+            aria-label="Copy Dashboard password"
+            onClick={() =>
+              copyTemporaryAccessValue(
+                temporaryAccessResult
+                  .credentials.dashboard
+                  .password,
+                "dashboard-password"
+              )
+            }
+          >
+            {temporaryAccessFieldCopied ===
+            "dashboard-password"
+              ? "Copied"
+              : "Copy"}
+          </button>
+        </div>
       </div>
 
       <div>
         <strong>Guard Web App</strong>
 
-        <span>
-          Username:{" "}
-          {
-            temporaryAccessResult
-              .credentials.web_app.username
-          }
-        </span>
+        <div className="temporary-credential-row">
+          <span>
+            Username:{" "}
+            <code>
+              {
+                temporaryAccessResult
+                  .credentials.web_app
+                  .username
+              }
+            </code>
+          </span>
 
-        <span>
-          Password:{" "}
-          {
-            temporaryAccessResult
-              .credentials.web_app.password
-          }
-        </span>
+          <button
+            type="button"
+            className="temporary-credential-copy-button"
+            aria-label="Copy Guard Web App username"
+            onClick={() =>
+              copyTemporaryAccessValue(
+                temporaryAccessResult
+                  .credentials.web_app
+                  .username,
+                "web-app-username"
+              )
+            }
+          >
+            {temporaryAccessFieldCopied ===
+            "web-app-username"
+              ? "Copied"
+              : "Copy"}
+          </button>
+        </div>
+
+        <div className="temporary-credential-row">
+          <span>
+            Password:{" "}
+            <code>
+              {
+                temporaryAccessResult
+                  .credentials.web_app
+                  .password
+              }
+            </code>
+          </span>
+
+          <button
+            type="button"
+            className="temporary-credential-copy-button"
+            aria-label="Copy Guard Web App password"
+            onClick={() =>
+              copyTemporaryAccessValue(
+                temporaryAccessResult
+                  .credentials.web_app
+                  .password,
+                "web-app-password"
+              )
+            }
+          >
+            {temporaryAccessFieldCopied ===
+            "web-app-password"
+              ? "Copied"
+              : "Copy"}
+          </button>
+        </div>
       </div>
     </div>
 
     <button
       type="button"
-      className="secondary-button"
+      className="secondary-button temporary-credentials-message-copy"
       onClick={
         copyTemporaryAccessCredentials
       }
