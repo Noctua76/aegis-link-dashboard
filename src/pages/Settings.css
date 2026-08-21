@@ -690,7 +690,47 @@ font-size:13px;
   overflow-wrap: anywhere;
 }
 
-.temporary-credentials-result button {
+.temporary-credential-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.temporary-credential-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.temporary-credential-row code {
+  color: #f8fafc;
+  font: inherit;
+  font-weight: 700;
+}
+
+.temporary-credential-copy-button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid
+    rgba(96, 165, 250, 0.42);
+  border-radius: 8px;
+  background:
+    rgba(59, 130, 246, 0.14);
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.temporary-credential-copy-button:hover {
+  border-color:
+    rgba(96, 165, 250, 0.72);
+  background:
+    rgba(59, 130, 246, 0.24);
+}
+
+.temporary-credentials-message-copy {
   margin-top: 14px;
 }
 
