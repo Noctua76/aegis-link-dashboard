@@ -10,13 +10,108 @@ function formatDate(value) {
   });
 }
 
-function isReallyActive(session) {
-  if (!session.is_active || !session.last_seen) return false;
+function formatDuration(value) {
+  const totalSeconds = Number(value);
 
-  const lastSeen = new Date(session.last_seen).getTime();
-  const now = Date.now();
+  if (
+    !Number.isFinite(totalSeconds) ||
+    totalSeconds < 0
+  ) {
+    return "-";
+  }
 
-  return now - lastSeen < 90000;
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor(
+    (totalSeconds % 3600) / 60
+  );
+  const seconds = totalSeconds % 60;
+
+  const parts = [];
+
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}m`);
+  }
+
+  parts.push(`${seconds}s`);
+
+  return parts.join(" ");
+}
+
+function getSessionEndDetails(
+  session,
+  activeNow
+) {
+  if (activeNow) {
+    return {
+      label: "Active session",
+      detail:
+        session.is_temporary &&
+        session.access_expires_at
+          ? `Expires ${formatDate(
+              session.access_expires_at
+            )}`
+          : null,
+      tone: "active",
+    };
+  }
+
+  switch (session.session_end_reason) {
+    case "logout":
+      return {
+        label: "Logged out",
+        detail: session.logout_time
+          ? `Ended ${formatDate(
+              session.logout_time
+            )}`
+          : null,
+        tone: "logout",
+      };
+
+    case "temporary_access_expired":
+      return {
+        label: "Preview expired",
+        detail:
+          session.access_expires_at ||
+          session.logout_time
+            ? `Expired ${formatDate(
+                session.access_expires_at ||
+                  session.logout_time
+              )}`
+            : null,
+        tone: "expired",
+      };
+
+    case "temporary_access_revoked":
+      return {
+        label: "Preview revoked",
+        detail:
+          session.temporary_access_revoked_at ||
+          session.logout_time
+            ? `Revoked ${formatDate(
+                session.temporary_access_revoked_at ||
+                  session.logout_time
+              )}`
+            : null,
+        tone: "revoked",
+      };
+
+    default:
+      return {
+        label: session.is_active
+          ? "No recent heartbeat"
+          : "Closed session",
+        detail: session.last_seen
+          ? `Last seen ${formatDate(
+              session.last_seen
+            )}`
+          : null,
+        tone: "inactive",
+      };
+  }
 }
 
 function todayISO() {
@@ -240,71 +335,127 @@ function AdminAuditLogs() {
 </button>
       </div>
 
-      <div
-        style={{
-          maxHeight: "520px",
-          overflowY: "auto",
-          border: "1px solid rgba(255,255,255,0.12)",
-          borderRadius: "14px",
-        }}
-      >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead
-            style={{
-              position: "sticky",
-              top: 0,
-              background: "#111",
-              zIndex: 1,
-            }}
-          >
-            <tr>
-              <th>Date / Login</th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Logout</th>
-              <th>Duration</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+      <div className="audit-table-container">
+  <table className="audit-table">
+    <thead>
+      <tr>
+        <th>Date / Login</th>
+        <th>User</th>
+        <th>Role</th>
+        <th>Access</th>
+        <th>Logout</th>
+        <th>Duration</th>
+        <th>Status</th>
+        <th>Session End</th>
+      </tr>
+    </thead>
 
-          <tbody>
-            {filteredSessions.map((session) => {
-              const activeNow = session.is_currently_online === true;
-              return (
-                <tr
-                  key={session.id}
-                  style={{
-                    borderTop: "1px solid rgba(255,255,255,0.08)",
-                  }}
+    <tbody>
+      {filteredSessions.length === 0 ? (
+        <tr>
+          <td
+            colSpan={8}
+            className="audit-empty-state"
+          >
+            No admin sessions found for the
+            selected period.
+          </td>
+        </tr>
+      ) : (
+        filteredSessions.map((session) => {
+          const activeNow =
+            session.is_currently_online === true;
+
+          const endDetails =
+            getSessionEndDetails(
+              session,
+              activeNow
+            );
+
+          return (
+            <tr
+              key={session.id}
+              className={
+                session.is_temporary
+                  ? "audit-row-temporary"
+                  : ""
+              }
+            >
+              <td>
+                {formatDate(session.login_time)}
+              </td>
+
+              <td>{session.username}</td>
+
+              <td>{session.role || "-"}</td>
+
+              <td>
+                <span
+                  className={`audit-access-badge ${
+                    session.is_temporary
+                      ? "temporary"
+                      : "standard"
+                  }`}
                 >
-                  <td>{formatDate(session.login_time)}</td>
-                  <td>{session.username}</td>
-                  <td>{session.role}</td>
-                  <td>{formatDate(session.logout_time)}</td>
-                  <td>{session.session_duration_seconds || "-"}</td>
-                  <td>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        minWidth: "82px",
-                        textAlign: "center",
-                        padding: "6px 10px",
-                        borderRadius: "7px",
-                        background: activeNow ? "#166534" : "#991b1b",
-                        color: "#fff",
-                        fontSize: "13px",
-                        fontWeight: "700",
-                      }}
-                    >
-                      {activeNow ? "ACTIVE" : "CLOSED"}
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  {session.is_temporary
+                    ? "TEMPORARY PREVIEW"
+                    : "STANDARD"}
+                </span>
+
+                {session.is_temporary &&
+                  session.temporary_access_label && (
+                    <small className="audit-access-label">
+                      {
+                        session.temporary_access_label
+                      }
+                    </small>
+                  )}
+              </td>
+
+              <td>
+                {formatDate(session.logout_time)}
+              </td>
+
+              <td>
+                {formatDuration(
+                  session.session_duration_seconds
+                )}
+              </td>
+
+              <td>
+                <span
+                  className={`audit-status-badge ${
+                    activeNow
+                      ? "active"
+                      : "closed"
+                  }`}
+                >
+                  {activeNow
+                    ? "ACTIVE"
+                    : "CLOSED"}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  className={`audit-session-end ${endDetails.tone}`}
+                >
+                  {endDetails.label}
+                </span>
+
+                {endDetails.detail && (
+                  <small className="audit-session-detail">
+                    {endDetails.detail}
+                  </small>
+                )}
+              </td>
+            </tr>
+          );
+        })
+      )}
+    </tbody>
+  </table>
+</div>
 
       <div style={{ marginTop: "14px", color: "#b8c2cc" }}>
         Total: {filteredSessions.length}
