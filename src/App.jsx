@@ -1797,6 +1797,7 @@ const renderIncidentLocation = (incident) => {
       <main
         style={{
           flex: 1,
+          minWidth: 0,
           background: "#0b0b0b",
           color: "#ffffff",
           padding: "24px",
