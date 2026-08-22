@@ -908,3 +908,43 @@ font-size:13px;
     padding-right: 2px;
   }
 }
+
+.temporary-access-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.temporary-access-actions button {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  .temporary-access-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .temporary-access-actions button {
+    width: min(100%, 320px);
+  }
+}
+
+.temporary-access-form-grid {
+  gap: 18px;
+  min-width: 0;
+}
+
+.temporary-access-form-grid .settings-field {
+  min-width: 0;
+}
+
+.temporary-access-form-grid .settings-field input,
+.temporary-access-form-grid .settings-field select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}

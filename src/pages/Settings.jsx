@@ -2178,27 +2178,29 @@ const cancelManualPatrol = async (item) => {
       </label>
     </div>
 
-    <button
-      type="button"
-      onClick={createTemporaryAccess}
-      disabled={isCreatingTemporaryAccess}
-    >
-      {isCreatingTemporaryAccess
-        ? "Creating..."
-        : "Create Temporary Access"}
-    </button>
+    <div className="temporary-access-actions">
+      <button
+        type="button"
+        onClick={createTemporaryAccess}
+        disabled={isCreatingTemporaryAccess}
+      >
+        {isCreatingTemporaryAccess
+          ? "Creating..."
+          : "Create Temporary Access"}
+      </button>
 
-        <button
-      type="button"
-      className="secondary-button temporary-access-history-button"
-      disabled={temporaryAccessList.length === 0}
-      onClick={() =>
-        setShowTemporaryAccessModal(true)
-      }
-    >
-      View Issued Preview Access (
-      {temporaryAccessList.length})
-    </button>
+      <button
+        type="button"
+        className="secondary-button temporary-access-history-button"
+        disabled={temporaryAccessList.length === 0}
+        onClick={() =>
+          setShowTemporaryAccessModal(true)
+        }
+      >
+        View Issued Preview Access (
+        {temporaryAccessList.length})
+      </button>
+    </div>
 
     {temporaryAccessError && (
       <p className="settings-error-text">
