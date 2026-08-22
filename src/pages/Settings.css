@@ -826,3 +826,85 @@ font-size:13px;
     flex-direction: column;
   }
 }
+
+.temporary-access-history-button {
+  margin-top: 10px;
+  border: 1px solid
+    rgba(96, 165, 250, 0.38);
+  background:
+    rgba(59, 130, 246, 0.1);
+  color: #bfdbfe;
+}
+
+.temporary-access-history-button:hover:not(:disabled) {
+  border-color:
+    rgba(96, 165, 250, 0.65);
+  background:
+    rgba(59, 130, 246, 0.18);
+}
+
+.temporary-access-history-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.temporary-access-modal {
+  width: 100%;
+  max-width: 900px;
+  max-height: 86vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.temporary-access-modal .modal-header {
+  align-items: flex-start;
+}
+
+.temporary-access-modal .modal-header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 22px;
+}
+
+.temporary-access-modal-subtitle {
+  margin: 7px 0 0;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.temporary-access-modal .modal-close {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  padding: 0;
+}
+
+.temporary-access-modal-list {
+  display: grid;
+  gap: 10px;
+  max-height: 62vh;
+  padding-right: 6px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.temporary-access-modal-empty {
+  margin: 20px 0;
+  color: #94a3b8;
+  text-align: center;
+}
+
+@media (max-width: 700px) {
+  .temporary-access-modal {
+    max-height: 90vh;
+    padding: 18px;
+  }
+
+  .temporary-access-modal-list {
+    max-height: 68vh;
+    padding-right: 2px;
+  }
+}
