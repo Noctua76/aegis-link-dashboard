@@ -815,6 +815,100 @@
   color: #00d26a;
   font-size: 12px;
 }
+
+.online-admins-box {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.current-user-box .online-admins-title {
+  display: block;
+  margin: 0 0 10px;
+  color: #8f9aaa;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-align: center;
+}
+
+.online-admin-row {
+  padding: 8px 2px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.online-admin-row.temporary-preview {
+  margin-top: 6px;
+  padding: 9px 8px;
+  border: 1px solid rgba(245,158,11,0.35);
+  border-radius: 8px;
+  background: rgba(245,158,11,0.07);
+}
+
+.online-admin-main {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.current-user-box .online-admin-indicator {
+  display: block;
+  flex: 0 0 7px;
+  width: 7px;
+  height: 7px;
+  margin: 0;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 7px rgba(34,197,94,0.65);
+}
+
+.current-user-box .online-admin-username {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #e5e7eb;
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.current-user-box .temporary-preview-badge {
+  display: inline-flex;
+  margin: 7px 0 0 14px;
+  padding: 3px 6px;
+  border: 1px solid rgba(245,158,11,0.5);
+  border-radius: 999px;
+  background: rgba(245,158,11,0.12);
+  color: #fbbf24;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.current-user-box .temporary-preview-label {
+  display: block;
+  margin: 5px 0 0 14px;
+  overflow-wrap: anywhere;
+  color: #cbd5e1;
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.current-user-box .online-admins-empty {
+  display: block;
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 11px;
+  text-align: center;
+}
+
 .incident-status {
   background: rgba(34, 197, 94, 0.18);
   color: #22c55e;
@@ -1017,6 +1111,163 @@
     white-space: nowrap;
   }
 }
+
+.audit-table-container {
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.015);
+}
+
+.audit-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+}
+
+.audit-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #111;
+}
+
+.audit-table th,
+.audit-table td {
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.audit-table th {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.audit-table td {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  color: #e5e7eb;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.audit-row-temporary {
+  background: rgba(245,158,11,0.035);
+}
+
+.audit-access-badge,
+.audit-status-badge,
+.audit-session-end {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.55px;
+  white-space: nowrap;
+}
+
+.audit-access-badge {
+  padding: 5px 8px;
+}
+
+.audit-access-badge.standard {
+  border-color: rgba(148,163,184,0.3);
+  background: rgba(100,116,139,0.14);
+  color: #cbd5e1;
+}
+
+.audit-access-badge.temporary {
+  border-color: rgba(245,158,11,0.5);
+  background: rgba(245,158,11,0.12);
+  color: #fbbf24;
+}
+
+.audit-access-label {
+  display: block;
+  max-width: 180px;
+  margin-top: 6px;
+  overflow: hidden;
+  color: #cbd5e1;
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audit-status-badge {
+  min-width: 72px;
+  padding: 6px 10px;
+  color: #fff;
+}
+
+.audit-status-badge.active {
+  border-color: #22c55e;
+  background: #166534;
+}
+
+.audit-status-badge.closed {
+  border-color: #ef4444;
+  background: #991b1b;
+}
+
+.audit-session-end {
+  padding: 5px 8px;
+}
+
+.audit-session-end.active {
+  border-color: rgba(34,197,94,0.4);
+  background: rgba(22,101,52,0.35);
+  color: #86efac;
+}
+
+.audit-session-end.logout {
+  border-color: rgba(148,163,184,0.3);
+  background: rgba(100,116,139,0.14);
+  color: #cbd5e1;
+}
+
+.audit-session-end.expired {
+  border-color: rgba(245,158,11,0.45);
+  background: rgba(245,158,11,0.12);
+  color: #fbbf24;
+}
+
+.audit-session-end.revoked {
+  border-color: rgba(239,68,68,0.45);
+  background: rgba(127,29,29,0.3);
+  color: #fca5a5;
+}
+
+.audit-session-end.inactive {
+  border-color: rgba(148,163,184,0.22);
+  background: rgba(71,85,105,0.16);
+  color: #94a3b8;
+}
+
+.audit-session-detail {
+  display: block;
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.audit-empty-state {
+  padding: 32px !important;
+  color: #94a3b8 !important;
+  text-align: center !important;
+}
+
 .flow-step {
   display: inline-flex;
   align-items: center;

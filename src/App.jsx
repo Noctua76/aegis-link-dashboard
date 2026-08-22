@@ -1651,22 +1651,52 @@ const renderIncidentLocation = (incident) => {
   <strong>{currentUser?.username || currentUser?.user?.username}</strong>
   <small>● Active</small>
 </div>
-          <div className="current-user-box">
+          <div className="current-user-box online-admins-box">
+  <span className="online-admins-title">
+    ONLINE ADMINS
+  </span>
 
-<span>ONLINE ADMINS</span>
+  {onlineAdmins.length === 0 ? (
+    <small className="online-admins-empty">
+      No admins online
+    </small>
+  ) : (
+    onlineAdmins.map((admin) => (
+      <div
+        key={admin.username}
+        className={`online-admin-row ${
+          admin.is_temporary
+            ? "temporary-preview"
+            : ""
+        }`}
+      >
+        <div className="online-admin-main">
+          <span
+            className="online-admin-indicator"
+            aria-hidden="true"
+          />
 
-{onlineAdmins.map((admin) => (
+          <small className="online-admin-username">
+            {admin.username}
+          </small>
+        </div>
 
-<div key={admin.username}>
+        {admin.is_temporary && (
+          <>
+            <span className="temporary-preview-badge">
+              TEMPORARY PREVIEW
+            </span>
 
-<small>
-🟢 {admin.username}
-</small>
-
-</div>
-
-))}
-
+            {admin.temporary_access_label && (
+              <small className="temporary-preview-label">
+                {admin.temporary_access_label}
+              </small>
+            )}
+          </>
+        )}
+      </div>
+    ))
+  )}
 </div>
   <img
     src={aegisLogo}
