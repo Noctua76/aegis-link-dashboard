@@ -691,27 +691,49 @@ font-size:13px;
 }
 
 .temporary-credential-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) 72px;
+  align-items: end;
+  gap: 12px;
   min-width: 0;
 }
 
 .temporary-credential-row > span {
+  display: grid;
+  gap: 5px;
   min-width: 0;
-  overflow-wrap: anywhere;
+  color: #d1d5db;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: left;
 }
 
 .temporary-credential-row code {
-  color: #f8fafc;
-  font: inherit;
-  font-weight: 700;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #f3f4f6;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .temporary-credential-copy-button {
-  flex: 0 0 auto;
-  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0;
   border: 1px solid
     rgba(96, 165, 250, 0.42);
   border-radius: 8px;
@@ -720,6 +742,7 @@ font-size:13px;
   color: #bfdbfe;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
 }
 
