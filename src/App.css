@@ -1122,8 +1122,24 @@
    ADMIN AUDIT LOGS TOOLBAR
 ====================================================== */
 
+.admin-audit-page {
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.admin-audit-page > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .audit-toolbar {
   display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
   padding: 18px;
@@ -1155,8 +1171,13 @@
 }
 
 .audit-table-container {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   max-height: 520px;
-  overflow: auto;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: auto;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 14px;
   background: rgba(255,255,255,0.015);

@@ -217,7 +217,7 @@ function AdminAuditLogs() {
 };
 
   return (
-    <section style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+        <section className="admin-audit-page">
       <h1 style={{ fontSize: "42px", marginBottom: "8px" }}>
         Admin Audit Logs
       </h1>
