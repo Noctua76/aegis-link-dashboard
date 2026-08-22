@@ -25,6 +25,10 @@ import {
 
 function App() {
   const [onlineAdmins, setOnlineAdmins] = useState([]);
+  const [
+  temporaryGuardPreviews,
+  setTemporaryGuardPreviews,
+] = useState([]);
   const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
   const getSessionToken = () => {
   const storedUser = JSON.parse(
@@ -533,8 +537,11 @@ const response = await fetch(
 
       const data = await response.json();
 
-      if (data.status === "ok") {
-        setOnlineAdmins(data.admins);
+            if (data.status === "ok") {
+        setOnlineAdmins(data.admins || []);
+        setTemporaryGuardPreviews(
+          data.temporary_guard_previews || []
+        );
       }
 
     } catch (err) {
@@ -1653,49 +1660,103 @@ const renderIncidentLocation = (incident) => {
 </div>
           <div className="current-user-box online-admins-box">
   <span className="online-admins-title">
-    ONLINE ADMINS
+    ONLINE ADMINS & PREVIEWS
   </span>
 
-  {onlineAdmins.length === 0 ? (
+  {onlineAdmins.length === 0 &&
+  temporaryGuardPreviews.length === 0 ? (
     <small className="online-admins-empty">
-      No admins online
+      No users online
     </small>
   ) : (
-    onlineAdmins.map((admin) => (
-      <div
-        key={admin.username}
-        className={`online-admin-row ${
-          admin.is_temporary
-            ? "temporary-preview"
-            : ""
-        }`}
-      >
-        <div className="online-admin-main">
-          <span
-            className="online-admin-indicator"
-            aria-hidden="true"
-          />
+    <>
+      {onlineAdmins.map((admin) => (
+        <div
+          key={admin.username}
+          className={`online-admin-row ${
+            admin.is_temporary
+              ? "temporary-preview"
+              : ""
+          }`}
+        >
+          <div className="online-admin-main">
+            <span
+              className="online-admin-indicator"
+              aria-hidden="true"
+            />
 
-          <small className="online-admin-username">
-            {admin.username}
-          </small>
+            <small className="online-admin-username">
+              {admin.username}
+            </small>
+          </div>
+
+          {admin.is_temporary && (
+            <>
+              <span className="temporary-preview-badge">
+                TEMPORARY PREVIEW
+              </span>
+
+              {admin.temporary_access_label && (
+                <small className="temporary-preview-label">
+                  {admin.temporary_access_label}
+                </small>
+              )}
+            </>
+          )}
         </div>
+      ))}
 
-        {admin.is_temporary && (
-          <>
-            <span className="temporary-preview-badge">
-              TEMPORARY PREVIEW
-            </span>
+      {temporaryGuardPreviews.length > 0 && (
+        <div className="temporary-guard-preview-group">
+          <span className="temporary-guard-preview-title">
+            GUARD WEB APP
+          </span>
 
-            {admin.temporary_access_label && (
-              <small className="temporary-preview-label">
-                {admin.temporary_access_label}
-              </small>
-            )}
-          </>
-        )}
-      </div>
-    ))
+          {temporaryGuardPreviews.map((guard) => (
+            <div
+              key={`guard-${guard.guard_id}`}
+              className="
+                online-admin-row
+                temporary-preview
+                temporary-guard-preview
+              "
+            >
+              <div className="online-admin-main">
+                <span
+                  className="online-admin-indicator"
+                  aria-hidden="true"
+                />
+
+                <small className="online-admin-username">
+                  {guard.username}
+                </small>
+              </div>
+
+              <span
+                className="
+                  temporary-preview-badge
+                  temporary-guard-preview-badge
+                "
+              >
+                TEMPORARY GUARD PREVIEW
+              </span>
+
+              {guard.temporary_access_label && (
+                <small className="temporary-preview-label">
+                  {guard.temporary_access_label}
+                </small>
+              )}
+
+              {guard.site_name && (
+                <small className="temporary-guard-preview-site">
+                  Site: {guard.site_name}
+                </small>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </>
   )}
 </div>
   <img
