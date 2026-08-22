@@ -65,6 +65,11 @@ const [
 ] = useState([]);
 
 const [
+  showTemporaryAccessModal,
+  setShowTemporaryAccessModal,
+] = useState(false);
+
+const [
   temporaryAccessResult,
   setTemporaryAccessResult,
 ] = useState(null);
@@ -2183,6 +2188,18 @@ const cancelManualPatrol = async (item) => {
         : "Create Temporary Access"}
     </button>
 
+        <button
+      type="button"
+      className="secondary-button temporary-access-history-button"
+      disabled={temporaryAccessList.length === 0}
+      onClick={() =>
+        setShowTemporaryAccessModal(true)
+      }
+    >
+      View Issued Preview Access (
+      {temporaryAccessList.length})
+    </button>
+
     {temporaryAccessError && (
       <p className="settings-error-text">
         {temporaryAccessError}
@@ -2348,80 +2365,125 @@ const cancelManualPatrol = async (item) => {
   </div>
 )}
 
-{temporaryAccessList.length > 0 && (
-  <div className="temporary-access-list">
-    <h3>Issued Preview Access</h3>
-
-    {temporaryAccessList.map((access) => (
-      <div
-        className="temporary-access-list-item"
-        key={access.group_id}
-      >
+{showTemporaryAccessModal && (
+  <div
+    className="modal-overlay"
+    onClick={() =>
+      setShowTemporaryAccessModal(false)
+    }
+  >
+    <div
+      className="recipients-modal temporary-access-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="temporary-access-modal-title"
+      onClick={(event) =>
+        event.stopPropagation()
+      }
+    >
+      <div className="modal-header">
         <div>
-          <strong>{access.label}</strong>
+          <h3 id="temporary-access-modal-title">
+            Issued Preview Access
+          </h3>
 
-          <span>
-            {access.company_name} ·{" "}
-            {access.site_name}
-          </span>
-
-          <small>
-            {access.dashboard.username} /{" "}
-            {access.web_app?.username}
-          </small>
-
-          <small>
-            Dashboard:{" "}
-            {access.dashboard.expires_at
-              ? `expires ${formatGreekDateTime(
-                  access.dashboard.expires_at
-                )}`
-              : `pending first login · ${access.duration_hours} hours`}
-          </small>
-
-          <small>
-            Web App:{" "}
-            {access.web_app?.expires_at
-              ? `expires ${formatGreekDateTime(
-                  access.web_app.expires_at
-                )}`
-              : `pending first login · ${access.duration_hours} hours`}
-          </small>
+          <p className="temporary-access-modal-subtitle">
+            Review and revoke previously issued
+            temporary preview accounts.
+          </p>
         </div>
 
-        <div className="temporary-access-list-actions">
-          <span
-            className={
-              `temporary-access-status ${access.status}`
-            }
-          >
-            {access.status}
-          </span>
-
-          {(access.status === "pending" ||
-            access.status === "active") && (
-            <button
-              type="button"
-              className="secondary-button"
-              disabled={
-                revokingTemporaryAccessId ===
-                access.group_id
-              }
-              onClick={() =>
-                revokeTemporaryAccess(
-                  access.group_id
-                )
-              }
-            >
-              {revokingTemporaryAccessId ===
-              access.group_id
-                ? "Revoking..."
-                : "Revoke"}
-            </button>
-          )}
-        </div>
+        <button
+          type="button"
+          className="modal-close"
+          aria-label="Close issued preview access"
+          onClick={() =>
+            setShowTemporaryAccessModal(false)
+          }
+        >
+          ×
+        </button>
       </div>
-    ))}
+
+      <div className="temporary-access-modal-list">
+        {temporaryAccessList.length === 0 ? (
+          <p className="temporary-access-modal-empty">
+            No preview access has been issued.
+          </p>
+        ) : (
+          temporaryAccessList.map((access) => (
+            <div
+              className="temporary-access-list-item"
+              key={access.group_id}
+            >
+              <div>
+                <strong>{access.label}</strong>
+
+                <span>
+                  {access.company_name} ·{" "}
+                  {access.site_name}
+                </span>
+
+                <small>
+                  {access.dashboard.username} /{" "}
+                  {access.web_app?.username}
+                </small>
+
+                <small>
+                  Dashboard:{" "}
+                  {access.dashboard.expires_at
+                    ? `expires ${formatGreekDateTime(
+                        access.dashboard.expires_at
+                      )}`
+                    : `pending first login · ${access.duration_hours} hours`}
+                </small>
+
+                <small>
+                  Web App:{" "}
+                  {access.web_app?.expires_at
+                    ? `expires ${formatGreekDateTime(
+                        access.web_app.expires_at
+                      )}`
+                    : `pending first login · ${access.duration_hours} hours`}
+                </small>
+              </div>
+
+              <div className="temporary-access-list-actions">
+                <span
+                  className={
+                    `temporary-access-status ${access.status}`
+                  }
+                >
+                  {access.status}
+                </span>
+
+                {(access.status === "pending" ||
+                  access.status === "active") && (
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      revokingTemporaryAccessId ===
+                      access.group_id
+                    }
+                    onClick={() =>
+                      revokeTemporaryAccess(
+                        access.group_id
+                      )
+                    }
+                  >
+                    {revokingTemporaryAccessId ===
+                    access.group_id
+                      ? "Revoking..."
+                      : "Revoke"}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
   </div>
 )}
 
