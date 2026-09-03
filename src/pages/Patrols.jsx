@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import "./Patrols.css";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
+const GUARD_PATROL_URL =
+  "https://noctua76.github.io/noctua-panic-webapp/patrol.html";
 const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
@@ -149,15 +151,16 @@ const openQrSiteDetails = async (siteId) => {
 
 const openQrModal = async (pointId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`, {
+      headers: getAuthHeaders(),
+    });
     const data = await response.json();
 
-    if (data.status !== "ok") {
+    if (!response.ok || data.status !== "ok") {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload =
-`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;;
+    const qrPayload = `${GUARD_PATROL_URL}?token=${data.point.qr_token}`;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 320,
@@ -178,15 +181,16 @@ const openQrModal = async (pointId) => {
 
 const printQrCard = async (pointId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`, {
+      headers: getAuthHeaders(),
+    });
     const data = await response.json();
 
-    if (data.status !== "ok") {
+    if (!response.ok || data.status !== "ok") {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload =
-`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+    const qrPayload = `${GUARD_PATROL_URL}?token=${data.point.qr_token}`;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 420,
@@ -302,15 +306,16 @@ const printQrCard = async (pointId) => {
 
 const downloadQr = async (pointId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`);
+    const response = await fetch(`${API_BASE_URL}/patrol-points/${pointId}/qr`, {
+      headers: getAuthHeaders(),
+    });
     const data = await response.json();
 
-    if (data.status !== "ok") {
+    if (!response.ok || data.status !== "ok") {
       throw new Error("Failed to load QR");
     }
 
-    const qrPayload =
-`https://noctua76.github.io/aegis-link-webapp/patrol.html?token=${data.point.qr_token}`;
+    const qrPayload = `${GUARD_PATROL_URL}?token=${data.point.qr_token}`;
 
     const imageUrl = await QRCode.toDataURL(qrPayload, {
       width: 640,
