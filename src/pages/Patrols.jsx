@@ -15,7 +15,6 @@ const getAuthHeaders = () => {
   };
 };
 const formatCompletedStatus = (status) => {
-  if (status === "missed_completed_late") return "Missed Completed Late";
   if (status === "completed_late") return "Completed Late";
   return "Completed";
 };
@@ -1437,9 +1436,7 @@ shift_label: patrol.shift_label,
             style={{
               marginTop: "6px",
               color:
-                entry.display_status === "missed_completed_late"
-                  ? "#f59e0b"
-                  : entry.display_status === "completed_late"
+                entry.display_status === "completed_late"
                   ? "#facc15"
                   : "#22c55e",
               fontSize: "12px",
@@ -1447,9 +1444,7 @@ shift_label: patrol.shift_label,
             }}
           >
             ●{" "}
-            {entry.display_status === "missed_completed_late"
-              ? "Missed Completed Late"
-              : entry.display_status === "completed_late"
+            {entry.display_status === "completed_late"
               ? "Completed Late"
               : "Completed"}
           </div>
@@ -1975,9 +1970,6 @@ shift_label: patrol.shift_label,
                 <option value="all">All Completed</option>
                 <option value="completed">Completed</option>
                 <option value="completed_late">Completed Late</option>
-                <option value="missed_completed_late">
-                  Missed Completed Late
-                </option>
               </select>
             </div>
           </div>
@@ -2143,9 +2135,7 @@ cursor: "pointer",
                       <div
                         style={{
                           color:
-                            entry.display_status === "missed_completed_late"
-                              ? "#f59e0b"
-                              : entry.display_status === "completed_late"
+                            entry.display_status === "completed_late"
                               ? "#facc15"
                               : "#22c55e",
                           fontWeight: 800,
@@ -2533,11 +2523,7 @@ cursor: "pointer",
 
           <p>
   <strong>Status:</strong>{" "}
-  {selectedHistoryPatrol.display_status === "missed_completed_late"
-    ? "Missed Completed Late"
-    : selectedHistoryPatrol.display_status === "completed_late"
-    ? "Completed Late"
-    : "Completed"}
+  {formatCompletedStatus(selectedHistoryPatrol.display_status)}
 </p>
 
 <p>
