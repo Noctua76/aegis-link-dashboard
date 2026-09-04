@@ -5,7 +5,7 @@ export const sites = [
     location: "Ekali, Athens",
     clientType: "Private Residence",
     companyPhone: "+30 210XXXXXXX",
-    sopFile: "/aegis-link-dashboard/sop/ekali-sop.pdf",
+    sopFile: `${import.meta.env.BASE_URL}sop/ekali-sop.pdf`,
     status: "Alert Active",
     notes: {
   summary: "Residential security site with perimeter monitoring.",
@@ -33,7 +33,7 @@ export const sites = [
     location: "Vouliagmeni, Athens",
     clientType: "Hotel / Resort Site",
     companyPhone: "+30 210YYYYYYY",
-    sopFile: "/aegis-link-dashboard/sop/astir-sop.pdf",
+    sopFile: `${import.meta.env.BASE_URL}sop/astir-sop.pdf`,
     status: "Normal",
     notes: {
   summary: "Large hospitality site with entrance control and patrol coverage.",
