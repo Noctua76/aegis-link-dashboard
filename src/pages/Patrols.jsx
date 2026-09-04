@@ -4,7 +4,7 @@ import "./Patrols.css";
 
 const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 const GUARD_PATROL_URL =
-  "https://noctua76.github.io/noctua-panic-webapp/patrol.html";
+  "https://guard.aegislink.noctuacore.ai/patrol.html";
 const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
