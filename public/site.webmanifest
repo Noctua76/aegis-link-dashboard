@@ -2,6 +2,7 @@
   "name": "Aegis Link Admin Dashboard",
   "short_name": "Aegis Admin",
   "description": "Admin dashboard for Aegis Link security operations.",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
