@@ -895,6 +895,7 @@ const response = await fetch(
 
 useEffect(() => {
   const loadSystemStatus = async () => {
+    let backendResponded = false;
     try {
       const sessionToken = getSessionToken();
       if (!sessionToken) return;
@@ -907,24 +908,30 @@ useEffect(() => {
           },
         }
       );
+      backendResponded = true;
       if (!response.ok) {
-        throw new Error(`System status request failed (${response.status})`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `System status request failed (${response.status})`
+        );
       }
       const data = await response.json();
       setSystemStatus(data);
     } catch (err) {
       console.error("Failed loading system status:", err);
       setSystemStatus({
-        overall_status: "offline",
-        critical_issue: true,
+        overall_status: backendResponded ? "degraded" : "offline",
+        critical_issue: !backendResponded,
         checked_at: new Date().toISOString(),
         platform: [
           {
             name: "backend_api",
             label: "Backend API",
-            status: "offline",
+            status: backendResponded ? "degraded" : "offline",
             severity: "critical",
-            last_error: err.message,
+            last_error: backendResponded
+              ? `Backend responded, but operational data could not be loaded: ${err.message}`
+              : err.message,
           },
         ],
         tenant: [],
