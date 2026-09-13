@@ -58,7 +58,10 @@ export default function Guards() {
           headers: authHeaders,
         }),
 
-        fetch(`${API_BASE_URL}/system/status`),
+        fetch(`${API_BASE_URL}/system/status/tenant`, {
+          headers: authHeaders,
+          cache: "no-store",
+        }),
       ]);
 
     const statusData = await statusRes.json();
