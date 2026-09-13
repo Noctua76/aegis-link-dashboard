@@ -472,6 +472,246 @@
   color: #d1d5db;
   line-height: 1.7;
 }
+
+.system-status-page {
+  display: grid;
+  gap: 28px;
+}
+
+.system-status-header,
+.system-status-section-title,
+.system-status-card-heading,
+.system-health-banner,
+.system-status-ai-note {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.system-status-header h1,
+.system-status-section-title h2,
+.system-status-ai-note h3 {
+  margin: 0;
+}
+
+.system-status-header h1 {
+  font-size: 32px;
+}
+
+.system-status-header p,
+.system-status-section-title p,
+.system-status-ai-note p {
+  margin: 8px 0 0;
+  color: #9ca3af;
+}
+
+.system-status-updated {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.system-health-banner {
+  align-items: center;
+  padding: 22px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: #151a22;
+}
+
+.system-health-banner strong {
+  display: block;
+  font-size: 20px;
+}
+
+.system-health-banner p {
+  margin: 6px 0 0;
+  color: #aeb7c5;
+}
+
+.system-health-banner > span,
+.system-status-ai-note > span,
+.system-status-guard-count {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.system-health-banner.status-operational {
+  border-color: rgba(34, 197, 94, 0.36);
+  background: linear-gradient(120deg, rgba(34, 197, 94, 0.12), #151a22 55%);
+}
+
+.system-health-banner.status-degraded {
+  border-color: rgba(245, 158, 11, 0.42);
+  background: linear-gradient(120deg, rgba(245, 158, 11, 0.13), #151a22 55%);
+}
+
+.system-health-banner.status-offline {
+  border-color: rgba(239, 68, 68, 0.48);
+  background: linear-gradient(120deg, rgba(239, 68, 68, 0.15), #151a22 55%);
+}
+
+.system-status-section {
+  display: grid;
+  gap: 16px;
+}
+
+.system-status-section-title {
+  align-items: center;
+}
+
+.system-status-section-title h2 {
+  font-size: 22px;
+}
+
+.system-status-card {
+  display: block;
+  min-height: 190px;
+  background: linear-gradient(145deg, #181d26, #14171d);
+}
+
+.system-status-card-heading h3 {
+  margin-bottom: 5px;
+}
+
+.system-status-card-heading > span {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.system-status-card.status-operational {
+  border-color: rgba(34, 197, 94, 0.28);
+}
+
+.system-status-card.status-operational .system-status-card-heading > span {
+  background: rgba(34, 197, 94, 0.16);
+  color: #4ade80;
+}
+
+.system-status-card.status-degraded,
+.system-status-card.status-not_configured {
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.system-status-card.status-degraded .system-status-card-heading > span,
+.system-status-card.status-not_configured .system-status-card-heading > span {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+}
+
+.system-status-card.status-offline {
+  border-color: rgba(239, 68, 68, 0.36);
+}
+
+.system-status-card.status-offline .system-status-card-heading > span {
+  background: rgba(239, 68, 68, 0.16);
+  color: #f87171;
+}
+
+.system-status-scope {
+  text-transform: capitalize;
+}
+
+.system-status-details {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.system-status-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.system-status-details dt {
+  color: #8f9bab;
+  font-size: 12px;
+}
+
+.system-status-details dd {
+  margin: 0;
+  color: #e5e7eb;
+  font-size: 12px;
+  text-align: right;
+}
+
+.system-status-error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #fecaca !important;
+  background: rgba(127, 29, 29, 0.28);
+  overflow-wrap: anywhere;
+}
+
+.system-status-ai-note {
+  align-items: center;
+  padding: 18px 20px;
+  border: 1px dashed rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.system-tenant-list {
+  display: grid;
+  gap: 20px;
+}
+
+.system-tenant-group {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(15, 18, 24, 0.72);
+}
+
+.system-tenant-group h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.system-tenant-overall {
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  background: rgba(148, 163, 184, 0.14);
+}
+
+.system-tenant-overall.status-operational {
+  color: #4ade80;
+}
+
+.system-tenant-overall.status-degraded {
+  color: #fbbf24;
+}
+
+.system-tenant-overall.status-offline {
+  color: #f87171;
+}
+
+@media (max-width: 720px) {
+  .system-status-header,
+  .system-status-section-title,
+  .system-health-banner,
+  .system-status-ai-note {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .system-status-updated {
+    white-space: normal;
+  }
+}
 .location-card,
 .guard-location-card,
 .guards-location-card {

@@ -1326,7 +1326,10 @@ loadGuards();
 loadUsers();
     async function loadSystemStatus() {
       try {
-        const response = await fetch(`${API_BASE_URL}/system/status`);
+        const response = await fetch(`${API_BASE_URL}/system/status/tenant`, {
+          headers: getAuthHeaders(),
+          cache: "no-store",
+        });
         const data = await response.json();
 
         setSystemStatus(data);

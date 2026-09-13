@@ -23,6 +23,72 @@ import {
   getActiveSessionBySiteId,
 } from "./data/securityData";
 
+const STATUS_LABELS = {
+  operational: "Operational",
+  degraded: "Degraded",
+  offline: "Offline",
+  unknown: "Unknown",
+  not_configured: "Not configured",
+};
+
+const formatHealthTime = (value) => {
+  if (!value) return "No recorded event";
+  return new Date(value).toLocaleString("el-GR", {
+    timeZone: "Europe/Athens",
+    dateStyle: "short",
+    timeStyle: "medium",
+  });
+};
+
+function SystemStatusCard({ item }) {
+  const status = item?.status || "unknown";
+  const details = [
+    item?.last_checked_at && ["Last checked", formatHealthTime(item.last_checked_at)],
+    item?.last_success_at && ["Last success", formatHealthTime(item.last_success_at)],
+    item?.last_failure_at && ["Last failure", formatHealthTime(item.last_failure_at)],
+    item?.last_scan_at && ["Last patrol scan", formatHealthTime(item.last_scan_at)],
+    item?.last_completion_at && ["Last patrol completion", formatHealthTime(item.last_completion_at)],
+    item?.last_missed_patrol_at && ["Last missed patrol", formatHealthTime(item.last_missed_patrol_at)],
+    item?.last_incident_at && ["Last incident", formatHealthTime(item.last_incident_at)],
+    item?.last_resolved_at && ["Last incident resolved", formatHealthTime(item.last_resolved_at)],
+    Number.isFinite(item?.response_time_ms) && ["Response", `${item.response_time_ms} ms`],
+    Number.isFinite(item?.active_subscriptions) && ["Active subscriptions", item.active_subscriptions],
+    Number.isFinite(item?.active_schedules) && ["Active schedules", item.active_schedules],
+    Number.isFinite(item?.active_incidents) && ["Active incidents", item.active_incidents],
+    Number.isFinite(item?.missed_last_30_days) && ["Missed (30 days)", item.missed_last_30_days],
+  ].filter(Boolean);
+
+  return (
+    <article className={`system-status-card status-${status}`}>
+      <div className="system-status-card-heading">
+        <div>
+          <h3>{item?.label || item?.name || "Service"}</h3>
+          <p className="system-status-scope">
+            {item?.scope === "tenant" ? "Tenant service" : "Shared platform"}
+            {item?.severity ? ` · ${item.severity} priority` : ""}
+          </p>
+        </div>
+        <span>{STATUS_LABELS[status] || status}</span>
+      </div>
+
+      {details.length > 0 && (
+        <dl className="system-status-details">
+          {details.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+
+      {item?.last_error && (
+        <p className="system-status-error">{item.last_error}</p>
+      )}
+    </article>
+  );
+}
+
 function App() {
   const [onlineAdmins, setOnlineAdmins] = useState([]);
   const [
@@ -46,6 +112,8 @@ const [currentUser, setCurrentUser] = useState(() => {
   const savedUser = localStorage.getItem("aegis-current-user");
   return savedUser ? JSON.parse(savedUser) : null;
 });
+
+const isSystemOwner = currentUser?.user?.role === "system_owner";
 
 const isReadOnlyAccess =
   currentUser?.user?.access_mode === "read_only";
@@ -828,87 +896,55 @@ const response = await fetch(
 useEffect(() => {
   const loadSystemStatus = async () => {
     try {
-      let webAppStatus = "offline";
-
-try {
-  const webCheck = await fetch(
-    "https://noctua-panic-backend-production.up.railway.app/health",
-    {
-      cache: "no-store"
-    }
-  );
-
-  const webData = await webCheck.json();
-
-  if (webData.status === "ok") {
-    webAppStatus = "online";
-  }
-} catch {
-  webAppStatus = "offline";
-}
-
+      const sessionToken = getSessionToken();
+      if (!sessionToken) return;
       const response = await fetch(
-        "https://noctua-panic-backend-production.up.railway.app/system/status"
+        `${API_BASE_URL}/system/status/${isSystemOwner ? "global" : "tenant"}`,
+        {
+          cache: "no-store",
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
       );
-
+      if (!response.ok) {
+        throw new Error(`System status request failed (${response.status})`);
+      }
       const data = await response.json();
-
-      data.services.web_app = {
-  status: webAppStatus
-};
-
       setSystemStatus(data);
-
     } catch (err) {
-
-      console.error(
-  "Failed loading system status:",
-  err
-);
-
-setSystemStatus({
-  overall_status: "offline",
-  services: {
-    backend_api: {
-      label: "Backend API",
-      status: "offline",
-      message: "Backend API is not responding"
-    },
-    sms_gateway: {
-      label: "SMS Gateway",
-      status: "unknown"
-    },
-    voice_calls: {
-      label: "Voice Calls",
-      status: "unknown"
-    },
-    database: {
-      label: "Database",
-      status: "unknown"
-    },
-    ai_intake: {
-      label: "AI Intake",
-      status: "unknown"
+      console.error("Failed loading system status:", err);
+      setSystemStatus({
+        overall_status: "offline",
+        critical_issue: true,
+        checked_at: new Date().toISOString(),
+        platform: [
+          {
+            name: "backend_api",
+            label: "Backend API",
+            status: "offline",
+            severity: "critical",
+            last_error: err.message,
+          },
+        ],
+        tenant: [],
+      });
     }
-    }
-  });
-
-}
-};
+  };
 
   loadSystemStatus();
 
   const interval =
     setInterval(
       loadSystemStatus,
-      10000
+      30000
     );
 
   return () => {
   clearInterval(interval);
 };
 
-}, []);
+}, [currentUser]);
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
@@ -2615,123 +2651,109 @@ const renderIncidentLocation = (incident) => {
 <Analytics/>
 )}
         
-        {activeMenu === "System Status" && (
-  <>
-    <header style={{ marginBottom: "28px" }}>
-      <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "700" }}>
-        System Status
-      </h1>
-      <p style={{ marginTop: "8px", color: "#9ca3af", fontSize: "15px" }}>
-        Operational health of the Aegis Link infrastructure
+{activeMenu === "System Status" && (
+  <div className="system-status-page">
+    <header className="system-status-header">
+      <div>
+        <h1>System Status</h1>
+        <p>Live platform checks and real operational events for your company.</p>
+      </div>
+      <p className="system-status-updated">
+        Last refresh: {formatHealthTime(systemStatus?.checked_at)}
       </p>
     </header>
 
-    <section className="system-status-grid">
-      <div className="system-status-card online">
-        <div>
-          <h3>Web App</h3>
-          <p>Guard interface and alert trigger</p>
-        </div>
-        <span>
-  {systemStatus?.services?.web_app?.status || "Loading"}
-</span>
+    <section className={`system-health-banner status-${systemStatus?.overall_status || "unknown"}`}>
+      <div>
+        <strong>
+          {systemStatus?.critical_issue
+            ? "Critical operational issue"
+            : systemStatus?.overall_status === "degraded"
+              ? "Some services need attention"
+              : systemStatus?.overall_status === "operational"
+                ? "All monitored systems operational"
+                : "Checking system health"}
+        </strong>
+        <p>
+          Unknown and not-configured services are shown transparently and do not create synthetic failures.
+        </p>
       </div>
-
-      <div
-className={`system-status-card ${
-systemStatus?.services?.backend_api?.status === "operational"
-? "online"
-: "warning"
-}`}
->
-
-<div>
-
-<h3>Backend API</h3>
-
-<p>
-Incident orchestration and event handling
-</p>
-
-</div>
-
-<span>
-
-{
-systemStatus?.services?.backend_api?.status
-||
-"Loading"
-}
-
-</span>
-
-</div>
-
-      <div
-  className={`system-status-card ${
-    systemStatus?.services?.sms_gateway?.status === "operational"
-      ? "online"
-      : "warning"
-  }`}
->
-  <div>
-    <h3>SMS Gateway</h3>
-    <p>Vonage SMS delivery channel</p>
-  </div>
-  <span>
-    {systemStatus?.services?.sms_gateway?.status || "Loading"}
-  </span>
-</div>
-
-      <div
-  className={`system-status-card ${
-    systemStatus?.services?.voice_calls?.status === "operational"
-      ? "online"
-      : "warning"
-  }`}
->
-  <div>
-    <h3>Voice Calls</h3>
-    <p>Automated outbound emergency calls</p>
-  </div>
-  <span>
-    {systemStatus?.services?.voice_calls?.status || "Loading"}
-  </span>
-</div>
-
-      <div className="system-status-card warning">
-        <div>
-          <h3>AI Intake</h3>
-          <p>Post-alert structured questioning flow</p>
-        </div>
-        <span>Demo Mode</span>
-      </div>
-
-      <div
-  className={`system-status-card ${
-    systemStatus?.services?.database?.status === "operational"
-      ? "online"
-      : "warning"
-  }`}
->
-  <div>
-    <h3>Database</h3>
-    <p>Incident history and audit persistence</p>
-  </div>
-
-  <span>
-    {systemStatus?.services?.database?.status || "Loading"}
-  </span>
-</div>
+      <span>{STATUS_LABELS[systemStatus?.overall_status] || "Loading"}</span>
     </section>
 
-    <section className="system-status-panel">
-      <h2>Current Infrastructure State</h2>
-      <p>
-        Operational overview of the Aegis Link environment. Service status indicators provide live visibility into communication channels, incident workflows, backend infrastructure, and escalation readiness.
-      </p>
+    <section className="system-status-section">
+      <div className="system-status-section-title">
+        <div>
+          <h2>Shared Platform</h2>
+          <p>Infrastructure shared by all Aegis Link tenants.</p>
+        </div>
+      </div>
+      <div className="system-status-grid">
+        {(systemStatus?.platform || []).map((item) => (
+          <SystemStatusCard key={item.name} item={{ ...item, scope: "platform" }} />
+        ))}
+      </div>
     </section>
-  </>
+
+    {systemStatus?.scope === "global" ? (
+      <section className="system-status-section">
+        <div className="system-status-section-title">
+          <div>
+            <h2>Tenant Operations</h2>
+            <p>System Owner view across all companies, kept separate by tenant.</p>
+          </div>
+          <span className="system-status-guard-count">
+            {systemStatus?.tenants?.length || 0} companies
+          </span>
+        </div>
+        <div className="system-tenant-list">
+          {(systemStatus?.tenants || []).map((tenant) => (
+            <article className="system-tenant-group" key={tenant.company_id}>
+              <div className="system-status-section-title">
+                <div>
+                  <h3>{tenant.company_name}</h3>
+                  <p>Account: {tenant.company_status || "unknown"}</p>
+                </div>
+                <span className={`system-tenant-overall status-${tenant.overall_status}`}>
+                  {STATUS_LABELS[tenant.overall_status] || tenant.overall_status}
+                </span>
+              </div>
+              <div className="system-status-grid">
+                {(tenant.services || []).map((item) => (
+                  <SystemStatusCard key={item.name} item={{ ...item, scope: "tenant" }} />
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    ) : (
+      <section className="system-status-section">
+        <div className="system-status-section-title">
+          <div>
+            <h2>Company Operations</h2>
+            <p>Only real events and resources belonging to your authenticated company.</p>
+          </div>
+          <span className="system-status-guard-count">
+            {systemStatus?.active_guards ?? 0} active guards
+          </span>
+        </div>
+        <div className="system-status-grid">
+          {(systemStatus?.tenant || []).map((item) => (
+            <SystemStatusCard key={item.name} item={{ ...item, scope: "tenant" }} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <section className="system-status-ai-note">
+      <div>
+        <h3>AI Intake</h3>
+        <p>Unchanged. Its state is informational and excluded from overall operational health.</p>
+      </div>
+      <span>{STATUS_LABELS[systemStatus?.ai_intake?.status] || "Unknown"}</span>
+    </section>
+  </div>
 )}
 
 {reportPreviewHtml && (
