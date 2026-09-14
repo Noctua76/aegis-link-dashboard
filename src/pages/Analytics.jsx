@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import "./Analytics.css";
+import { API_BASE_URL } from "../config/api";
 
 function Analytics() {
-  const API_BASE_URL =
-    "https://noctua-panic-backend-production.up.railway.app";
   
   const getAuthHeaders = () => {
   const currentUser = JSON.parse(

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Guards.css";
+import { API_BASE_URL } from "../config/api";
 
-const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 function getSessionToken() {
   const storedUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "null"

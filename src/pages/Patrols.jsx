@@ -1,8 +1,8 @@
 import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import "./Patrols.css";
+import { API_BASE_URL } from "../config/api";
 
-const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
 const GUARD_PATROL_URL =
   "https://guard.aegislink.noctuacore.ai/patrol.html";
 const getAuthHeaders = () => {
@@ -1786,6 +1786,7 @@ shift_label: patrol.shift_label,
               {missedHistory.map((entry) => (
                 <div
                   key={entry.id}
+                  onClick={() => entry.corrected && setSelectedHistoryPatrol(entry)}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "1.2fr 1fr 1fr",
@@ -1795,6 +1796,7 @@ shift_label: patrol.shift_label,
                     borderRadius: "14px",
                     background: "rgba(255,255,255,0.04)",
                     border: "1px solid rgba(239,68,68,0.22)",
+                    cursor: entry.corrected ? "pointer" : "default",
                   }}
                 >
                   <div>
@@ -1835,6 +1837,9 @@ shift_label: patrol.shift_label,
                     }}
                   >
                     ● Missed
+                    {entry.corrected && (
+                      <span className="patrol-corrected-badge">CORRECTED</span>
+                    )}
                   </span>
                 </div>
               ))}
@@ -2144,6 +2149,16 @@ cursor: "pointer",
                         ● {formatCompletedStatus(entry.display_status)}
                       </div>
 
+                      {entry.corrected && (
+                        <button
+                          type="button"
+                          className="patrol-corrected-button"
+                          onClick={() => setSelectedHistoryPatrol(entry)}
+                        >
+                          CORRECTED · View amendment
+                        </button>
+                      )}
+
                       <div
                         style={{
                           marginTop: "8px",
@@ -2416,7 +2431,11 @@ cursor: "pointer",
         </p>
 
         <div className="analytics-table-card">
-          <h3>Completed Patrol Details</h3>
+          <h3>
+            {selectedHistoryPatrol.original_operational_outcome === "MISSED"
+              ? "Missed Patrol Details"
+              : "Completed Patrol Details"}
+          </h3>
 
           <p>
             <strong>Checkpoint:</strong>{" "}
@@ -2513,18 +2532,47 @@ cursor: "pointer",
 </p>
 
           <p>
-            <strong>Completed:</strong>{" "}
-            {selectedHistoryPatrol.patrol_time
-              ? new Date(selectedHistoryPatrol.patrol_time).toLocaleString("el-GR", {
-                  timeZone: "Europe/Athens",
-                })
+            <strong>
+              {selectedHistoryPatrol.patrol_time ? "Completed:" : "Scheduled:"}
+            </strong>{" "}
+            {selectedHistoryPatrol.patrol_time || selectedHistoryPatrol.scheduled_at
+              ? new Date(
+                  selectedHistoryPatrol.patrol_time || selectedHistoryPatrol.scheduled_at
+                ).toLocaleString("el-GR", { timeZone: "Europe/Athens" })
               : "-"}
           </p>
 
-          <p>
+<p>
   <strong>Status:</strong>{" "}
-  {formatCompletedStatus(selectedHistoryPatrol.display_status)}
+  {selectedHistoryPatrol.original_operational_outcome ||
+    formatCompletedStatus(selectedHistoryPatrol.display_status)}
 </p>
+
+{selectedHistoryPatrol.corrected && (
+  <div className="patrol-correction-evidence">
+    <span className="patrol-corrected-badge">CORRECTED</span>
+    <h4>Original Record</h4>
+    <p>
+      <strong>Original operational outcome:</strong>{" "}
+      {selectedHistoryPatrol.original_operational_outcome}
+    </p>
+    <p>
+      <strong>Final interpreted value:</strong>{" "}
+      {selectedHistoryPatrol.final_interpreted_value}
+    </p>
+    <h4>Correction / Amendment History</h4>
+    {selectedHistoryPatrol.corrections.map((correction) => (
+      <div className="patrol-correction-entry" key={correction.id}>
+        <strong>{correction.original_value} → {correction.corrected_value}</strong>
+        <span>{correction.reason}</span>
+        <small>
+          {correction.corrected_by_name || "System Owner"} ·{" "}
+          {new Date(correction.corrected_at).toLocaleString("el-GR")}
+        </small>
+      </div>
+    ))}
+  </div>
+)}
 
 <p>
   <strong>Delay:</strong>{" "}
