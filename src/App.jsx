@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import Analytics from "./pages/Analytics";
 import { formatDateTime } from "./utils/dateTime";
+import { API_BASE_URL } from "./config/api";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -95,7 +96,6 @@ function App() {
   temporaryGuardPreviews,
   setTemporaryGuardPreviews,
 ] = useState([]);
-  const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
   const getSessionToken = () => {
   const storedUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "null"
@@ -288,6 +288,9 @@ const [loginForm, setLoginForm] = useState({
 
 const [loginError, setLoginError] = useState("");
 const [isLoggingIn, setIsLoggingIn] = useState(false);
+const [showLoginPassword, setShowLoginPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 const [recentAlerts, setRecentAlerts] = useState([]);
 const [recentAlertsCheckedAt, setRecentAlertsCheckedAt] = useState(null);
 
@@ -595,7 +598,7 @@ if (!sessionToken) {
 }
 
 const response = await fetch(
-  "https://noctua-panic-backend-production.up.railway.app/admin/active",
+  `${API_BASE_URL}/admin/active`,
   {
     headers: {
       Authorization: `Bearer ${sessionToken}`,
@@ -1028,29 +1031,51 @@ if (!currentUser) {
 
         {showPasswordChange ? (
   <form onSubmit={handlePasswordChange} className="login-form">
-    <input
-      type="password"
-      placeholder="New Password"
-      value={passwordChangeForm.new_password}
-      onChange={(e) =>
-        setPasswordChangeForm({
-          ...passwordChangeForm,
-          new_password: e.target.value,
-        })
-      }
-    />
+    <div className="password-input-row">
+      <input
+        type={showNewPassword ? "text" : "password"}
+        placeholder="New Password"
+        value={passwordChangeForm.new_password}
+        onChange={(e) =>
+          setPasswordChangeForm({
+            ...passwordChangeForm,
+            new_password: e.target.value,
+          })
+        }
+      />
+      <button
+        type="button"
+        className="password-visibility-button"
+        aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+        aria-pressed={showNewPassword}
+        onClick={() => setShowNewPassword((visible) => !visible)}
+      >
+        {showNewPassword ? "Hide" : "Show"}
+      </button>
+    </div>
 
-    <input
-      type="password"
-      placeholder="Confirm New Password"
-      value={passwordChangeForm.confirm_password}
-      onChange={(e) =>
-        setPasswordChangeForm({
-          ...passwordChangeForm,
-          confirm_password: e.target.value,
-        })
-      }
-    />
+    <div className="password-input-row">
+      <input
+        type={showConfirmPassword ? "text" : "password"}
+        placeholder="Confirm New Password"
+        value={passwordChangeForm.confirm_password}
+        onChange={(e) =>
+          setPasswordChangeForm({
+            ...passwordChangeForm,
+            confirm_password: e.target.value,
+          })
+        }
+      />
+      <button
+        type="button"
+        className="password-visibility-button"
+        aria-label={showConfirmPassword ? "Hide confirmed password" : "Show confirmed password"}
+        aria-pressed={showConfirmPassword}
+        onClick={() => setShowConfirmPassword((visible) => !visible)}
+      >
+        {showConfirmPassword ? "Hide" : "Show"}
+      </button>
+    </div>
 
     {passwordChangeError && (
       <span className="login-error">{passwordChangeError}</span>
@@ -1071,14 +1096,25 @@ if (!currentUser) {
       }
     />
 
-    <input
-      type="password"
-      placeholder="Password"
-      value={loginForm.password}
-      onChange={(e) =>
-        setLoginForm({ ...loginForm, password: e.target.value })
-      }
-    />
+    <div className="password-input-row">
+      <input
+        type={showLoginPassword ? "text" : "password"}
+        placeholder="Password"
+        value={loginForm.password}
+        onChange={(e) =>
+          setLoginForm({ ...loginForm, password: e.target.value })
+        }
+      />
+      <button
+        type="button"
+        className="password-visibility-button"
+        aria-label={showLoginPassword ? "Hide password" : "Show password"}
+        aria-pressed={showLoginPassword}
+        onClick={() => setShowLoginPassword((visible) => !visible)}
+      >
+        {showLoginPassword ? "Hide" : "Show"}
+      </button>
+    </div>
 
     {loginError && <span className="login-error">{loginError}</span>}
 

@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import "./Settings.css";
+import { API_BASE_URL } from "../config/api";
+
+const toDateInputValue = (date) => {
+  const localDate = new Date(
+    date.getTime() - date.getTimezoneOffset() * 60000
+  );
+  return localDate.toISOString().slice(0, 10);
+};
 
 function Settings() {
-  const API_BASE_URL = "https://noctua-panic-backend-production.up.railway.app";
   const storedCurrentUser = (() => {
   try {
     return JSON.parse(
@@ -111,6 +118,23 @@ const [
   guard_username: "preview.guard",
 });
 
+const [patrolCorrectionForm, setPatrolCorrectionForm] = useState(() => ({
+  site_id: "",
+  from: toDateInputValue(new Date()),
+  to: toDateInputValue(new Date()),
+  occurrence_key: "",
+  corrected_value: "COMPLETED",
+  reason: "",
+}));
+const [patrolCorrectionOccurrences, setPatrolCorrectionOccurrences] = useState([]);
+const [patrolCorrectionLoading, setPatrolCorrectionLoading] = useState(false);
+const [patrolCorrectionSaving, setPatrolCorrectionSaving] = useState(false);
+const [patrolCorrectionMessage, setPatrolCorrectionMessage] = useState("");
+
+const selectedCorrectionOccurrence = patrolCorrectionOccurrences.find(
+  (occurrence) => occurrence.occurrence_key === patrolCorrectionForm.occurrence_key
+) || null;
+
 const [newUser, setNewUser] = useState({
   full_name: "",
   username: "",
@@ -169,6 +193,7 @@ const [newGuard, setNewGuard] = useState({
   password: "",
   site_id: "",
 });
+const [showNewGuardPassword, setShowNewGuardPassword] = useState(false);
 
 const [newRecipient, setNewRecipient] = useState({
 full_name:"",
@@ -365,6 +390,87 @@ const loadTemporaryAccess = async () => {
   }
 };
 
+const loadPatrolCorrectionOccurrences = async () => {
+  if (!patrolCorrectionForm.site_id) {
+    setPatrolCorrectionMessage("Select a site.");
+    return;
+  }
+
+  setPatrolCorrectionLoading(true);
+  setPatrolCorrectionMessage("");
+
+  try {
+    const params = new URLSearchParams({
+      site_id: patrolCorrectionForm.site_id,
+      from: patrolCorrectionForm.from,
+      to: patrolCorrectionForm.to,
+    });
+    const response = await fetch(
+      `${API_BASE_URL}/admin/patrol-corrections/occurrences?${params.toString()}`,
+      { headers: getAuthHeaders() }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to load patrol occurrences");
+    }
+
+    setPatrolCorrectionOccurrences(data.occurrences || []);
+    setPatrolCorrectionForm((current) => ({
+      ...current,
+      occurrence_key: "",
+      reason: "",
+    }));
+
+    if (!(data.occurrences || []).length) {
+      setPatrolCorrectionMessage("No patrol occurrences found for this period.");
+    }
+  } catch (err) {
+    setPatrolCorrectionOccurrences([]);
+    setPatrolCorrectionMessage(err.message || "Unable to load patrol occurrences");
+  } finally {
+    setPatrolCorrectionLoading(false);
+  }
+};
+
+const createPatrolCorrection = async () => {
+  if (!selectedCorrectionOccurrence) {
+    setPatrolCorrectionMessage("Select a patrol occurrence.");
+    return;
+  }
+
+  setPatrolCorrectionSaving(true);
+  setPatrolCorrectionMessage("");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/patrol-corrections`, {
+      method: "POST",
+      headers: {
+        ...getAuthHeaders(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        occurrence_key: selectedCorrectionOccurrence.occurrence_key,
+        field: "outcome",
+        corrected_value: patrolCorrectionForm.corrected_value,
+        reason: patrolCorrectionForm.reason,
+      }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to create patrol correction");
+    }
+
+    await loadPatrolCorrectionOccurrences();
+    setPatrolCorrectionMessage("Correction recorded. The original record was not changed.");
+  } catch (err) {
+    setPatrolCorrectionMessage(err.message || "Unable to create patrol correction");
+  } finally {
+    setPatrolCorrectionSaving(false);
+  }
+};
+
 const createTemporaryAccess = async () => {
   setTemporaryAccessError("");
   setTemporaryAccessResult(null);
@@ -465,6 +571,7 @@ const copyTemporaryAccessCredentials =
       `Password: ${webApp.password}`,
       "",
       `Access duration: ${duration} hours for each account, starting from its own first successful login.`,
+      "Each account must be activated within 14 days of issue.",
       "Read-only access. Operational actions are disabled.",
     ].join("\n");
 
@@ -2072,9 +2179,10 @@ const cancelManualPatrol = async (item) => {
         <h2>Temporary Preview Access</h2>
 
         <p>
-          Create a linked Dashboard and Guard
-          Web App account. The timer starts on
-          the first successful login.
+          Create a linked Dashboard and Guard Web App account.
+          Each 48-hour timer starts on that surface's first
+          successful login. Unused credentials auto-expire
+          after 14 days.
         </p>
       </div>
 
@@ -2434,23 +2542,33 @@ const cancelManualPatrol = async (item) => {
                   {access.web_app?.username}
                 </small>
 
-                <small>
-                  Dashboard:{" "}
-                  {access.dashboard.expires_at
-                    ? `expires ${formatGreekDateTime(
-                        access.dashboard.expires_at
-                      )}`
-                    : `pending first login · ${access.duration_hours} hours`}
-                </small>
+                <div className="temporary-surface-statuses">
+                  <div>
+                    <span className={`temporary-access-status ${access.dashboard.status}`}>
+                      Dashboard: {access.dashboard.status.replace("_", "-")}
+                    </span>
+                    <small>{access.dashboard.status_reason}</small>
+                    <small>
+                      {access.dashboard.expires_at
+                        ? `Access deadline: ${formatGreekDateTime(access.dashboard.expires_at)}`
+                        : `Activation deadline: ${formatGreekDateTime(access.dashboard.activation_deadline)}`}
+                    </small>
+                  </div>
 
-                <small>
-                  Web App:{" "}
-                  {access.web_app?.expires_at
-                    ? `expires ${formatGreekDateTime(
-                        access.web_app.expires_at
-                      )}`
-                    : `pending first login · ${access.duration_hours} hours`}
-                </small>
+                  {access.web_app && (
+                    <div>
+                      <span className={`temporary-access-status ${access.web_app.status}`}>
+                        Guard Web App: {access.web_app.status.replace("_", "-")}
+                      </span>
+                      <small>{access.web_app.status_reason}</small>
+                      <small>
+                        {access.web_app.expires_at
+                          ? `Access deadline: ${formatGreekDateTime(access.web_app.expires_at)}`
+                          : `Activation deadline: ${formatGreekDateTime(access.web_app.activation_deadline)}`}
+                      </small>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="temporary-access-list-actions">
@@ -2492,6 +2610,169 @@ const cancelManualPatrol = async (item) => {
   </div>
 )}
 
+  </section>
+)}
+
+{isSystemOwner && (
+  <section className="patrol-corrections-panel">
+    <div className="temporary-access-heading">
+      <div>
+        <span className="temporary-access-eyebrow">System Owner</span>
+        <h2>Patrol Management · Patrol Corrections</h2>
+        <p>
+          Create an append-only outcome amendment. The original operational
+          patrol evidence always remains unchanged and visible.
+        </p>
+      </div>
+      <span className="patrol-corrections-immutable-badge">Immutable history</span>
+    </div>
+
+    <div className="patrol-corrections-filter-grid">
+      <label className="settings-field">
+        <span>Site</span>
+        <select
+          value={patrolCorrectionForm.site_id}
+          onChange={(event) => setPatrolCorrectionForm({
+            ...patrolCorrectionForm,
+            site_id: event.target.value,
+            occurrence_key: "",
+          })}
+        >
+          <option value="">Select site</option>
+          {sites.map((site) => (
+            <option key={site.id} value={site.id}>{site.name}</option>
+          ))}
+        </select>
+      </label>
+
+      <label className="settings-field">
+        <span>From</span>
+        <input
+          type="date"
+          value={patrolCorrectionForm.from}
+          onChange={(event) => setPatrolCorrectionForm({
+            ...patrolCorrectionForm,
+            from: event.target.value,
+          })}
+        />
+      </label>
+
+      <label className="settings-field">
+        <span>To</span>
+        <input
+          type="date"
+          value={patrolCorrectionForm.to}
+          onChange={(event) => setPatrolCorrectionForm({
+            ...patrolCorrectionForm,
+            to: event.target.value,
+          })}
+        />
+      </label>
+
+      <button
+        type="button"
+        onClick={loadPatrolCorrectionOccurrences}
+        disabled={patrolCorrectionLoading}
+      >
+        {patrolCorrectionLoading ? "Loading..." : "Load Occurrences"}
+      </button>
+    </div>
+
+    {patrolCorrectionOccurrences.length > 0 && (
+      <div className="patrol-corrections-workspace">
+        <label className="settings-field">
+          <span>Patrol occurrence</span>
+          <select
+            value={patrolCorrectionForm.occurrence_key}
+            onChange={(event) => setPatrolCorrectionForm({
+              ...patrolCorrectionForm,
+              occurrence_key: event.target.value,
+            })}
+          >
+            <option value="">Select occurrence</option>
+            {patrolCorrectionOccurrences.map((occurrence) => (
+              <option
+                key={occurrence.occurrence_key}
+                value={occurrence.occurrence_key}
+              >
+                {occurrence.point_name || "Patrol Point"} · {new Date(
+                  occurrence.patrol_time || occurrence.scheduled_at
+                ).toLocaleString("el-GR")} · {occurrence.final_interpreted_value}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {selectedCorrectionOccurrence && (
+          <div className="patrol-correction-original-record">
+            <h3>Original Record</h3>
+            <dl>
+              <div><dt>Occurrence ID</dt><dd>{selectedCorrectionOccurrence.occurrence_key}</dd></div>
+              <div><dt>Checkpoint</dt><dd>{selectedCorrectionOccurrence.point_name || "-"}</dd></div>
+              <div><dt>Guard</dt><dd>{selectedCorrectionOccurrence.guard_name || "-"}</dd></div>
+              <div><dt>Original operational outcome</dt><dd>{selectedCorrectionOccurrence.original_operational_outcome}</dd></div>
+              <div><dt>Final interpreted value</dt><dd>{selectedCorrectionOccurrence.final_interpreted_value}</dd></div>
+            </dl>
+
+            {selectedCorrectionOccurrence.corrections?.length > 0 && (
+              <div className="patrol-correction-history">
+                <h4>Correction / Amendment History</h4>
+                {selectedCorrectionOccurrence.corrections.map((correction) => (
+                  <p key={correction.id}>
+                    <strong>{correction.original_value} → {correction.corrected_value}</strong>
+                    {" · "}{correction.reason}{" · "}
+                    {correction.corrected_by_name || "System Owner"}
+                  </p>
+                ))}
+              </div>
+            )}
+
+            <div className="patrol-correction-form">
+              <label className="settings-field">
+                <span>Administrative amendment</span>
+                <select
+                  value={patrolCorrectionForm.corrected_value}
+                  onChange={(event) => setPatrolCorrectionForm({
+                    ...patrolCorrectionForm,
+                    corrected_value: event.target.value,
+                  })}
+                >
+                  <option value="COMPLETED">COMPLETED</option>
+                  <option value="COMPLETED_LATE">COMPLETED LATE</option>
+                  <option value="MISSED">MISSED</option>
+                </select>
+              </label>
+
+              <label className="settings-field patrol-correction-reason">
+                <span>Reason (required)</span>
+                <textarea
+                  minLength="10"
+                  maxLength="1000"
+                  value={patrolCorrectionForm.reason}
+                  onChange={(event) => setPatrolCorrectionForm({
+                    ...patrolCorrectionForm,
+                    reason: event.target.value,
+                  })}
+                  placeholder="Explain why this administrative amendment is required."
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={createPatrolCorrection}
+                disabled={patrolCorrectionSaving || patrolCorrectionForm.reason.trim().length < 10}
+              >
+                {patrolCorrectionSaving ? "Recording..." : "Create Correction"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    )}
+
+    {patrolCorrectionMessage && (
+      <p className="patrol-correction-message">{patrolCorrectionMessage}</p>
+    )}
   </section>
 )}
 
@@ -2840,17 +3121,28 @@ Manage Recipients
     }
   />
 
-  <input
-    type="password"
-    placeholder="Temporary password"
-    value={newGuard.password}
-    onChange={(e) =>
-      setNewGuard({
-        ...newGuard,
-        password: e.target.value,
-      })
-    }
-  />
+  <div className="settings-password-row">
+    <input
+      type={showNewGuardPassword ? "text" : "password"}
+      placeholder="Temporary password"
+      value={newGuard.password}
+      onChange={(e) =>
+        setNewGuard({
+          ...newGuard,
+          password: e.target.value,
+        })
+      }
+    />
+    <button
+      type="button"
+      className="settings-password-toggle"
+      aria-label={showNewGuardPassword ? "Hide temporary password" : "Show temporary password"}
+      aria-pressed={showNewGuardPassword}
+      onClick={() => setShowNewGuardPassword((visible) => !visible)}
+    >
+      {showNewGuardPassword ? "Hide" : "Show"}
+    </button>
+  </div>
 
   <select
     value={newGuard.site_id}
