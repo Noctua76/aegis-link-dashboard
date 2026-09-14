@@ -948,3 +948,28 @@ font-size:13px;
   min-width: 0;
   box-sizing: border-box;
 }
+
+@media (max-width: 768px) {
+  .settings-users-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .settings-side-stack {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    gap: 18px;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+
+  .settings-users-layout > .settings-card,
+  .settings-side-stack > .settings-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+}
