@@ -102,4 +102,25 @@
     white-space: normal !important;
   }
 
+  /* History filter and result cards keep their readable desktop width
+     and can be swiped horizontally inside the mobile modal. */
+  .report-modal .analytics-table-card {
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  /* Keep the generated QR fully inside the available modal width. */
+  .report-modal img[alt^="QR Code for"] {
+    display: block;
+    width: 100% !important;
+    max-width: 320px;
+    height: auto !important;
+    aspect-ratio: 1;
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
 }
