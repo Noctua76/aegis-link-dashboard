@@ -60,13 +60,22 @@
 @media (max-width: 768px) {
 
   .patrol-section-header {
-    align-items: flex-start !important;
-    gap: 10px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 10px 12px !important;
   }
 
   .patrol-section-header > div:first-child {
-    flex: 1;
+    flex: 0 0 100% !important;
+    width: 100%;
     min-width: 0;
+  }
+
+  .patrol-section-header > div:first-child h3,
+  .patrol-section-header > div:first-child p {
+    max-width: 100%;
+    word-break: normal !important;
+    overflow-wrap: break-word;
   }
 
   .patrol-section-header > span {
@@ -76,6 +85,8 @@
   }
 
   .patrol-queue-row {
+    width: 100%;
+    min-width: 0;
     grid-template-columns: 1fr !important;
     gap: 8px !important;
     align-items: start !important;
