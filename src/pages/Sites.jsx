@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Sites.css";
+import { API_BASE_URL } from "../config/api";
 
-const API_BASE_URL =
-  "https://noctua-panic-backend-production.up.railway.app";
   
   function getSessionToken() {
   const storedUser = JSON.parse(

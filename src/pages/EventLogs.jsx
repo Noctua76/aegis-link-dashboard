@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import "./EventLogs.css";
+import { API_BASE_URL } from "../config/api";
 
-const API_BASE_URL =
-  "https://noctua-panic-backend-production.up.railway.app";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");

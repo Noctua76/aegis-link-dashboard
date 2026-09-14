@@ -815,6 +815,33 @@
     font-size: 22px;
   }
 }
+
+.password-input-row {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-row input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 68px;
+}
+
+.login-form .password-visibility-button {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: auto;
+  min-width: 50px;
+  margin: 0;
+  padding: 6px 8px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #93c5fd;
+  font-size: 12px;
+  font-weight: 700;
+}
 @media (max-width: 768px) {
   body,
   html,
