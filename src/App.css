@@ -1971,3 +1971,9 @@
     0 16px 40px
     rgba(0, 0, 0, 0.45);
 }
+
+@media (max-width: 768px) {
+  main > header > h1 {
+    line-height: 1.2;
+  }
+}
