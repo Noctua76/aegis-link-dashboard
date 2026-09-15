@@ -9,6 +9,11 @@ const toDateInputValue = (date) => {
   return localDate.toISOString().slice(0, 10);
 };
 
+const formatDispatchStatus = (status) =>
+  String(status || "unknown")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
 function Settings() {
   const storedCurrentUser = (() => {
   try {
@@ -202,13 +207,23 @@ sms_enabled:true,
 voice_enabled:true,
 });
   const [isTestingAlert, setIsTestingAlert] = useState(false);
+  const [testAlertResult, setTestAlertResult] = useState(null);
+  const [testAlertError, setTestAlertError] = useState("");
   const loadAlertConfiguration = async () => {
   try {
+    const sessionToken = getSessionToken();
+    if (!sessionToken) return;
+
     const response = await fetch(
-      `${API_BASE_URL}/settings/alert-configuration`
+      `${API_BASE_URL}/settings/alert-configuration`,
+      { headers: { Authorization: `Bearer ${sessionToken}` } }
     );
 
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to load alert configuration");
+    }
 
     setAlertConfig(data);
   } catch (err) {
@@ -1502,6 +1517,8 @@ loadUsers(false);
 
   const handleTestAlert = async () => {
   setIsTestingAlert(true);
+  setTestAlertError("");
+  setTestAlertResult(null);
 
   try {
     const storedUser = JSON.parse(
@@ -1529,10 +1546,11 @@ loadUsers(false);
       throw new Error(data.message || "Test alert failed");
     }
 
+    setTestAlertResult(data.result);
     await loadAlertConfiguration();
   } catch (err) {
     console.error("Test alert error", err);
-    alert(err.message || "Test alert failed");
+    setTestAlertError(err.message || "Test alert failed");
   } finally {
     setIsTestingAlert(false);
   }
@@ -2782,12 +2800,22 @@ const cancelManualPatrol = async (item) => {
 
   <div className="settings-item">
     <span>SMS Recipients</span>
-    <strong>{alertConfig?.sms?.recipients_count ?? "-"}</strong>
+    <strong>
+      {alertConfig?.sms?.enabled_count ?? "-"} enabled
+      {alertConfig?.sms?.recipients_count != null
+        ? ` / ${alertConfig.sms.recipients_count} active`
+        : ""}
+    </strong>
   </div>
 
   <div className="settings-item">
     <span>Voice Call Recipients</span>
-    <strong>{alertConfig?.voice?.recipients_count ?? "-"}</strong>
+    <strong>
+      {alertConfig?.voice?.enabled_count ?? "-"} enabled
+      {alertConfig?.voice?.recipients_count != null
+        ? ` / ${alertConfig.voice.recipients_count} active`
+        : ""}
+    </strong>
   </div>
 
   <div className="settings-item">
@@ -2797,12 +2825,12 @@ const cancelManualPatrol = async (item) => {
 
   <div className="settings-item">
     <span>SMS Status</span>
-    <strong>{alertConfig?.last_test?.sms?.status || "-"}</strong>
+    <strong>{formatDispatchStatus(alertConfig?.last_test?.sms?.status || "-")}</strong>
   </div>
 
   <div className="settings-item">
     <span>Voice Status</span>
-    <strong>{alertConfig?.last_test?.voice?.status || "-"}</strong>
+    <strong>{formatDispatchStatus(alertConfig?.last_test?.voice?.status || "-")}</strong>
   </div>
 
   <div className="settings-item">
@@ -2855,6 +2883,60 @@ Manage Recipients
 >
   {isTestingAlert ? "Sending..." : "Send Test Alert"}
 </button>
+
+  {testAlertError && (
+    <div className="alert-test-result alert-test-result--failed" role="alert">
+      <h4>Test Alert Failed</h4>
+      <p>{testAlertError}</p>
+    </div>
+  )}
+
+  {testAlertResult && (
+    <div
+      className={`alert-test-result alert-test-result--${testAlertResult.status}`}
+      aria-live="polite"
+    >
+      <h4>Test Alert {formatDispatchStatus(testAlertResult.status)}</h4>
+      <p>
+        Recipients: <strong>{testAlertResult.recipients_count}</strong>
+        {testAlertResult.fallback_used ? " · Environment fallback used" : ""}
+      </p>
+
+      <div className="alert-test-channels">
+        {["sms", "voice"].map((channel) => {
+          const summary = testAlertResult[channel];
+          return (
+            <div className="alert-test-channel" key={channel}>
+              <span>{channel.toUpperCase()}</span>
+              <strong>{summary.submitted} submitted</strong>
+              <small>
+                {summary.failed} failed · {summary.attempted} attempted
+              </small>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="alert-test-notifications">
+        {["sms", "voice"].flatMap((channel) =>
+          (testAlertResult.notifications?.[channel] || []).map((notification) => (
+            <div
+              className="alert-test-notification"
+              key={`${channel}-${notification.phone}`}
+            >
+              <span>{notification.phone}</span>
+              <strong className={`notification-status notification-status--${notification.status}`}>
+                {channel.toUpperCase()}: {formatDispatchStatus(notification.status)}
+              </strong>
+              {notification.error_message && <small>{notification.error_message}</small>}
+            </div>
+          ))
+        )}
+      </div>
+
+      <small>Tested: {formatGreekDateTime(testAlertResult.tested_at)}</small>
+    </div>
+  )}
 </div>
 
 <div className="settings-card">
@@ -3418,6 +3500,12 @@ Manage Recipients
         ? "Yes"
         : "No"}
     </div>
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Last success: {formatGreekDateTime(systemStatus?.services?.sms_gateway?.last_success_at)}
+    </div>
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Last failure: {formatGreekDateTime(systemStatus?.services?.sms_gateway?.last_failure_at)}
+    </div>
   </div>
 
   <div className="integration-status">
@@ -3435,6 +3523,12 @@ Manage Recipients
       {systemStatus?.services?.voice_calls?.configured
         ? "Yes"
         : "No"}
+    </div>
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Last success: {formatGreekDateTime(systemStatus?.services?.voice_calls?.last_success_at)}
+    </div>
+    <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      Last failure: {formatGreekDateTime(systemStatus?.services?.voice_calls?.last_failure_at)}
     </div>
   </div>
 
