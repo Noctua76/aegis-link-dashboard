@@ -14,6 +14,10 @@ const formatDispatchStatus = (status) =>
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
+const pendingDeliveryStatuses = new Set([
+  "submitted", "accepted", "buffered", "started", "ringing", "answered", "unknown",
+]);
+
 function Settings() {
   const storedCurrentUser = (() => {
   try {
@@ -209,6 +213,7 @@ voice_enabled:true,
   const [isTestingAlert, setIsTestingAlert] = useState(false);
   const [testAlertResult, setTestAlertResult] = useState(null);
   const [testAlertError, setTestAlertError] = useState("");
+  const [testAlertPhase, setTestAlertPhase] = useState("");
   const loadAlertConfiguration = async () => {
   try {
     const sessionToken = getSessionToken();
@@ -226,8 +231,10 @@ voice_enabled:true,
     }
 
     setAlertConfig(data);
+    return data;
   } catch (err) {
     console.error("Alert configuration error", err);
+    return null;
   }
 };
 
@@ -1517,6 +1524,7 @@ loadUsers(false);
 
   const handleTestAlert = async () => {
   setIsTestingAlert(true);
+  setTestAlertPhase("sending");
   setTestAlertError("");
   setTestAlertResult(null);
 
@@ -1547,12 +1555,30 @@ loadUsers(false);
     }
 
     setTestAlertResult(data.result);
-    await loadAlertConfiguration();
+    setTestAlertPhase("verifying");
+
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const configuration = await loadAlertConfiguration();
+      const latestResult = configuration?.last_test;
+      if (!latestResult) continue;
+
+      setTestAlertResult(latestResult);
+      const notifications = [
+        ...(latestResult.notifications?.sms || []),
+        ...(latestResult.notifications?.voice || []),
+      ];
+      const hasPendingDelivery = notifications.some((notification) =>
+        pendingDeliveryStatuses.has(String(notification.status || "unknown").toLowerCase())
+      );
+      if (!hasPendingDelivery) break;
+    }
   } catch (err) {
     console.error("Test alert error", err);
     setTestAlertError(err.message || "Test alert failed");
   } finally {
     setIsTestingAlert(false);
+    setTestAlertPhase("");
   }
 };
 
@@ -2881,7 +2907,11 @@ Manage Recipients
   onClick={handleTestAlert}
   disabled={isTestingAlert}
 >
-  {isTestingAlert ? "Sending..." : "Send Test Alert"}
+  {testAlertPhase === "sending"
+    ? "Sending..."
+    : testAlertPhase === "verifying"
+      ? "Verifying delivery..."
+      : "Send Test Alert"}
 </button>
 
   {testAlertError && (
@@ -2908,9 +2938,12 @@ Manage Recipients
           return (
             <div className="alert-test-channel" key={channel}>
               <span>{channel.toUpperCase()}</span>
-              <strong>{summary.submitted} submitted</strong>
+              <strong>{formatDispatchStatus(summary.status)}</strong>
               <small>
-                {summary.failed} failed · {summary.attempted} attempted
+                {summary.successful == null
+                  ? `${summary.submitted} submitted · ${summary.failed} failed`
+                  : `${summary.successful} confirmed · ${summary.pending} pending · ${summary.failed} failed`}
+                {` · ${summary.attempted} attempted`}
               </small>
             </div>
           );
