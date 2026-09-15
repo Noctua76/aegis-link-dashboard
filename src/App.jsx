@@ -44,6 +44,7 @@ const formatHealthTime = (value) => {
 function SystemStatusCard({ item }) {
   const status = item?.status || "unknown";
   const details = [
+    typeof item?.configured === "boolean" && ["Configured", item.configured ? "Yes" : "No"],
     item?.last_checked_at && ["Last checked", formatHealthTime(item.last_checked_at)],
     item?.last_success_at && ["Last success", formatHealthTime(item.last_success_at)],
     item?.last_failure_at && ["Last failure", formatHealthTime(item.last_failure_at)],
