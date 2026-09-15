@@ -607,6 +607,10 @@ font-size:13px;
   border-color: rgba(245, 158, 11, 0.65);
 }
 
+.alert-test-result--pending {
+  border-color: rgba(56, 189, 248, 0.65);
+}
+
 .alert-test-result--failed {
   border-color: rgba(239, 68, 68, 0.65);
 }
@@ -642,11 +646,28 @@ font-size:13px;
   overflow-wrap: anywhere;
 }
 
-.notification-status--submitted {
+.notification-status--submitted,
+.notification-status--accepted,
+.notification-status--buffered,
+.notification-status--started,
+.notification-status--ringing,
+.notification-status--answered {
+  color: #38bdf8;
+}
+
+.notification-status--delivered,
+.notification-status--completed {
   color: #4ade80;
 }
 
-.notification-status--failed {
+.notification-status--failed,
+.notification-status--rejected,
+.notification-status--busy,
+.notification-status--unanswered,
+.notification-status--cancelled,
+.notification-status--timeout,
+.notification-status--expired,
+.notification-status--undeliverable {
   color: #f87171;
 }
 
