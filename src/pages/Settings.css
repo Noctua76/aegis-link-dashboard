@@ -993,6 +993,36 @@ font-size:13px;
   resize: vertical;
 }
 
+@media (min-width: 769px) {
+  .patrol-corrections-filter-grid {
+    grid-template-columns:
+      minmax(180px, 1fr)
+      minmax(190px, 1fr)
+      minmax(190px, 1fr)
+      max-content;
+    column-gap: 22px;
+    row-gap: 14px;
+  }
+
+  .patrol-corrections-filter-grid .settings-field {
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  .patrol-corrections-filter-grid input,
+  .patrol-corrections-filter-grid select {
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .settings-card .patrol-corrections-filter-grid button {
+    width: auto;
+    min-width: 170px;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
 .settings-password-row {
   position: relative;
   width: 100%;
