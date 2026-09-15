@@ -225,6 +225,7 @@ voice_enabled:true,
   const [testAlertHistoryLoading, setTestAlertHistoryLoading] = useState(false);
   const [testAlertHistoryError, setTestAlertHistoryError] = useState("");
   const [expandedTestAlertId, setExpandedTestAlertId] = useState(null);
+  const [showTestAlertHistoryModal, setShowTestAlertHistoryModal] = useState(false);
   const loadAlertConfiguration = async () => {
   try {
     const sessionToken = getSessionToken();
@@ -3038,11 +3039,58 @@ Manage Recipients
     </div>
   )}
 
+  <div className="alert-test-history-launcher">
+    <div>
+      <h4>Test Alert History</h4>
+      <small>{testAlertHistoryPagination.total} recorded tests</small>
+    </div>
+    <button
+      type="button"
+      className="secondary-button alert-test-history-open"
+      onClick={() => {
+        setShowTestAlertHistoryModal(true);
+        loadTestAlertHistory(1);
+      }}
+    >
+      Open History
+    </button>
+  </div>
+
+  {showTestAlertHistoryModal && (
+    <div
+      className="modal-overlay"
+      onMouseDown={() => setShowTestAlertHistoryModal(false)}
+    >
+      <div
+        className="test-alert-history-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="test-alert-history-modal-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="modal-header test-alert-history-modal-header">
+          <div>
+            <h3 id="test-alert-history-modal-title">Test Alert History</h3>
+            <small>{testAlertHistoryPagination.total} recorded tests</small>
+          </div>
+          <button
+            type="button"
+            className="modal-close"
+            aria-label="Close test alert history"
+            onClick={() => {
+              setShowTestAlertHistoryModal(false);
+              setExpandedTestAlertId(null);
+            }}
+          >
+            ×
+          </button>
+        </div>
+
   <section className="alert-test-history" aria-labelledby="test-alert-history-title">
     <div className="alert-test-history-header">
       <div>
-        <h4 id="test-alert-history-title">Test Alert History</h4>
-        <small>{testAlertHistoryPagination.total} recorded tests</small>
+        <h4 id="test-alert-history-title">Recorded Tests</h4>
+        <small>Newest first</small>
       </div>
       <button
         type="button"
@@ -3150,6 +3198,9 @@ Manage Recipients
       </div>
     )}
   </section>
+      </div>
+    </div>
+  )}
 </div>
 
 <div className="settings-card">
