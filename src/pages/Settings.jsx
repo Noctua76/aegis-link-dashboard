@@ -214,6 +214,17 @@ voice_enabled:true,
   const [testAlertResult, setTestAlertResult] = useState(null);
   const [testAlertError, setTestAlertError] = useState("");
   const [testAlertPhase, setTestAlertPhase] = useState("");
+  const [testAlertHistory, setTestAlertHistory] = useState([]);
+  const [testAlertHistoryPage, setTestAlertHistoryPage] = useState(1);
+  const [testAlertHistoryPagination, setTestAlertHistoryPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 1,
+  });
+  const [testAlertHistoryLoading, setTestAlertHistoryLoading] = useState(false);
+  const [testAlertHistoryError, setTestAlertHistoryError] = useState("");
+  const [expandedTestAlertId, setExpandedTestAlertId] = useState(null);
   const loadAlertConfiguration = async () => {
   try {
     const sessionToken = getSessionToken();
@@ -235,6 +246,41 @@ voice_enabled:true,
   } catch (err) {
     console.error("Alert configuration error", err);
     return null;
+  }
+};
+
+const loadTestAlertHistory = async (page = 1) => {
+  setTestAlertHistoryLoading(true);
+  setTestAlertHistoryError("");
+
+  try {
+    const sessionToken = getSessionToken();
+    if (!sessionToken) throw new Error("Authentication required");
+
+    const response = await fetch(
+      `${API_BASE_URL}/settings/test-alert-history?page=${page}&limit=10`,
+      { headers: { Authorization: `Bearer ${sessionToken}` } }
+    );
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to load test alert history");
+    }
+
+    setTestAlertHistory(data.items || []);
+    setTestAlertHistoryPagination(data.pagination || {
+      page,
+      limit: 10,
+      total: 0,
+      total_pages: 1,
+    });
+    setTestAlertHistoryPage(page);
+    setExpandedTestAlertId(null);
+  } catch (err) {
+    console.error("Test alert history error", err);
+    setTestAlertHistoryError(err.message || "Failed to load test alert history");
+  } finally {
+    setTestAlertHistoryLoading(false);
   }
 };
 
@@ -1449,6 +1495,7 @@ const addGuard = async () => {
     
 
 loadAlertConfiguration();
+loadTestAlertHistory(1);
 loadRecipients();
 loadSites();
 loadGuards();
@@ -1573,6 +1620,8 @@ loadUsers(false);
       );
       if (!hasPendingDelivery) break;
     }
+
+    await loadTestAlertHistory(1);
   } catch (err) {
     console.error("Test alert error", err);
     setTestAlertError(err.message || "Test alert failed");
@@ -2916,7 +2965,16 @@ Manage Recipients
 
   {testAlertError && (
     <div className="alert-test-result alert-test-result--failed" role="alert">
-      <h4>Test Alert Failed</h4>
+      <div className="alert-test-result-header">
+        <h4>Test Alert Failed</h4>
+        <button
+          type="button"
+          className="alert-test-dismiss"
+          onClick={() => setTestAlertError("")}
+        >
+          Close
+        </button>
+      </div>
       <p>{testAlertError}</p>
     </div>
   )}
@@ -2926,7 +2984,16 @@ Manage Recipients
       className={`alert-test-result alert-test-result--${testAlertResult.status}`}
       aria-live="polite"
     >
-      <h4>Test Alert {formatDispatchStatus(testAlertResult.status)}</h4>
+      <div className="alert-test-result-header">
+        <h4>Test Alert {formatDispatchStatus(testAlertResult.status)}</h4>
+        <button
+          type="button"
+          className="alert-test-dismiss"
+          onClick={() => setTestAlertResult(null)}
+        >
+          Close
+        </button>
+      </div>
       <p>
         Recipients: <strong>{testAlertResult.recipients_count}</strong>
         {testAlertResult.fallback_used ? " · Environment fallback used" : ""}
@@ -2970,6 +3037,119 @@ Manage Recipients
       <small>Tested: {formatGreekDateTime(testAlertResult.tested_at)}</small>
     </div>
   )}
+
+  <section className="alert-test-history" aria-labelledby="test-alert-history-title">
+    <div className="alert-test-history-header">
+      <div>
+        <h4 id="test-alert-history-title">Test Alert History</h4>
+        <small>{testAlertHistoryPagination.total} recorded tests</small>
+      </div>
+      <button
+        type="button"
+        className="secondary-button alert-test-history-refresh"
+        onClick={() => loadTestAlertHistory(testAlertHistoryPage)}
+        disabled={testAlertHistoryLoading}
+      >
+        {testAlertHistoryLoading ? "Loading..." : "Refresh"}
+      </button>
+    </div>
+
+    {testAlertHistoryError && (
+      <p className="alert-test-history-error">{testAlertHistoryError}</p>
+    )}
+
+    {!testAlertHistoryLoading && !testAlertHistoryError && testAlertHistory.length === 0 && (
+      <p className="alert-test-history-empty">No test alerts recorded yet.</p>
+    )}
+
+    <div className="alert-test-history-list">
+      {testAlertHistory.map((test) => {
+        const isExpanded = expandedTestAlertId === test.test_id;
+        return (
+          <article className="alert-test-history-item" key={test.test_id}>
+            <div className="alert-test-history-summary">
+              <div>
+                <strong>{formatGreekDateTime(test.tested_at)}</strong>
+                <small>{test.recipients_count} recipients</small>
+              </div>
+              <span className={`alert-test-history-status alert-test-history-status--${test.status}`}>
+                {formatDispatchStatus(test.status)}
+              </span>
+            </div>
+
+            <div className="alert-test-history-channels">
+              {['sms', 'voice'].map((channel) => (
+                <div key={channel}>
+                  <span>{channel.toUpperCase()}</span>
+                  <strong>{formatDispatchStatus(test[channel]?.status)}</strong>
+                  <small>
+                    {test[channel]?.successful ?? test[channel]?.submitted ?? 0} confirmed
+                    {` · ${test[channel]?.failed ?? 0} failed`}
+                  </small>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="secondary-button alert-test-history-details-button"
+              onClick={() => setExpandedTestAlertId(isExpanded ? null : test.test_id)}
+            >
+              {isExpanded ? "Hide Details" : "View Details"}
+            </button>
+
+            {isExpanded && (
+              <div className="alert-test-history-details">
+                {['sms', 'voice'].flatMap((channel) =>
+                  (test.notifications?.[channel] || []).map((notification) => (
+                    <div
+                      className="alert-test-notification"
+                      key={`${test.test_id}-${channel}-${notification.phone}`}
+                    >
+                      <span>{notification.phone}</span>
+                      <strong className={`notification-status notification-status--${notification.status}`}>
+                        {channel.toUpperCase()}: {formatDispatchStatus(notification.status)}
+                      </strong>
+                      {notification.error_message && (
+                        <small>{notification.error_message}</small>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+
+    {testAlertHistoryPagination.total_pages > 1 && (
+      <div className="alert-test-history-pagination">
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => loadTestAlertHistory(testAlertHistoryPage - 1)}
+          disabled={testAlertHistoryLoading || testAlertHistoryPage <= 1}
+        >
+          Previous
+        </button>
+        <span>
+          Page {testAlertHistoryPage} of {testAlertHistoryPagination.total_pages}
+        </span>
+        <button
+          type="button"
+          className="secondary-button"
+          onClick={() => loadTestAlertHistory(testAlertHistoryPage + 1)}
+          disabled={
+            testAlertHistoryLoading ||
+            testAlertHistoryPage >= testAlertHistoryPagination.total_pages
+          }
+        >
+          Next
+        </button>
+      </div>
+    )}
+  </section>
 </div>
 
 <div className="settings-card">
