@@ -285,6 +285,23 @@ const loadTestAlertHistory = async (page = 1) => {
   }
 };
 
+const loadTestAlertResult = async (testId) => {
+  const sessionToken = getSessionToken();
+  if (!sessionToken) throw new Error("Authentication required");
+
+  const response = await fetch(
+    `${API_BASE_URL}/settings/test-alerts/${testId}`,
+    { headers: { Authorization: `Bearer ${sessionToken}` } }
+  );
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to load test alert result");
+  }
+
+  return data.result;
+};
+
 const loadRecipients = async () => {
   try {
     const storedUser = JSON.parse(
@@ -1602,19 +1619,23 @@ loadUsers(false);
       throw new Error(data.message || "Test alert failed");
     }
 
+    const testId = data.result?.test_id;
+    if (!testId) {
+      throw new Error("Test alert did not return a tracking ID");
+    }
+
     setTestAlertResult(data.result);
     setTestAlertPhase("verifying");
 
     for (let attempt = 0; attempt < 15; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      const configuration = await loadAlertConfiguration();
-      const latestResult = configuration?.last_test;
-      if (!latestResult) continue;
+      const currentResult = await loadTestAlertResult(testId);
+      if (!currentResult) continue;
 
-      setTestAlertResult(latestResult);
+      setTestAlertResult(currentResult);
       const notifications = [
-        ...(latestResult.notifications?.sms || []),
-        ...(latestResult.notifications?.voice || []),
+        ...(currentResult.notifications?.sms || []),
+        ...(currentResult.notifications?.voice || []),
       ];
       const hasPendingDelivery = notifications.some((notification) =>
         pendingDeliveryStatuses.has(String(notification.status || "unknown").toLowerCase())
@@ -1622,7 +1643,10 @@ loadUsers(false);
       if (!hasPendingDelivery) break;
     }
 
-    await loadTestAlertHistory(1);
+    await Promise.all([
+      loadAlertConfiguration(),
+      loadTestAlertHistory(1),
+    ]);
   } catch (err) {
     console.error("Test alert error", err);
     setTestAlertError(err.message || "Test alert failed");
@@ -2999,6 +3023,7 @@ Manage Recipients
         Recipients: <strong>{testAlertResult.recipients_count}</strong>
         {testAlertResult.fallback_used ? " · Environment fallback used" : ""}
       </p>
+      {testAlertResult.reason && <p>{testAlertResult.reason}</p>}
 
       <div className="alert-test-channels">
         {["sms", "voice"].map((channel) => {
@@ -3148,6 +3173,7 @@ Manage Recipients
 
             {isExpanded && (
               <div className="alert-test-history-details">
+                {test.reason && <p>{test.reason}</p>}
                 {['sms', 'voice'].flatMap((channel) =>
                   (test.notifications?.[channel] || []).map((notification) => (
                     <div
