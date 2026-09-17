@@ -63,6 +63,37 @@
   margin-top: 18px;
 }
 
+.random-schedule-metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #bfdbfe;
+}
+
+.random-schedule-point-summary {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.random-schedule-point-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, .16);
+  border-radius: 10px;
+}
+
+.random-schedule-point-summary span {
+  color: #9ca3af;
+  text-align: right;
+}
+
 .random-schedule-table-wrap table {
   width: 100%;
   min-width: 820px;
@@ -83,6 +114,14 @@
 
   .random-schedule-filters {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .random-schedule-point-summary > div {
+    flex-direction: column;
+  }
+
+  .random-schedule-point-summary span {
+    text-align: left;
   }
 
   .patrol-summary-scroll {

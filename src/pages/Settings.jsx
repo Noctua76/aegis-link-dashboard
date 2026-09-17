@@ -1089,7 +1089,18 @@ const saveRandomPatrolConfig = async () => {
     if (!response.ok) throw new Error(data.message || "Unable to save Random Patrol configuration");
     await loadRandomPatrolConfig(patrolSite.id);
     setRandomSelectedPointIds([]);
-    setRandomPatrolSaveStatus(`Saved. Effective from ${new Date(data.effective_from_date).toLocaleDateString("el-GR")}.`);
+    const newlyGenerated = (data.generated_schedules || []).filter((item) => item.created);
+    const generatedCount = newlyGenerated.reduce(
+      (total, item) => total + Number(item.generated_count || 0),
+      0
+    );
+    setRandomPatrolSaveStatus(
+      newlyGenerated.length > 0
+        ? `Saved and active today. Generated ${generatedCount} feasible Random Patrol${generatedCount === 1 ? "" : "s"} for the remaining day.`
+        : randomPatrolEnabled
+          ? "Saved. Today's existing schedule was not changed; the new value applies to the next full-day generation."
+          : "Random Patrols disabled for the selected points."
+    );
   } catch (err) {
     setRandomPatrolSaveStatus(err.message || "Save failed");
   }

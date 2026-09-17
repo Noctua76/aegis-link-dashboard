@@ -64,6 +64,8 @@ const [qrImageUrl, setQrImageUrl] = useState("");
 const [randomScheduleSiteId, setRandomScheduleSiteId] = useState("");
 const [randomScheduleDate, setRandomScheduleDate] = useState(() => new Date().toISOString().slice(0, 10));
 const [randomSchedule, setRandomSchedule] = useState([]);
+const [randomScheduleDays, setRandomScheduleDays] = useState([]);
+const [randomScheduleSummary, setRandomScheduleSummary] = useState(null);
 const [randomScheduleLoading, setRandomScheduleLoading] = useState(false);
 const [randomScheduleMessage, setRandomScheduleMessage] = useState("");
 
@@ -330,9 +332,21 @@ const loadRandomSchedule = async () => {
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Unable to load Random Patrol schedule");
     setRandomSchedule(data.occurrences || []);
-    if (!(data.occurrences || []).length) setRandomScheduleMessage("No Random Patrol schedule was generated for this Site and Date.");
+    setRandomScheduleDays(data.days || []);
+    setRandomScheduleSummary({
+      configured: Number(data.configured_daily_patrols || 0),
+      generated: Number(data.generated_count || 0),
+      type: data.schedule_type,
+    });
+    if (!(data.days || []).length) {
+      setRandomScheduleMessage("No Random Patrol schedule was generated for this Site and Date.");
+    } else if (!(data.occurrences || []).length) {
+      setRandomScheduleMessage("The partial-day schedule was created, but no valid occurrence could fit before the end of the local day.");
+    }
   } catch (err) {
     setRandomSchedule([]);
+    setRandomScheduleDays([]);
+    setRandomScheduleSummary(null);
     setRandomScheduleMessage(err.message || "Unable to load Random Patrol schedule");
   } finally {
     setRandomScheduleLoading(false);
@@ -734,7 +748,7 @@ const downloadCompletedReport = async () => {
             <h3>Random Daily Schedule</h3>
             <p>View generated Random Patrols by Site and Date. Each Patrol Point has its own independent schedule.</p>
           </div>
-          <span className="random-schedule-badge">Generated at 00:01</span>
+          <span className="random-schedule-badge">Full day 00:01 · First activation immediate</span>
         </div>
         <div className="random-schedule-filters">
           <label>
@@ -751,10 +765,27 @@ const downloadCompletedReport = async () => {
           <button type="button" onClick={loadRandomSchedule} disabled={randomScheduleLoading}>
             {randomScheduleLoading ? "Loading..." : "View Schedule"}
           </button>
-          <button type="button" onClick={() => openRandomSchedulePdf(false)} disabled={!randomSchedule.length}>Print / Preview PDF</button>
-          <button type="button" onClick={() => openRandomSchedulePdf(true)} disabled={!randomSchedule.length}>Download PDF</button>
+          <button type="button" onClick={() => openRandomSchedulePdf(false)} disabled={!randomScheduleDays.length}>Print / Preview PDF</button>
+          <button type="button" onClick={() => openRandomSchedulePdf(true)} disabled={!randomScheduleDays.length}>Download PDF</button>
         </div>
         {randomScheduleMessage && <p className="random-schedule-message">{randomScheduleMessage}</p>}
+        {randomScheduleSummary && randomScheduleDays.length > 0 && (
+          <div className="random-schedule-metadata-wrap">
+            <div className="random-schedule-metadata">
+              <span><strong>Configured daily patrols:</strong> {randomScheduleSummary.configured}</span>
+              <span><strong>Generated:</strong> {randomScheduleSummary.generated}</span>
+              <span><strong>Schedule type:</strong> {randomScheduleSummary.type === "partial_first_day" ? "Partial first day" : "Full day"}</span>
+            </div>
+            <div className="random-schedule-point-summary">
+              {randomScheduleDays.map((day) => (
+                <div key={day.day_id}>
+                  <strong>{day.point_name}</strong>
+                  <span>{day.configured_count}/day configured · {day.generated_count} generated · {day.generation_type === "partial_first_day" ? "Partial first day" : "Full day"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {randomSchedule.length > 0 && (
           <div className="random-schedule-table-wrap">
             <table>
