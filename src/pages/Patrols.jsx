@@ -18,6 +18,13 @@ const formatCompletedStatus = (status) => {
   if (status === "completed_late") return "Completed Late";
   return "Completed";
 };
+const formatPatrolStatus = (status) => ({
+  completed: "Completed",
+  completed_late: "Late Completed",
+  missed: "Missed",
+  active: "Active",
+  scheduled: "Scheduled",
+})[status] || status || "-";
 
 function Patrols() {
   const [patrolSites, setPatrolSites] = useState([]);
@@ -54,6 +61,11 @@ const [historyLoading, setHistoryLoading] = useState(false);
 const [detailsLoading, setDetailsLoading] = useState(false);
 const [selectedQr, setSelectedQr] = useState(null);
 const [qrImageUrl, setQrImageUrl] = useState("");
+const [randomScheduleSiteId, setRandomScheduleSiteId] = useState("");
+const [randomScheduleDate, setRandomScheduleDate] = useState(() => new Date().toISOString().slice(0, 10));
+const [randomSchedule, setRandomSchedule] = useState([]);
+const [randomScheduleLoading, setRandomScheduleLoading] = useState(false);
+const [randomScheduleMessage, setRandomScheduleMessage] = useState("");
 
   useEffect(() => {
   const loadPatrolSites = async () => {
@@ -300,6 +312,54 @@ const printQrCard = async (pointId) => {
   } catch (err) {
     console.error("Failed printing QR:", err);
     alert("Failed to print QR");
+  }
+};
+
+const loadRandomSchedule = async () => {
+  if (!randomScheduleSiteId || !randomScheduleDate) {
+    setRandomScheduleMessage("Select a Site and Date.");
+    return;
+  }
+  setRandomScheduleLoading(true);
+  setRandomScheduleMessage("");
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/random-schedules?site_id=${randomScheduleSiteId}&date=${randomScheduleDate}`,
+      { headers: getAuthHeaders() }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Unable to load Random Patrol schedule");
+    setRandomSchedule(data.occurrences || []);
+    if (!(data.occurrences || []).length) setRandomScheduleMessage("No Random Patrol schedule was generated for this Site and Date.");
+  } catch (err) {
+    setRandomSchedule([]);
+    setRandomScheduleMessage(err.message || "Unable to load Random Patrol schedule");
+  } finally {
+    setRandomScheduleLoading(false);
+  }
+};
+
+const openRandomSchedulePdf = async (download = false) => {
+  if (!randomScheduleSiteId || !randomScheduleDate) return;
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/patrols/random-schedules/report/pdf?site_id=${randomScheduleSiteId}&date=${randomScheduleDate}&preview=${download ? "false" : "true"}`,
+      { headers: getAuthHeaders() }
+    );
+    if (!response.ok) throw new Error("Unable to generate Random Patrol PDF");
+    const url = URL.createObjectURL(await response.blob());
+    if (download) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `random-patrols-${randomScheduleDate}.pdf`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } else {
+      window.open(url, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    }
+  } catch (err) {
+    setRandomScheduleMessage(err.message || "Unable to generate Random Patrol PDF");
   }
 };
 
@@ -667,6 +727,55 @@ const downloadCompletedReport = async () => {
 </p>
         </div>
       </div>
+
+      <section className="analytics-table-card random-schedule-viewer">
+        <div className="random-schedule-heading">
+          <div>
+            <h3>Random Daily Schedule</h3>
+            <p>View generated Random Patrols by Site and Date. Each Patrol Point has its own independent schedule.</p>
+          </div>
+          <span className="random-schedule-badge">Generated at 00:01</span>
+        </div>
+        <div className="random-schedule-filters">
+          <label>
+            <span>Site</span>
+            <select value={randomScheduleSiteId} onChange={(event) => setRandomScheduleSiteId(event.target.value)}>
+              <option value="">Select Site</option>
+              {patrolSites.map((site) => <option key={site.site_id} value={site.site_id}>{site.site_name}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>Date</span>
+            <input type="date" value={randomScheduleDate} onChange={(event) => setRandomScheduleDate(event.target.value)} />
+          </label>
+          <button type="button" onClick={loadRandomSchedule} disabled={randomScheduleLoading}>
+            {randomScheduleLoading ? "Loading..." : "View Schedule"}
+          </button>
+          <button type="button" onClick={() => openRandomSchedulePdf(false)} disabled={!randomSchedule.length}>Print / Preview PDF</button>
+          <button type="button" onClick={() => openRandomSchedulePdf(true)} disabled={!randomSchedule.length}>Download PDF</button>
+        </div>
+        {randomScheduleMessage && <p className="random-schedule-message">{randomScheduleMessage}</p>}
+        {randomSchedule.length > 0 && (
+          <div className="random-schedule-table-wrap">
+            <table>
+              <thead><tr><th>Patrol Point</th><th>Type</th><th>Scheduled</th><th>Status</th><th>Completed</th><th>Delay</th><th>Guard</th></tr></thead>
+              <tbody>
+                {randomSchedule.map((occurrence) => (
+                  <tr key={occurrence.occurrence_id}>
+                    <td>{occurrence.point_name}</td>
+                    <td>Random</td>
+                    <td>{new Date(occurrence.scheduled_at).toLocaleString("el-GR")}</td>
+                    <td>{formatPatrolStatus(occurrence.status)}</td>
+                    <td>{occurrence.completed_at ? new Date(occurrence.completed_at).toLocaleString("el-GR") : "-"}</td>
+                    <td>{occurrence.delay_minutes == null ? "-" : `${occurrence.delay_minutes} min`}</td>
+                    <td>{occurrence.guard_name || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       {loading ? (
         <div className="analytics-table-card">
@@ -1709,6 +1818,7 @@ shift_label: patrol.shift_label,
         <option value="all">All Patrols</option>
         <option value="recurring">Routine Patrols</option>
         <option value="manual">Manual Patrols</option>
+        <option value="random">Random Patrols</option>
       </select>
     </div>
   </div>
@@ -1960,6 +2070,7 @@ shift_label: patrol.shift_label,
                 <option value="all">All Patrols</option>
                 <option value="recurring">Routine Patrols</option>
                 <option value="manual">Manual Patrols</option>
+                <option value="random">Random Patrols</option>
               </select>
             </div>
 
