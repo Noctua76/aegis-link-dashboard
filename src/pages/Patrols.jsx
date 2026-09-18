@@ -1961,10 +1961,16 @@ shift_label: patrol.shift_label,
   }}
 >
   <div>Guard: {entry.guard_name || "-"}</div>
+  <div>Shift: {entry.shift_label || "-"}</div>
+  {entry.guard_session_id && (
+    <div>Session: #{entry.guard_session_id}</div>
+  )}
   <div>
     Type:{" "}
     {entry.schedule_type === "manual"
       ? "Manual Patrol"
+      : entry.schedule_type === "random"
+      ? "Random Patrol"
       : "Routine Patrol"}
   </div>
 </div>
@@ -1978,6 +1984,7 @@ shift_label: patrol.shift_label,
                     }}
                   >
                     ● Missed
+                    {entry.missed_reason === "shift_end" && " · Shift ended"}
                     {entry.corrected && (
                       <span className="patrol-corrected-badge">CORRECTED</span>
                     )}
