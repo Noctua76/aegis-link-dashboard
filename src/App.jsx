@@ -1,4 +1,5 @@
 import Patrols from "./pages/Patrols";
+import ShiftReports from "./pages/ShiftReports";
 import { APP_VERSION, APP_BUILD } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
 import { useEffect, useState } from "react";
@@ -569,11 +570,13 @@ const handleLogout = async () => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
 });
 const [liveActiveGuards, setLiveActiveGuards] = useState([]);
+  const [unreadShiftReports, setUnreadShiftReports] = useState(0);
   const [incidentFilter, setIncidentFilter] = useState("All");
   const [resolutionForms, setResolutionForms] = useState({});
 const menuItems = [
   "Dashboard",
   "Live Incidents",
+  "Shift Reports",
   "Event Logs",
   "Admin Audit Logs",
   "Guards",
@@ -583,6 +586,23 @@ const menuItems = [
   "Analytics",
   "Settings",
 ];
+  useEffect(() => {
+    if (!currentUser) return undefined;
+    const loadUnreadShiftReports = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/shift-reports/unread-count`, {
+          headers: { Authorization: `Bearer ${getSessionToken() || ""}` },
+        });
+        const data = await response.json();
+        if (response.ok) setUnreadShiftReports(data.unread || 0);
+      } catch (error) {
+        console.error("Shift Report badge refresh failed:", error);
+      }
+    };
+    loadUnreadShiftReports();
+    const timer = setInterval(loadUnreadShiftReports, 30000);
+    return () => clearInterval(timer);
+  }, [currentUser]);
   useEffect(() => {
     const loadAdmins = async () => {
     try {
@@ -1868,6 +1888,9 @@ const renderIncidentLocation = (incident) => {
         onClick={() => setActiveMenu(item)}
       >
         {item}
+        {item === "Shift Reports" && unreadShiftReports > 0 && (
+          <span className="sidebar-badge">{unreadShiftReports}</span>
+        )}
       </li>
     ))}
   </ul>
@@ -2687,6 +2710,9 @@ const renderIncidentLocation = (incident) => {
         {activeMenu === "Event Logs" && <EventLogs />}
         {activeMenu === "Sites" && <Sites />}
         {activeMenu === "Patrols" && <Patrols />}
+        {activeMenu === "Shift Reports" && (
+          <ShiftReports onUnreadCountChange={setUnreadShiftReports} />
+        )}
         {activeMenu === "Settings" && (
 <Settings/>
 )}
