@@ -33,6 +33,8 @@ function ShiftReports({ onUnreadCountChange }) {
   const current = JSON.parse(localStorage.getItem("aegis-current-user") || "{}");
   const readOnly = current?.user?.access_mode === "read_only";
   const [reports, setReports] = useState([]);
+  const [filterSites, setFilterSites] = useState([]);
+  const [filterGuards, setFilterGuards] = useState([]);
   const [summary, setSummary] = useState({ NEW: 0, READ: 0, ACKNOWLEDGED: 0, TODAY: 0 });
   const [filters, setFilters] = useState({ site_id: "", guard_id: "", from: "", to: "", category: "", priority: "", status: "" });
   const [selected, setSelected] = useState(null);
@@ -63,8 +65,28 @@ function ShiftReports({ onUnreadCountChange }) {
 
   useEffect(() => { loadReports(); }, [loadReports]);
 
-  const sites = useMemo(() => Array.from(new Map(reports.map((item) => [item.site_id, item.site_name])).entries()), [reports]);
-  const guards = useMemo(() => Array.from(new Map(reports.map((item) => [item.guard_id, item.guard_name])).entries()), [reports]);
+  useEffect(() => {
+    const loadFilterOptions = async () => {
+      try {
+        const [sitesData, guardsData] = await Promise.all([
+          request("/sites"),
+          request("/guards"),
+        ]);
+        setFilterSites(sitesData.sites || []);
+        setFilterGuards(guardsData.guards || []);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+    loadFilterOptions();
+  }, []);
+
+  const availableGuards = useMemo(
+    () => filters.site_id
+      ? filterGuards.filter((guard) => String(guard.site_id) === String(filters.site_id))
+      : filterGuards,
+    [filterGuards, filters.site_id]
+  );
 
   const openReport = async (report) => {
     setError("");
@@ -115,11 +137,29 @@ function ShiftReports({ onUnreadCountChange }) {
     }
   };
 
+  const previewPdf = async (path) => {
+    const previewWindow = window.open("", "_blank");
+    try {
+      const separator = path.includes("?") ? "&" : "?";
+      const blob = await request(`${path}${separator}disposition=inline`);
+      const url = URL.createObjectURL(blob);
+      if (previewWindow) previewWindow.location.href = url;
+      else window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 300000);
+    } catch (err) {
+      previewWindow?.close();
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="shift-reports-page">
       <header className="shift-reports-header">
         <div><p className="shift-reports-eyebrow">OPERATIONAL NOTES</p><h1>Shift Reports</h1><p>Immutable guard observations and handover notes, owned by the active shift.</p></div>
-        <button type="button" onClick={() => exportPdf(`/shift-reports/report/pdf${query ? `?${query}` : ""}`, "shift-reports.pdf")}>Export filtered PDF</button>
+        <div className="shift-report-header-actions">
+          <button type="button" onClick={() => previewPdf(`/shift-reports/report/pdf${query ? `?${query}` : ""}`)}>Preview / Print PDF</button>
+          <button type="button" onClick={() => exportPdf(`/shift-reports/report/pdf${query ? `?${query}` : ""}`, "Aegis-Link-Shift-Reports.pdf")}>Download PDF</button>
+        </div>
       </header>
 
       <section className="shift-report-kpis">
@@ -127,8 +167,8 @@ function ShiftReports({ onUnreadCountChange }) {
       </section>
 
       <section className="shift-report-filters">
-        <label>Site<select value={filters.site_id} onChange={(event) => setFilters({ ...filters, site_id: event.target.value })}><option value="">All sites</option>{sites.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-        <label>Guard<select value={filters.guard_id} onChange={(event) => setFilters({ ...filters, guard_id: event.target.value })}><option value="">All guards</option>{guards.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+        <label>Site<select value={filters.site_id} onChange={(event) => setFilters({ ...filters, site_id: event.target.value, guard_id: "" })}><option value="">All sites</option>{filterSites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}</select></label>
+        <label>Guard<select value={filters.guard_id} onChange={(event) => setFilters({ ...filters, guard_id: event.target.value })}><option value="">All guards</option>{availableGuards.map((guard) => <option key={guard.id} value={guard.id}>{guard.full_name}</option>)}</select></label>
         <label>From<input type="date" value={filters.from} onChange={(event) => setFilters({ ...filters, from: event.target.value })}/></label>
         <label>To<input type="date" value={filters.to} onChange={(event) => setFilters({ ...filters, to: event.target.value })}/></label>
         {Object.entries(options).map(([key, values]) => <label key={key}>{key}<select value={filters[key]} onChange={(event) => setFilters({ ...filters, [key]: event.target.value })}><option value="">All</option>{values.map((value) => <option key={value} value={value}>{label(value)}</option>)}</select></label>)}
@@ -141,7 +181,7 @@ function ShiftReports({ onUnreadCountChange }) {
             <span className={`shift-report-status status-${report.status.toLowerCase()}`}>{label(report.status)}</span>
             <span><strong>{report.report_number}</strong><small>{report.site_name} · {report.guard_name}</small></span>
             <span><strong>{label(report.category)}</strong><small>{report.message}</small></span>
-            <span><strong>{when(report.created_at)}</strong><small>{report.attachment_count} image(s)</small></span>
+            <span><strong>{when(report.created_at)}</strong><small>Shift: {when(report.scheduled_shift_start)} → {when(report.scheduled_shift_end)} · {report.attachment_count} image(s)</small></span>
           </button>
         ))}
       </section>
@@ -150,10 +190,10 @@ function ShiftReports({ onUnreadCountChange }) {
         <article className="shift-report-detail">
           <button className="shift-report-close" type="button" onClick={() => setSelected(null)}>×</button>
           <p className="shift-reports-eyebrow">{selected.report_number}</p><h2>{label(selected.category)}</h2>
-          <div className="shift-report-detail-grid"><div><span>Status</span><strong>{label(selected.status)}</strong></div><div><span>Priority</span><strong>{label(selected.priority)}</strong></div><div><span>Site</span><strong>{selected.site_name}</strong></div><div><span>Guard</span><strong>{selected.guard_name}</strong></div><div><span>Created</span><strong>{when(selected.created_at)}</strong></div><div><span>Shift</span><strong>{when(selected.scheduled_shift_start)} → {when(selected.scheduled_shift_end)}</strong></div></div>
+          <div className="shift-report-detail-grid"><div><span>Status</span><strong>{label(selected.status)}</strong></div><div><span>Priority</span><strong>{label(selected.priority)}</strong></div><div><span>Company</span><strong>{selected.company_name}</strong></div><div><span>Site</span><strong>{selected.site_name}</strong></div><div><span>Guard</span><strong>{selected.guard_name}</strong></div><div><span>Session ID</span><strong>{selected.session_id}</strong></div><div><span>Created</span><strong>{when(selected.created_at)}</strong></div><div><span>Shift</span><strong>{when(selected.scheduled_shift_start)} → {when(selected.scheduled_shift_end)}</strong></div><div><span>Read</span><strong>{selected.read_by_admin_name || "—"} · {when(selected.read_at)}</strong></div><div><span>Acknowledged</span><strong>{selected.acknowledged_by_admin_name || "—"} · {when(selected.acknowledged_at)}</strong></div></div>
           <p className="shift-report-note">{selected.message}</p>
           {!!selected.attachments?.length && <div className="shift-report-images">{selected.attachments.map((attachment) => imageUrls[attachment.id] ? <a key={attachment.id} href={imageUrls[attachment.id]} target="_blank" rel="noreferrer"><img src={imageUrls[attachment.id]} alt={attachment.original_filename || "Shift Report"}/></a> : <button key={attachment.id} type="button" onClick={() => showImage(attachment)}>Load secure image</button>)}</div>}
-          <div className="shift-report-actions"><button type="button" onClick={() => exportPdf(`/shift-reports/${selected.id}/report/pdf`, `${selected.report_number}.pdf`)}>Download PDF</button>{selected.status === "READ" && !readOnly && <button className="primary" type="button" onClick={acknowledge}>Acknowledge</button>}</div>
+          <div className="shift-report-actions"><button type="button" onClick={() => previewPdf(`/shift-reports/${selected.id}/report/pdf`)}>Preview / Print PDF</button><button type="button" onClick={() => exportPdf(`/shift-reports/${selected.id}/report/pdf`, `Aegis-Link-Shift-Report-${selected.report_number}.pdf`)}>Download PDF</button>{selected.status === "READ" && !readOnly && <button className="primary" type="button" onClick={acknowledge}>Acknowledge</button>}</div>
           <div className="shift-report-audit"><h3>Audit</h3>{selected.events?.map((event) => <p key={event.id}>{label(event.event_type)} · {when(event.created_at)}</p>)}</div>
         </article>
       </div>}
