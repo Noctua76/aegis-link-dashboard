@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 import "./Analytics.css";
 import { API_BASE_URL } from "../config/api";
+import { getDashboardAuthHeaders } from "../utils/dashboardAuth";
 
 function Analytics() {
   
-  const getAuthHeaders = () => {
-  const currentUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "{}"
-  );
-
-  return {
-    Authorization: `Bearer ${currentUser.session_token}`,
-  };
-};
+  const getAuthHeaders = () => getDashboardAuthHeaders();
 
   const [analytics, setAnalytics] = useState(null);
   const [lastChecked, setLastChecked] = useState(null);

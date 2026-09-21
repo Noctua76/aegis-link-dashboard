@@ -1,8 +1,10 @@
-export const PASSWORD_CHANGE_REQUIRED_CODE = "PASSWORD_CHANGE_REQUIRED";
+import {
+  getDashboardSessionToken,
+  hydrateDashboardSession,
+} from "./dashboardAuth.js";
 
-export function getStoredSessionToken(session) {
-  return session?.session_token || session?.session?.token || null;
-}
+export const PASSWORD_CHANGE_REQUIRED_CODE = "PASSWORD_CHANGE_REQUIRED";
+export const getStoredSessionToken = getDashboardSessionToken;
 
 export function buildRestrictedPasswordSession(payload, storedSession = null) {
   if (payload?.code !== PASSWORD_CHANGE_REQUIRED_CODE) return null;
@@ -19,6 +21,10 @@ export function buildRestrictedPasswordSession(payload, storedSession = null) {
     storedSession: {
       ...(storedSession || {}),
       session_token: sessionToken,
+      session: {
+        ...(storedSession?.session || {}),
+        token: sessionToken,
+      },
       user,
     },
     passwordChangeUser: {
@@ -28,14 +34,6 @@ export function buildRestrictedPasswordSession(payload, storedSession = null) {
   };
 }
 
-export function buildPasswordChangedSession(sessionToken, user) {
-  return {
-    status: "ok",
-    message: "Login successful",
-    session_token: sessionToken,
-    user: {
-      ...user,
-      must_change_password: false,
-    },
-  };
+export function buildPasswordChangedSession(existingSession, authContext) {
+  return hydrateDashboardSession(existingSession, authContext);
 }
