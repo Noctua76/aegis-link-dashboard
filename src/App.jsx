@@ -16,6 +16,12 @@ import Analytics from "./pages/Analytics";
 import { formatDateTime } from "./utils/dateTime";
 import { API_BASE_URL } from "./config/api";
 import {
+  PASSWORD_CHANGE_REQUIRED_CODE,
+  buildPasswordChangedSession,
+  buildRestrictedPasswordSession,
+  getStoredSessionToken,
+} from "./utils/passwordChangeSession";
+import {
   sites as securitySites,
   guards as securityGuards,
   activeSessions,
@@ -40,6 +46,16 @@ const formatHealthTime = (value) => {
     dateStyle: "short",
     timeStyle: "medium",
   });
+};
+
+const readStoredDashboardSession = () => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("aegis-current-user") || "null"
+    );
+  } catch {
+    return null;
+  }
 };
 
 function SystemStatusCard({ item }) {
@@ -111,9 +127,29 @@ function App() {
 };
 
 const [currentUser, setCurrentUser] = useState(() => {
-  const savedUser = localStorage.getItem("aegis-current-user");
-  return savedUser ? JSON.parse(savedUser) : null;
+  const savedUser = readStoredDashboardSession();
+  return savedUser?.user?.must_change_password ? null : savedUser;
 });
+
+const [showPasswordChange, setShowPasswordChange] = useState(() =>
+  Boolean(readStoredDashboardSession()?.user?.must_change_password)
+);
+const [passwordChangeUser, setPasswordChangeUser] = useState(() => {
+  const stored = readStoredDashboardSession();
+  const sessionToken = getStoredSessionToken(stored);
+  return stored?.user?.must_change_password && sessionToken
+    ? { ...stored.user, session_token: sessionToken }
+    : null;
+});
+
+const [passwordChangeForm, setPasswordChangeForm] = useState({
+  current_password: "",
+  new_password: "",
+  confirm_password: "",
+});
+
+const [passwordChangeError, setPasswordChangeError] = useState("");
+const [isChangingPassword, setIsChangingPassword] = useState(false);
 
 useEffect(() => {
   if (!currentUser || Array.isArray(currentUser?.user?.permissions)) return;
@@ -147,10 +183,6 @@ const [readOnlyNotice, setReadOnlyNotice] =
   useState("");
 
   useEffect(() => {
-  if (!isReadOnlyAccess) {
-    return undefined;
-  }
-
   const originalFetch = window.fetch;
 
   const safeMethods = new Set([
@@ -185,6 +217,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
     ).pathname;
 
     if (
+      isReadOnlyAccess &&
       !safeMethods.has(requestMethod) &&
       !allowedMutationPaths.has(requestPath)
     ) {
@@ -218,7 +251,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
       init
     );
 
-    if (
+  if (
   response.status === 401 ||
   response.status === 403
 ) {
@@ -227,10 +260,35 @@ const [readOnlyNotice, setReadOnlyNotice] =
     .json()
     .catch(() => null);
 
-  if (
+  if (responseData?.code === PASSWORD_CHANGE_REQUIRED_CODE) {
+    const storedSession = readStoredDashboardSession();
+    const restricted = buildRestrictedPasswordSession(
+      responseData,
+      storedSession
+    );
+
+    if (restricted) {
+      localStorage.setItem(
+        "aegis-current-user",
+        JSON.stringify(restricted.storedSession)
+      );
+      setPasswordChangeUser(restricted.passwordChangeUser);
+      setPasswordChangeForm({
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+      setPasswordChangeError("");
+      setShowPasswordChange(true);
+      setCurrentUser(null);
+    }
+  } else if (
+    isReadOnlyAccess &&
+    (
     response.status === 401 ||
     responseData?.code ===
       "TEMPORARY_ACCESS_EXPIRED"
+    )
   ) {
     localStorage.removeItem(
       "aegis-current-user"
@@ -316,18 +374,6 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 const [recentAlerts, setRecentAlerts] = useState([]);
 const [recentAlertsCheckedAt, setRecentAlertsCheckedAt] = useState(null);
 
-const [showPasswordChange, setShowPasswordChange] = useState(false);
-const [passwordChangeUser, setPasswordChangeUser] = useState(null);
-
-const [passwordChangeForm, setPasswordChangeForm] = useState({
-  current_password: "",
-  new_password: "",
-  confirm_password: "",
-});
-
-const [passwordChangeError, setPasswordChangeError] = useState("");
-const [isChangingPassword, setIsChangingPassword] = useState(false);
-
 useEffect(() => {
   const loadRecentAlerts = async () => {
     try {
@@ -397,8 +443,22 @@ const handleLogin = async (event) => {
     throw new Error("Login session token was not returned");
   }
 
+  const restrictedLoginData = {
+    ...data,
+    session_token: sessionToken,
+    user: {
+      ...data.user,
+      must_change_password: true,
+    },
+  };
+
+  localStorage.setItem(
+    "aegis-current-user",
+    JSON.stringify(restrictedLoginData)
+  );
+
   setPasswordChangeUser({
-    ...data.user,
+    ...restrictedLoginData.user,
     session_token: sessionToken,
   });
 
@@ -504,12 +564,10 @@ const handlePasswordChange = async (event) => {
       );
     }
 
-    const loginData = {
-      status: "ok",
-      message: "Login successful",
-      session_token: sessionToken,
-      user: data.user,
-    };
+    const loginData = buildPasswordChangedSession(
+      sessionToken,
+      data.user
+    );
 
     localStorage.setItem(
       "aegis-current-user",
@@ -1072,6 +1130,29 @@ if (!currentUser) {
 
         {showPasswordChange ? (
   <form onSubmit={handlePasswordChange} className="login-form">
+    <div className="password-input-row">
+      <input
+        type={showLoginPassword ? "text" : "password"}
+        placeholder="Current Temporary Password"
+        value={passwordChangeForm.current_password}
+        onChange={(e) =>
+          setPasswordChangeForm({
+            ...passwordChangeForm,
+            current_password: e.target.value,
+          })
+        }
+      />
+      <button
+        type="button"
+        className="password-visibility-button"
+        aria-label={showLoginPassword ? "Hide temporary password" : "Show temporary password"}
+        aria-pressed={showLoginPassword}
+        onClick={() => setShowLoginPassword((visible) => !visible)}
+      >
+        {showLoginPassword ? "Hide" : "Show"}
+      </button>
+    </div>
+
     <div className="password-input-row">
       <input
         type={showNewPassword ? "text" : "password"}
