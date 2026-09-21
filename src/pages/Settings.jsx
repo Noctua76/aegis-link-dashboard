@@ -1644,6 +1644,9 @@ const resetGuardPassword = async (guard) => {
       expires_at: data.temporary_password_expires_at,
     });
     setGuardPasswordCopied(false);
+    if (profileGuard?.id === guard.id) {
+      setProfileGuard(null);
+    }
     await loadGuards();
   } catch (error) {
     setGuardActionError(error.message || "Failed to reset guard password");
@@ -1658,6 +1661,37 @@ const copyGuardCredentials = async () => {
     `Username: ${guardCredentialResult.username}\nTemporary password: ${guardCredentialResult.temporary_password}`
   );
   setGuardPasswordCopied(true);
+};
+
+const downloadGuardCredentials = () => {
+  if (!guardCredentialResult) return;
+
+  const expiresAt = formatUserDateTime(guardCredentialResult.expires_at);
+  const content = [
+    "AEGIS LINK — GUARD TEMPORARY CREDENTIALS",
+    "",
+    `Guard: ${guardCredentialResult.full_name}`,
+    `Username: ${guardCredentialResult.username}`,
+    `Temporary password: ${guardCredentialResult.temporary_password}`,
+    `Expires: ${expiresAt}`,
+    "Guard Web App: https://guard.aegislink.noctuacore.ai/",
+    "",
+    "The guard must create a permanent password at first login.",
+    "This file contains sensitive credentials. Store it securely and delete it after handover.",
+  ].join("\r\n");
+
+  const safeUsername = String(guardCredentialResult.username || "guard")
+    .replace(/[^a-zA-Z0-9_-]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "guard";
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `Aegis-Link-Guard-Credentials-${safeUsername}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 };
 
 
@@ -3726,6 +3760,9 @@ Manage Recipients
         <button type="button" onClick={copyGuardCredentials}>
           {guardPasswordCopied ? "Copied" : "Copy credentials"}
         </button>
+        <button type="button" className="secondary-button" onClick={downloadGuardCredentials}>
+          Download credentials
+        </button>
         <button type="button" className="secondary-button" onClick={() => setGuardCredentialResult(null)}>
           Close
         </button>
@@ -3761,18 +3798,6 @@ Manage Recipients
   <span className={`guard-password-status ${guard.password_status || "unknown"}`}>
     {guardPasswordStatusLabel(guard.password_status)}
   </span>
-
-  <button
-    type="button"
-    className="secondary-button"
-    disabled={resettingGuardId === guard.id}
-    onClick={(event) => {
-      event.stopPropagation();
-      resetGuardPassword(guard);
-    }}
-  >
-    {resettingGuardId === guard.id ? "Resetting..." : "Reset password"}
-  </button>
 
   <button
   type="button"
@@ -5764,6 +5789,42 @@ recipient-row-modal
           ))}
         </select>
       </label>
+
+      <h4>Security</h4>
+
+      <div className="guard-profile-security">
+        <div className="settings-item">
+          <span>Password Status</span>
+          <strong className={`guard-password-status ${profileGuard.password_status || "unknown"}`}>
+            {guardPasswordStatusLabel(profileGuard.password_status)}
+          </strong>
+        </div>
+
+        <div className="settings-item">
+          <span>Last Password Change</span>
+          <strong>
+            {profileGuard.password_changed_at
+              ? formatUserDateTime(profileGuard.password_changed_at)
+              : "Not completed"}
+          </strong>
+        </div>
+
+        {profileGuard.must_change_password && (
+          <div className="settings-item">
+            <span>Temporary Password Expires</span>
+            <strong>{formatUserDateTime(profileGuard.temporary_password_expires_at)}</strong>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="secondary-button guard-profile-reset-button"
+          disabled={resettingGuardId === profileGuard.id}
+          onClick={() => resetGuardPassword(profileGuard)}
+        >
+          {resettingGuardId === profileGuard.id ? "Resetting..." : "Reset Password"}
+        </button>
+      </div>
 
       <h4>Training & Experience</h4>
 
