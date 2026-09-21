@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import Analytics from "./pages/Analytics";
 import { formatDateTime } from "./utils/dateTime";
+import { formatHealthTime, hasCurrentHealthError } from "./utils/systemStatus";
 import { API_BASE_URL } from "./config/api";
 import {
   PASSWORD_CHANGE_REQUIRED_CODE,
@@ -50,15 +51,6 @@ const STATUS_LABELS = {
   not_configured: "Not configured",
 };
 
-const formatHealthTime = (value) => {
-  if (!value) return "No recorded event";
-  return new Date(value).toLocaleString("el-GR", {
-    timeZone: "Europe/Athens",
-    dateStyle: "short",
-    timeStyle: "medium",
-  });
-};
-
 function SystemStatusCard({ item }) {
   const status = item?.status || "unknown";
   const details = [
@@ -66,6 +58,10 @@ function SystemStatusCard({ item }) {
     item?.last_checked_at && ["Last checked", formatHealthTime(item.last_checked_at)],
     item?.last_success_at && ["Last success", formatHealthTime(item.last_success_at)],
     item?.last_failure_at && ["Last failure", formatHealthTime(item.last_failure_at)],
+    (item?.last_failure_reason || item?.last_error) && [
+      "Last failure reason",
+      item.last_failure_reason || item.last_error,
+    ],
     item?.last_scan_at && ["Last patrol scan", formatHealthTime(item.last_scan_at)],
     item?.last_completion_at && ["Last patrol completion", formatHealthTime(item.last_completion_at)],
     item?.last_missed_patrol_at && ["Last missed patrol", formatHealthTime(item.last_missed_patrol_at)],
@@ -76,6 +72,7 @@ function SystemStatusCard({ item }) {
     Number.isFinite(item?.active_schedules) && ["Active schedules", item.active_schedules],
     Number.isFinite(item?.active_incidents) && ["Active incidents", item.active_incidents],
     Number.isFinite(item?.missed_last_30_days) && ["Missed (30 days)", item.missed_last_30_days],
+    item?.status_message && ["Status note", item.status_message],
   ].filter(Boolean);
 
   return (
@@ -102,8 +99,8 @@ function SystemStatusCard({ item }) {
         </dl>
       )}
 
-      {item?.last_error && (
-        <p className="system-status-error">{item.last_error}</p>
+      {hasCurrentHealthError(item) && (
+        <p className="system-status-error">{item.current_error}</p>
       )}
     </article>
   );
@@ -1155,7 +1152,7 @@ useEffect(() => {
             label: "Backend API",
             status: backendResponded ? "degraded" : "offline",
             severity: "critical",
-            last_error: backendResponded
+            current_error: backendResponded
               ? `Backend responded, but operational data could not be loaded: ${err.message}`
               : err.message,
           },
