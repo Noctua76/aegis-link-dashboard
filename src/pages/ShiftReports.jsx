@@ -15,6 +15,13 @@ const options = {
 
 const label = (value) => String(value || "—").replaceAll("_", " ");
 const when = (value) => value ? new Date(value).toLocaleString("el-GR", { dateStyle: "short", timeStyle: "short" }) : "—";
+const shiftWhen = (value) => {
+  if (!value) return "—";
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!match) return String(value);
+  const [, year, month, day, hour, minute] = match;
+  return `${day}/${month}/${year}, ${hour}:${minute}`;
+};
 
 async function request(path, init = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -181,7 +188,7 @@ function ShiftReports({ onUnreadCountChange }) {
             <span className={`shift-report-status status-${report.status.toLowerCase()}`}>{label(report.status)}</span>
             <span><strong>{report.report_number}</strong><small>{report.site_name} · {report.guard_name}</small></span>
             <span><strong>{label(report.category)}</strong><small>{report.message}</small></span>
-            <span><strong>{when(report.created_at)}</strong><small>Shift: {when(report.scheduled_shift_start)} → {when(report.scheduled_shift_end)} · {report.attachment_count} image(s)</small></span>
+            <span><strong>{when(report.created_at)}</strong><small>Shift: {shiftWhen(report.scheduled_shift_start)} → {shiftWhen(report.scheduled_shift_end)} · {report.attachment_count} image(s)</small></span>
           </button>
         ))}
       </section>
@@ -190,7 +197,7 @@ function ShiftReports({ onUnreadCountChange }) {
         <article className="shift-report-detail">
           <button className="shift-report-close" type="button" onClick={() => setSelected(null)}>×</button>
           <p className="shift-reports-eyebrow">{selected.report_number}</p><h2>{label(selected.category)}</h2>
-          <div className="shift-report-detail-grid"><div><span>Status</span><strong>{label(selected.status)}</strong></div><div><span>Priority</span><strong>{label(selected.priority)}</strong></div><div><span>Company</span><strong>{selected.company_name}</strong></div><div><span>Site</span><strong>{selected.site_name}</strong></div><div><span>Guard</span><strong>{selected.guard_name}</strong></div><div><span>Session ID</span><strong>{selected.session_id}</strong></div><div><span>Created</span><strong>{when(selected.created_at)}</strong></div><div><span>Shift</span><strong>{when(selected.scheduled_shift_start)} → {when(selected.scheduled_shift_end)}</strong></div><div><span>Read</span><strong>{selected.read_by_admin_name || "—"} · {when(selected.read_at)}</strong></div><div><span>Acknowledged</span><strong>{selected.acknowledged_by_admin_name || "—"} · {when(selected.acknowledged_at)}</strong></div></div>
+          <div className="shift-report-detail-grid"><div><span>Status</span><strong>{label(selected.status)}</strong></div><div><span>Priority</span><strong>{label(selected.priority)}</strong></div><div><span>Company</span><strong>{selected.company_name}</strong></div><div><span>Site</span><strong>{selected.site_name}</strong></div><div><span>Guard</span><strong>{selected.guard_name}</strong></div><div><span>Session ID</span><strong>{selected.session_id}</strong></div><div><span>Created</span><strong>{when(selected.created_at)}</strong></div><div><span>Shift</span><strong>{shiftWhen(selected.scheduled_shift_start)} → {shiftWhen(selected.scheduled_shift_end)}</strong></div><div><span>Read</span><strong>{selected.read_by_admin_name || "—"} · {when(selected.read_at)}</strong></div><div><span>Acknowledged</span><strong>{selected.acknowledged_by_admin_name || "—"} · {when(selected.acknowledged_at)}</strong></div></div>
           <p className="shift-report-note">{selected.message}</p>
           {!!selected.attachments?.length && <div className="shift-report-images">{selected.attachments.map((attachment) => imageUrls[attachment.id] ? <a key={attachment.id} href={imageUrls[attachment.id]} target="_blank" rel="noreferrer"><img src={imageUrls[attachment.id]} alt={attachment.original_filename || "Shift Report"}/></a> : <button key={attachment.id} type="button" onClick={() => showImage(attachment)}>Load secure image</button>)}</div>}
           <div className="shift-report-actions"><button type="button" onClick={() => previewPdf(`/shift-reports/${selected.id}/report/pdf`)}>Preview / Print PDF</button><button type="button" onClick={() => exportPdf(`/shift-reports/${selected.id}/report/pdf`, `Aegis-Link-Shift-Report-${selected.report_number}.pdf`)}>Download PDF</button>{selected.status === "READ" && !readOnly && <button className="primary" type="button" onClick={acknowledge}>Acknowledge</button>}</div>
