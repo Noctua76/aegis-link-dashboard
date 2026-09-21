@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../config/api";
+import {
+  getDashboardSessionToken,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 
 function formatDate(value) {
@@ -118,20 +123,19 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function AdminAuditLogs() {
+function AdminAuditLogs({ permissions = [] }) {
+  const storedSession = readDashboardSession();
+  const canExport = hasDashboardPermission(
+    { ...storedSession?.user, permissions },
+    "exports.view"
+  );
   const [sessions, setSessions] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [fromDate, setFromDate] = useState(todayISO());
   const [toDate, setToDate] = useState(todayISO());
 
   const loadSessions = () => {
-  const storedUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "null"
-  );
-
-  const sessionToken =
-    storedUser?.session_token ||
-    storedUser?.session?.token;
+  const sessionToken = getDashboardSessionToken(readDashboardSession());
 
   if (!sessionToken) {
     return;
@@ -174,13 +178,7 @@ function AdminAuditLogs() {
 
   const exportSessions = async () => {
   try {
-    const storedUser = JSON.parse(
-      localStorage.getItem("aegis-current-user") || "null"
-    );
-
-    const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+    const sessionToken = getDashboardSessionToken(readDashboardSession());
 
     if (!sessionToken) {
       return;
@@ -318,7 +316,7 @@ function AdminAuditLogs() {
   Closed
 </button>
 
-        <button
+        {canExport && <button
   type="button"
   onClick={exportSessions}
   style={{
@@ -332,7 +330,7 @@ function AdminAuditLogs() {
   }}
 >
   Export CSV
-</button>
+</button>}
       </div>
 
       <div className="audit-table-container">

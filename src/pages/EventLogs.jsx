@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import "./EventLogs.css";
 import { API_BASE_URL } from "../config/api";
+import {
+  getDashboardSessionToken,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 
 function statusClass(status = "") {
@@ -123,7 +128,7 @@ function getShiftNotes(shift, status) {
   return "Shift status pending.";
 }
 
-export default function EventLogs() {
+export default function EventLogs({ permissions = [] }) {
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [selectedLog, setSelectedLog] = useState(null);
   const [sites, setSites] = useState([]);
@@ -132,26 +137,25 @@ export default function EventLogs() {
 
   const loadData = async () => {
   try {
-    const currentUser = JSON.parse(
-      localStorage.getItem("aegis-current-user") || "{}"
-    );
-
-    const sessionToken = currentUser.session_token;
+    const currentUser = readDashboardSession();
+    const sessionToken = getDashboardSessionToken(currentUser);
+    const user = { ...currentUser?.user, permissions };
+    if (!sessionToken) return;
 
 const [sitesRes, logsRes] = await Promise.all([
-  fetch(`${API_BASE_URL}/sites`, {
+  hasDashboardPermission(user, "sites.view") ? fetch(`${API_BASE_URL}/sites`, {
     headers: {
       Authorization: `Bearer ${sessionToken}`,
     },
-  }),
-  fetch(`${API_BASE_URL}/guards/shifts/history`, {
+  }) : null,
+  hasDashboardPermission(user, "guards.view") ? fetch(`${API_BASE_URL}/guards/shifts/history`, {
     headers: {
       Authorization: `Bearer ${sessionToken}`,
     },
-  }),
+  }) : null,
 ]);
-      const sitesData = await sitesRes.json();
-      const logsData = await logsRes.json();
+      const sitesData = sitesRes ? await sitesRes.json() : { sites: [] };
+      const logsData = logsRes ? await logsRes.json() : { shifts: [] };
 
       setSites(sitesData.sites || []);
 

@@ -2,6 +2,12 @@ import { useEffect, useState } from "react";
 import "./Settings.css";
 import { API_BASE_URL } from "../config/api";
 import { getAlertCapabilities } from "../utils/alertPermissions";
+import {
+  getDashboardAuthHeaders,
+  getDashboardSessionToken,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 const toDateInputValue = (date) => {
   const localDate = new Date(
@@ -50,46 +56,20 @@ const guardPasswordStatusLabel = (status) => ({
 }[status] || "Password status unknown");
 
 function Settings({ permissions = null }) {
-  const storedCurrentUser = (() => {
-  try {
-    return JSON.parse(
-      localStorage.getItem(
-        "aegis-current-user"
-      ) || "null"
-    );
-  } catch {
-    return null;
-  }
-})();
+  const storedCurrentUser = readDashboardSession();
 
 const isSystemOwner =
   storedCurrentUser?.user?.role === "system_owner" ||
   storedCurrentUser?.user?.role_code === "system_owner";
-const permissionSet = new Set(permissions || storedCurrentUser?.user?.permissions || []);
 const hasPermission = (permission) =>
-  isSystemOwner || (!permissions && !Array.isArray(storedCurrentUser?.user?.permissions)) || permissionSet.has(permission);
+  isSystemOwner || hasDashboardPermission(
+    { ...storedCurrentUser?.user, permissions: permissions || storedCurrentUser?.user?.permissions },
+    permission
+  );
 const canManageRoles = isSystemOwner && hasPermission("roles.manage");
 const { canViewAlerts, canManageAlerts } = getAlertCapabilities(hasPermission);
-  const getAuthHeaders = () => {
-  const currentUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "{}"
-  );
-
-  return {
-    Authorization: `Bearer ${currentUser.session_token}`,
-  };
-};
-  const getSessionToken = () => {
-  const currentUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "{}"
-  );
-
-  return (
-  currentUser?.session_token ||
-  currentUser?.session?.token ||
-  null
-);
-};
+  const getAuthHeaders = () => getDashboardAuthHeaders();
+  const getSessionToken = () => getDashboardSessionToken(readDashboardSession());
 
   const [systemStatus, setSystemStatus] = useState(null);
   const [alertConfig, setAlertConfig] = useState(null);
@@ -364,8 +344,7 @@ const loadRecipients = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -402,8 +381,7 @@ const loadSites = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -440,8 +418,7 @@ const loadGuards = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     const response = await fetch(`${API_BASE_URL}/settings/guards`, {
       headers: {
@@ -1309,8 +1286,7 @@ const addRecipient = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -1356,8 +1332,7 @@ const addSite = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -1404,8 +1379,7 @@ const updateSite = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -1449,8 +1423,7 @@ const uploadSopFile = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       throw new Error("Authentication session is missing");
@@ -1509,8 +1482,7 @@ const uploadSiteDocument = async (slot, file) => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       throw new Error("Authentication session is missing");
@@ -1562,8 +1534,7 @@ const updateSiteProfile = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       return;
@@ -1607,8 +1578,7 @@ const saveGuardProfile = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       throw new Error("Authentication session is missing");
@@ -1660,8 +1630,7 @@ const addGuard = async () => {
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     const response = await fetch(`${API_BASE_URL}/settings/guards`, {
       method: "POST",
@@ -1818,10 +1787,10 @@ loadRolePermissions();
       }
     }
 
-    loadSystemStatus();
+    if (hasPermission("system_status.tenant")) loadSystemStatus();
 
     const interval = setInterval(() => {
-  loadSystemStatus();
+if (hasPermission("system_status.tenant")) loadSystemStatus();
 if (canViewAlerts) {
   loadAlertConfiguration();
   loadRecipients();
@@ -1834,7 +1803,7 @@ loadDashboardRoles();
 
     
     return () => clearInterval(interval);
-  }, [canViewAlerts]);
+  }, [canViewAlerts, permissions]);
 
   useEffect(() => {
   if (!isSystemOwner) {
@@ -1878,8 +1847,7 @@ loadDashboardRoles();
     );
 
     const sessionToken =
-      storedUser?.session_token ||
-      storedUser?.session?.token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       throw new Error("Authentication required");
@@ -3702,8 +3670,7 @@ setShowRecipientsModal(true)
       );
 
       const sessionToken =
-        storedUser?.session_token ||
-        storedUser?.session?.token;
+        getDashboardSessionToken(storedUser);
 
       if (!sessionToken) {
         return;
@@ -3912,8 +3879,7 @@ setShowRecipientsModal(true)
       );
 
       const sessionToken =
-        storedUser?.session_token ||
-        storedUser?.session?.token;
+        getDashboardSessionToken(storedUser);
 
       if (!sessionToken) {
         throw new Error("Authentication session is missing");
@@ -5014,8 +4980,7 @@ recipient-row-modal
         );
 
         const sessionToken =
-          storedUser?.session_token ||
-          storedUser?.session?.token;
+          getDashboardSessionToken(storedUser);
 
         if (!sessionToken) {
           return;

@@ -1,19 +1,11 @@
 import { useEffect, useState } from "react";
 import "./Sites.css";
 import { API_BASE_URL } from "../config/api";
-
-  
-  function getSessionToken() {
-  const storedUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "null"
-  );
-
-  return (
-    storedUser?.session_token ||
-    storedUser?.session?.token ||
-    null
-  );
-}
+import {
+  getDashboardSessionToken,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
@@ -76,7 +68,11 @@ function gpsAccuracyLabel(accuracy) {
   };
 }
 
-export default function Sites() {
+export default function Sites({ permissions = [] }) {
+  const session = readDashboardSession();
+  const user = { ...session?.user, permissions };
+  const canViewGuards = hasDashboardPermission(user, "guards.view");
+  const canViewIncidents = hasDashboardPermission(user, "incidents.view");
   const [selectedSite, setSelectedSite] = useState(null);
   const [sites, setSites] = useState([]);
   const [guards, setGuards] = useState([]);
@@ -87,7 +83,7 @@ const [liveLocations, setLiveLocations] = useState([]);
 
   const loadData = async () => {
   try {
-    const sessionToken = getSessionToken();
+    const sessionToken = getDashboardSessionToken(readDashboardSession());
 
     if (!sessionToken) return;
 
@@ -107,33 +103,33 @@ const [liveLocations, setLiveLocations] = useState([]);
         headers: authHeaders,
       }),
 
-      fetch(`${API_BASE_URL}/guards`, {
+      canViewGuards ? fetch(`${API_BASE_URL}/guards`, {
         headers: authHeaders,
-      }),
+      }) : null,
 
-      fetch(`${API_BASE_URL}/guards/active`, {
+      canViewGuards ? fetch(`${API_BASE_URL}/guards/active`, {
         headers: authHeaders,
-      }),
+      }) : null,
 
-      fetch(`${API_BASE_URL}/guards/shifts/history`, {
+      canViewGuards ? fetch(`${API_BASE_URL}/guards/shifts/history`, {
         headers: authHeaders,
-      }),
+      }) : null,
 
-      fetch(`${API_BASE_URL}/incidents/site-monitoring`, {
+      canViewIncidents ? fetch(`${API_BASE_URL}/incidents/site-monitoring`, {
         headers: authHeaders,
-      }),
+      }) : null,
 
-      fetch(`${API_BASE_URL}/guards/live-locations`, {
+      canViewGuards ? fetch(`${API_BASE_URL}/guards/live-locations`, {
         headers: authHeaders,
-      }),
+      }) : null,
     ]);
 
     const sitesData = await sitesRes.json();
-    const guardsData = await guardsRes.json();
-    const activeData = await activeRes.json();
-    const shiftsData = await shiftsRes.json();
-    const incidentsData = await incidentsRes.json();
-    const locationsData = await locationsRes.json();
+    const guardsData = guardsRes ? await guardsRes.json() : { guards: [] };
+    const activeData = activeRes ? await activeRes.json() : { guards: [] };
+    const shiftsData = shiftsRes ? await shiftsRes.json() : { shifts: [] };
+    const incidentsData = incidentsRes ? await incidentsRes.json() : { cards: [] };
+    const locationsData = locationsRes ? await locationsRes.json() : { locations: [] };
 
     setSites(sitesData.sites || []);
     setGuards(guardsData.guards || []);
@@ -152,7 +148,7 @@ const [liveLocations, setLiveLocations] = useState([]);
     const interval = setInterval(loadData, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [canViewGuards, canViewIncidents]);
 
   const siteOverview = sites.map((site) => {
   const assignedGuards = guards.filter(

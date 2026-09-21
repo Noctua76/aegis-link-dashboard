@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 import "./Guards.css";
 import { API_BASE_URL } from "../config/api";
-
-function getSessionToken() {
-  const storedUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "null"
-  );
-
-  return (
-    storedUser?.session_token ||
-    storedUser?.session?.token ||
-    null
-  );
-}
+import {
+  getDashboardSessionToken,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-").replaceAll("_", "-");
@@ -26,7 +19,11 @@ function formatDateTime(value) {
   });
 }
 
-export default function Guards() {
+export default function Guards({ permissions = [] }) {
+  const session = readDashboardSession();
+  const user = { ...session?.user, permissions };
+  const canViewSites = hasDashboardPermission(user, "sites.view");
+  const canViewSystemStatus = hasDashboardPermission(user, "system_status.tenant");
   const [guards, setGuards] = useState([]);
   const [sites, setSites] = useState([]);
   const [activeGuards, setActiveGuards] = useState([]);
@@ -36,7 +33,7 @@ export default function Guards() {
 
   const loadData = async () => {
   try {
-    const sessionToken = getSessionToken();
+    const sessionToken = getDashboardSessionToken(readDashboardSession());
 
     if (!sessionToken) return;
 
@@ -50,23 +47,23 @@ export default function Guards() {
           headers: authHeaders,
         }),
 
-        fetch(`${API_BASE_URL}/sites`, {
+        canViewSites ? fetch(`${API_BASE_URL}/sites`, {
           headers: authHeaders,
-        }),
+        }) : null,
 
         fetch(`${API_BASE_URL}/guards/active`, {
           headers: authHeaders,
         }),
 
-        fetch(`${API_BASE_URL}/system/status/tenant`, {
+        canViewSystemStatus ? fetch(`${API_BASE_URL}/system/status/tenant`, {
           headers: authHeaders,
           cache: "no-store",
-        }),
+        }) : null,
       ]);
 
-    const statusData = await statusRes.json();
+    const statusData = statusRes ? await statusRes.json() : null;
     const guardsData = await guardsRes.json();
-    const sitesData = await sitesRes.json();
+    const sitesData = sitesRes ? await sitesRes.json() : { sites: [] };
     const activeData = await activeRes.json();
 
     setGuards(guardsData.guards || []);
@@ -84,7 +81,7 @@ export default function Guards() {
     const interval = setInterval(loadData, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [canViewSites, canViewSystemStatus]);
 
   const activeGuardsNow = activeGuards
   .filter((item) => item.guard_id && item.is_currently_online)

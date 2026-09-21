@@ -50,11 +50,26 @@ test("global handler shows Change Password and stops normal Dashboard rendering"
 
 test("successful password change restores a normal Dashboard session", () => {
   const session = buildPasswordChangedSession(
-    "same-session-token",
-    { id: 7, username: "temporary_admin", must_change_password: true }
+    {
+      session_token: "same-session-token",
+      session: { id: 99, token: "same-session-token", login_time: "now" },
+      user: { id: 7, username: "temporary_admin", company_id: 4 },
+    },
+    {
+      user_id: 7,
+      username: "temporary_admin",
+      company_id: 4,
+      role_code: "viewer",
+      role_name: "Viewer / Auditor",
+      permissions: ["shift_reports.view"],
+      must_change_password: false,
+    }
   );
 
   assert.equal(session.session_token, "same-session-token");
+  assert.equal(session.session.token, "same-session-token");
+  assert.equal(session.session.id, 99);
+  assert.deepEqual(session.user.permissions, ["shift_reports.view"]);
   assert.equal(session.user.must_change_password, false);
   assert.match(
     appSource,

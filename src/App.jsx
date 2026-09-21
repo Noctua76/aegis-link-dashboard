@@ -19,8 +19,16 @@ import {
   PASSWORD_CHANGE_REQUIRED_CODE,
   buildPasswordChangedSession,
   buildRestrictedPasswordSession,
-  getStoredSessionToken,
 } from "./utils/passwordChangeSession";
+import {
+  canAccessDashboardMenu,
+  getDashboardSessionToken,
+  getDashboardPollingCapabilities,
+  getPermittedDashboardMenus,
+  hasDashboardPermission,
+  hydrateDashboardSession,
+  readDashboardSession,
+} from "./utils/dashboardAuth";
 import {
   sites as securitySites,
   guards as securityGuards,
@@ -46,16 +54,6 @@ const formatHealthTime = (value) => {
     dateStyle: "short",
     timeStyle: "medium",
   });
-};
-
-const readStoredDashboardSession = () => {
-  try {
-    return JSON.parse(
-      localStorage.getItem("aegis-current-user") || "null"
-    );
-  } catch {
-    return null;
-  }
 };
 
 function SystemStatusCard({ item }) {
@@ -109,34 +107,26 @@ function SystemStatusCard({ item }) {
 }
 
 function App() {
+  const [startupSession] = useState(() => readDashboardSession());
   const [onlineAdmins, setOnlineAdmins] = useState([]);
   const [
   temporaryGuardPreviews,
   setTemporaryGuardPreviews,
 ] = useState([]);
-  const getSessionToken = () => {
-  const storedUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "null"
-  );
+const getSessionToken = () => getDashboardSessionToken(readDashboardSession());
 
-  return (
-    storedUser?.session_token ||
-    storedUser?.session?.token ||
-    null
-  );
-};
-
-const [currentUser, setCurrentUser] = useState(() => {
-  const savedUser = readStoredDashboardSession();
-  return savedUser?.user?.must_change_password ? null : savedUser;
-});
+const [currentUser, setCurrentUser] = useState(null);
+const [authorizationReady, setAuthorizationReady] = useState(false);
+const [authorizationLoading, setAuthorizationLoading] = useState(() =>
+  Boolean(startupSession && !startupSession?.user?.must_change_password)
+);
 
 const [showPasswordChange, setShowPasswordChange] = useState(() =>
-  Boolean(readStoredDashboardSession()?.user?.must_change_password)
+  Boolean(startupSession?.user?.must_change_password)
 );
 const [passwordChangeUser, setPasswordChangeUser] = useState(() => {
-  const stored = readStoredDashboardSession();
-  const sessionToken = getStoredSessionToken(stored);
+  const stored = startupSession;
+  const sessionToken = getDashboardSessionToken(stored);
   return stored?.user?.must_change_password && sessionToken
     ? { ...stored.user, session_token: sessionToken }
     : null;
@@ -152,26 +142,71 @@ const [passwordChangeError, setPasswordChangeError] = useState("");
 const [isChangingPassword, setIsChangingPassword] = useState(false);
 
 useEffect(() => {
-  if (!currentUser || Array.isArray(currentUser?.user?.permissions)) return;
-  const token = currentUser.session_token || currentUser?.session?.token;
-  if (!token) return;
-  let cancelled = false;
-  fetch(`${API_BASE_URL}/auth/context`, { headers: { Authorization: `Bearer ${token}` } })
-    .then(async (response) => ({ response, data: await response.json().catch(() => ({})) }))
-    .then(({ response, data }) => {
-      if (cancelled || !response.ok) return;
-      const updated = { ...currentUser, user: { ...currentUser.user, ...data.auth } };
-      localStorage.setItem("aegis-current-user", JSON.stringify(updated));
-      setCurrentUser(updated);
-    })
-    .catch((error) => console.error("Authorization context refresh failed:", error));
-  return () => { cancelled = true; };
-}, [currentUser]);
+  if (!startupSession || startupSession?.user?.must_change_password) {
+    setAuthorizationLoading(false);
+    return undefined;
+  }
 
-const isSystemOwner = currentUser?.user?.role === "system_owner";
-const permissionSet = new Set(currentUser?.user?.permissions || []);
+  const token = getDashboardSessionToken(startupSession);
+  if (!token) {
+    localStorage.removeItem("aegis-current-user");
+    setAuthorizationLoading(false);
+    return undefined;
+  }
+
+  let cancelled = false;
+  const restoreAuthorization = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/context`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json().catch(() => ({}));
+      if (cancelled) return;
+
+      if (data?.code === PASSWORD_CHANGE_REQUIRED_CODE) {
+        const restricted = buildRestrictedPasswordSession(data, startupSession);
+        if (restricted) {
+          localStorage.setItem("aegis-current-user", JSON.stringify(restricted.storedSession));
+          setPasswordChangeUser(restricted.passwordChangeUser);
+          setShowPasswordChange(true);
+        }
+        return;
+      }
+
+      if (!response.ok) {
+        localStorage.removeItem("aegis-current-user");
+        setLoginError(response.status === 401 ? "Your session has expired. Please sign in again." : "Unable to restore Dashboard authorization.");
+        return;
+      }
+
+      const hydrated = hydrateDashboardSession(startupSession, data.auth);
+      if (!hydrated) throw new Error("Authorization context is incomplete");
+      localStorage.setItem("aegis-current-user", JSON.stringify(hydrated));
+      setCurrentUser(hydrated);
+      setAuthorizationReady(true);
+    } catch (error) {
+      if (!cancelled) {
+        localStorage.removeItem("aegis-current-user");
+        setLoginError("Unable to restore Dashboard authorization. Please sign in again.");
+      }
+    } finally {
+      if (!cancelled) setAuthorizationLoading(false);
+    }
+  };
+
+  restoreAuthorization();
+  return () => { cancelled = true; };
+}, [startupSession]);
+
+const isSystemOwner =
+  currentUser?.user?.role === "system_owner" ||
+  currentUser?.user?.role_code === "system_owner";
 const hasPermission = (permission) =>
-  isSystemOwner || !Array.isArray(currentUser?.user?.permissions) || permissionSet.has(permission);
+  authorizationReady && hasDashboardPermission(currentUser?.user, permission);
+const pollingCapabilities = getDashboardPollingCapabilities(
+  currentUser?.user,
+  authorizationReady
+);
 
 const isReadOnlyAccess =
   currentUser?.user?.access_mode === "read_only";
@@ -261,7 +296,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
     .catch(() => null);
 
   if (responseData?.code === PASSWORD_CHANGE_REQUIRED_CODE) {
-    const storedSession = readStoredDashboardSession();
+    const storedSession = readDashboardSession();
     const restricted = buildRestrictedPasswordSession(
       responseData,
       storedSession
@@ -281,6 +316,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
       setPasswordChangeError("");
       setShowPasswordChange(true);
       setCurrentUser(null);
+      setAuthorizationReady(false);
     }
   } else if (
     isReadOnlyAccess &&
@@ -295,6 +331,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
     );
 
     setCurrentUser(null);
+    setAuthorizationReady(false);
 
     setLoginError(
       responseData?.code ===
@@ -337,6 +374,7 @@ useEffect(() => {
     );
 
     setCurrentUser(null);
+    setAuthorizationReady(false);
 
     setLoginError(
       "Temporary access has expired."
@@ -375,13 +413,13 @@ const [recentAlerts, setRecentAlerts] = useState([]);
 const [recentAlertsCheckedAt, setRecentAlertsCheckedAt] = useState(null);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.auditLogs) {
+    setRecentAlerts([]);
+    return undefined;
+  }
   const loadRecentAlerts = async () => {
     try {
-      const currentUser = JSON.parse(
-  localStorage.getItem("aegis-current-user") || "{}"
-);
-
-const sessionToken = currentUser.session_token;
+const sessionToken = getDashboardSessionToken(currentUser);
 
 const response = await fetch(
   `${API_BASE_URL}/event-logs`,
@@ -413,7 +451,7 @@ const interval = setInterval(() => {
 }, 5000);
 
 return () => clearInterval(interval);
-}, []);
+}, [currentUser, authorizationReady]);
 
   
 const handleLogin = async (event) => {
@@ -446,6 +484,10 @@ const handleLogin = async (event) => {
   const restrictedLoginData = {
     ...data,
     session_token: sessionToken,
+    session: {
+      ...(data.session || {}),
+      token: sessionToken,
+    },
     user: {
       ...data.user,
       must_change_password: true,
@@ -463,6 +505,7 @@ const handleLogin = async (event) => {
   });
 
   setShowPasswordChange(true);
+  setAuthorizationReady(false);
 
   setPasswordChangeForm({
     current_password: loginForm.password,
@@ -473,10 +516,14 @@ const handleLogin = async (event) => {
   return;
 }
 
-    const loginData = {
-  ...data,
-  session_token: data.session?.token,
-};
+    const loginData = hydrateDashboardSession(
+      { ...data, session_token: data.session?.token },
+      data.user
+    );
+
+if (!loginData) {
+  throw new Error("Login authorization context is incomplete");
+}
 
 localStorage.setItem(
   "aegis-current-user",
@@ -484,6 +531,7 @@ localStorage.setItem(
 );
 
 setCurrentUser(loginData);
+setAuthorizationReady(true);
   } catch (error) {
     setLoginError(error.message || "Invalid username or password");
   } finally {
@@ -526,14 +574,11 @@ const handlePasswordChange = async (event) => {
   setIsChangingPassword(true);
 
   try {
-    const storedUser = JSON.parse(
-      localStorage.getItem("aegis-current-user") || "null"
-    );
+    const storedUser = readDashboardSession();
 
     const sessionToken =
       passwordChangeUser?.session_token ||
-      storedUser?.session_token ||
-      storedUser?.user?.session_token;
+      getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
       throw new Error("Authentication session is missing");
@@ -564,10 +609,39 @@ const handlePasswordChange = async (event) => {
       );
     }
 
+    const contextResponse = await fetch(`${API_BASE_URL}/auth/context`, {
+      headers: { Authorization: `Bearer ${sessionToken}` },
+    });
+    const contextData = await contextResponse.json().catch(() => ({}));
+
+    if (!contextResponse.ok) {
+      localStorage.removeItem("aegis-current-user");
+      setCurrentUser(null);
+      setAuthorizationReady(false);
+      setShowPasswordChange(false);
+      setPasswordChangeUser(null);
+      setLoginError(
+        "Password changed successfully. Please sign in again using your new password."
+      );
+      return;
+    }
+
     const loginData = buildPasswordChangedSession(
-      sessionToken,
-      data.user
+      storedUser,
+      contextData.auth
     );
+
+    if (!loginData) {
+      localStorage.removeItem("aegis-current-user");
+      setCurrentUser(null);
+      setAuthorizationReady(false);
+      setShowPasswordChange(false);
+      setPasswordChangeUser(null);
+      setLoginError(
+        "Password changed successfully. Please sign in again using your new password."
+      );
+      return;
+    }
 
     localStorage.setItem(
       "aegis-current-user",
@@ -575,6 +649,7 @@ const handlePasswordChange = async (event) => {
     );
 
     setCurrentUser(loginData);
+    setAuthorizationReady(true);
 
     setShowPasswordChange(false);
     setPasswordChangeUser(null);
@@ -614,7 +689,9 @@ const [incidentTimeline, setIncidentTimeline] = useState({
 });
 
 const handleLogout = async () => {
-  const sessionToken = currentUser?.session?.token;
+  const sessionToken =
+    getDashboardSessionToken(currentUser) ||
+    getDashboardSessionToken(readDashboardSession());
 
   try {
     if (sessionToken) {
@@ -642,6 +719,7 @@ const handleLogout = async () => {
   } finally {
     localStorage.removeItem("aegis-current-user");
     setCurrentUser(null);
+    setAuthorizationReady(false);
   }
 };
   const [activeMenu, setActiveMenu] = useState(() => {
@@ -651,21 +729,19 @@ const [liveActiveGuards, setLiveActiveGuards] = useState([]);
   const [unreadShiftReports, setUnreadShiftReports] = useState(0);
   const [incidentFilter, setIncidentFilter] = useState("All");
   const [resolutionForms, setResolutionForms] = useState({});
-const menuItems = [
-  ["Dashboard", "dashboard.view"],
-  ["Live Incidents", "incidents.view"],
-  ["Shift Reports", "shift_reports.view"],
-  ["Event Logs", "audit_logs.view"],
-  ["Admin Audit Logs", "audit_logs.view"],
-  ["Guards", "guards.view"],
-  ["Sites", "sites.view"],
-  ["Patrols", "patrols.view"],
-  ["System Status", "system_status.tenant"],
-  ["Analytics", "analytics.view"],
-  ["Settings", null],
-].filter(([, permission]) => !permission || hasPermission(permission)).map(([label]) => label);
+const menuItems = authorizationReady
+  ? getPermittedDashboardMenus(currentUser?.user)
+  : [];
+const canRenderMenu = (menu) =>
+  authorizationReady && canAccessDashboardMenu(currentUser?.user, menu);
+
+useEffect(() => {
+  if (!authorizationReady || !currentUser || menuItems.length === 0) return;
+  if (!menuItems.includes(activeMenu)) setActiveMenu(menuItems[0]);
+}, [authorizationReady, currentUser, activeMenu, menuItems.join("|")]);
+
   useEffect(() => {
-    if (!currentUser || !hasPermission("shift_reports.view")) return undefined;
+    if (!currentUser || !pollingCapabilities.shiftReports) return undefined;
     const loadUnreadShiftReports = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/shift-reports/unread-count`, {
@@ -680,17 +756,16 @@ const menuItems = [
     loadUnreadShiftReports();
     const timer = setInterval(loadUnreadShiftReports, 30000);
     return () => clearInterval(timer);
-  }, [currentUser]);
+  }, [currentUser, authorizationReady]);
   useEffect(() => {
+    if (!currentUser || !pollingCapabilities.dashboard) {
+      setOnlineAdmins([]);
+      setTemporaryGuardPreviews([]);
+      return undefined;
+    }
     const loadAdmins = async () => {
     try {
-      const storedUser = JSON.parse(
-  localStorage.getItem("aegis-current-user") || "null"
-);
-
-const sessionToken =
-  storedUser?.session_token ||
-  storedUser?.session?.token;
+const sessionToken = getDashboardSessionToken(currentUser);
 
 if (!sessionToken) {
   return;
@@ -726,9 +801,10 @@ const response = await fetch(
 
   return () => clearInterval(interval);
 
-}, []);
+}, [currentUser, authorizationReady]);
   useEffect(() => {
-  const sessionToken = currentUser?.session?.token;
+  if (!currentUser || !authorizationReady) return undefined;
+  const sessionToken = getDashboardSessionToken(currentUser);
 
   if (!sessionToken) return;
 
@@ -762,9 +838,13 @@ const response = await fetch(
   const interval = setInterval(sendHeartbeat, 30000);
 
   return () => clearInterval(interval);
-}, [currentUser]);
+}, [currentUser, authorizationReady]);
   useEffect(() => {
   localStorage.setItem("aegis-active-menu", activeMenu);
+  if (!currentUser || !pollingCapabilities.guards) {
+    setLiveActiveGuards([]);
+    return undefined;
+  }
     const fetchActiveGuards = async () => {
   try {
     const sessionToken = getSessionToken();
@@ -793,7 +873,7 @@ fetchActiveGuards();
 const interval = setInterval(fetchActiveGuards, 10000);
 
 return () => clearInterval(interval);
-}, [activeMenu]);
+}, [activeMenu, currentUser, authorizationReady]);
   const dashboardSites = securitySites.map((site) => {
   const activeSession = getActiveSessionBySiteId(site.id);
   const activeGuard = activeSession
@@ -827,6 +907,7 @@ const [resolvedFilters, setResolvedFilters] = useState({
 });
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.dashboard) return undefined;
   async function loadDashboardMetrics() {
     try {
       const sessionToken = getSessionToken();
@@ -857,9 +938,10 @@ const res = await fetch(
 
   return () => clearInterval(interval);
 
-}, []);
+}, [currentUser, authorizationReady]);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.dashboard) return undefined;
   async function loadIncidentTimeline() {
     try {
       const sessionToken = getSessionToken();
@@ -899,9 +981,10 @@ const res = await fetch(
   const interval = setInterval(loadIncidentTimeline, 5000);
 
   return () => clearInterval(interval);
-}, []);
+}, [currentUser, authorizationReady]);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.sites) return undefined;
   async function loadSites() {
   try {
     const sessionToken = getSessionToken();
@@ -930,9 +1013,10 @@ useEffect(() => {
   const interval = setInterval(loadSites, 15000);
 
   return () => clearInterval(interval);
-}, []);
+}, [currentUser, authorizationReady]);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.incidents) return undefined;
   const loadResolvedIncidents = async () => {
     try {
       const sessionToken = getSessionToken();
@@ -962,9 +1046,10 @@ const response = await fetch(
   const interval = setInterval(loadResolvedIncidents, 15000);
 
   return () => clearInterval(interval);
-}, []);
+}, [currentUser, authorizationReady]);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.incidents) return undefined;
   const loadSiteMonitoring = async () => {
     try {
       const sessionToken = getSessionToken();
@@ -993,9 +1078,13 @@ const response = await fetch(
   const interval = setInterval(loadSiteMonitoring, 5000);
 
   return () => clearInterval(interval);
-}, []);
+}, [currentUser, authorizationReady]);
 
 useEffect(() => {
+  if (!currentUser || !pollingCapabilities.systemStatus) {
+    setSystemStatus(null);
+    return undefined;
+  }
   const loadSystemStatus = async () => {
     let backendResponded = false;
     try {
@@ -1053,7 +1142,7 @@ useEffect(() => {
   clearInterval(interval);
 };
 
-}, [currentUser]);
+}, [currentUser, authorizationReady]);
   const filteredIncidents =
   incidentFilter === "All"
     ? dashboardIncidents
@@ -1118,6 +1207,17 @@ incidentTimeline.incidentStatus === "normal"
       ? "Incident Resolved"
       : "Incident Active",
 };
+
+if (authorizationLoading) {
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <img src={aegisLogo} alt="Aegis Link Logo" className="login-logo" />
+        <p>Loading authorization...</p>
+      </div>
+    </div>
+  );
+}
 
 if (!currentUser) {
   return (
@@ -1249,6 +1349,26 @@ if (!currentUser) {
     </div>
   );
 }
+
+if (!authorizationReady) {
+  return (
+    <div className="login-screen">
+      <div className="login-card"><p>Loading authorization...</p></div>
+    </div>
+  );
+}
+
+if (menuItems.length === 0) {
+  return (
+    <div className="login-screen">
+      <div className="login-card">
+        <h1>Aegis Link</h1>
+        <p>No Dashboard permissions are assigned to this account.</p>
+        <button className="logout-button" onClick={handleLogout}>Logout</button>
+      </div>
+    </div>
+  );
+}
   
 const getFlowStatusClass = (status) => {
   const value = status?.toLowerCase();
@@ -1297,7 +1417,7 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
   `${API_BASE_URL}/incidents/${incidentDbId}/guard-responses`,
   {
     headers: {
-      Authorization: `Bearer ${currentUser?.session_token}`,
+      Authorization: `Bearer ${getDashboardSessionToken(currentUser) || ""}`,
     },
   }
 );
@@ -1735,7 +1855,7 @@ const handleResolveIncident = async (incident) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${currentUser?.session_token}`,
+        Authorization: `Bearer ${getDashboardSessionToken(currentUser) || ""}`,
       },
       body: JSON.stringify({
         supervisor_notified: true,
@@ -2036,7 +2156,7 @@ const renderIncidentLocation = (incident) => {
   </div>
 )}
 
-        {activeMenu === "Dashboard" && (
+        {activeMenu === "Dashboard" && canRenderMenu("Dashboard") && (
   <>
         <header style={{ marginBottom: "28px" }}>
           <h1
@@ -2312,7 +2432,7 @@ const renderIncidentLocation = (incident) => {
 </section>
     </>
 )}
-        {activeMenu === "Live Incidents" && (
+        {activeMenu === "Live Incidents" && canRenderMenu("Live Incidents") && (
   <>
     <header style={{ marginBottom: "28px" }}>
       <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "700" }}>
@@ -2506,7 +2626,7 @@ const renderIncidentLocation = (incident) => {
   `${API_BASE_URL}/incidents/${incident.incidentDbId}/guard-responses`,
   {
     headers: {
-      Authorization: `Bearer ${currentUser?.session_token}`,
+      Authorization: `Bearer ${getDashboardSessionToken(currentUser) || ""}`,
     },
   }
 );
@@ -2804,28 +2924,28 @@ const renderIncidentLocation = (incident) => {
 </>
 )}
 
-        {activeMenu === "Guards" && <Guards />}
-        {activeMenu==="Admin Audit Logs" &&
-<AdminAuditLogs/>
+        {activeMenu === "Guards" && canRenderMenu("Guards") && <Guards permissions={currentUser.user.permissions} />}
+        {activeMenu==="Admin Audit Logs" && canRenderMenu("Admin Audit Logs") &&
+<AdminAuditLogs permissions={currentUser.user.permissions}/>
 }
-        {activeMenu === "Event Logs" && <EventLogs />}
-        {activeMenu === "Sites" && <Sites />}
-        {activeMenu === "Patrols" && <Patrols />}
-        {activeMenu === "Shift Reports" && (
+        {activeMenu === "Event Logs" && canRenderMenu("Event Logs") && <EventLogs permissions={currentUser.user.permissions} />}
+        {activeMenu === "Sites" && canRenderMenu("Sites") && <Sites permissions={currentUser.user.permissions} />}
+        {activeMenu === "Patrols" && canRenderMenu("Patrols") && <Patrols />}
+        {activeMenu === "Shift Reports" && canRenderMenu("Shift Reports") && (
           <ShiftReports
             onUnreadCountChange={setUnreadShiftReports}
             permissions={currentUser?.user?.permissions || null}
           />
         )}
-        {activeMenu === "Settings" && (
+        {activeMenu === "Settings" && canRenderMenu("Settings") && (
 <Settings permissions={currentUser?.user?.permissions || null}/>
 )}
 
-{activeMenu === "Analytics" && (
+{activeMenu === "Analytics" && canRenderMenu("Analytics") && (
 <Analytics/>
 )}
         
-{activeMenu === "System Status" && (
+{activeMenu === "System Status" && canRenderMenu("System Status") && (
   <div className="system-status-page">
     <header className="system-status-header">
       <div>

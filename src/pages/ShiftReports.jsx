@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { API_BASE_URL } from "../config/api";
+import { getDashboardAuthHeaders, hasDashboardPermission } from "../utils/dashboardAuth";
 import "./ShiftReports.css";
 
-const authHeaders = () => {
-  const current = JSON.parse(localStorage.getItem("aegis-current-user") || "{}");
-  return { Authorization: `Bearer ${current.session_token || current.session?.token || ""}` };
-};
+const authHeaders = () => getDashboardAuthHeaders();
 
 const options = {
   category: ["OBSERVATION", "FACILITY_EQUIPMENT", "SECURITY_CONCERN", "HANDOVER_NOTE", "OTHER"],
@@ -41,9 +39,11 @@ function ShiftReports({ onUnreadCountChange, permissions = null }) {
   const readOnly = current?.user?.access_mode === "read_only";
   const isSystemOwner = current?.user?.role === "system_owner" || current?.user?.role_code === "system_owner";
   const resolvedPermissions = permissions || current?.user?.permissions;
-  const permissionSet = new Set(resolvedPermissions || []);
   const hasPermission = (permission) =>
-    isSystemOwner || !Array.isArray(resolvedPermissions) || permissionSet.has(permission);
+    isSystemOwner || hasDashboardPermission(
+      { ...current?.user, permissions: resolvedPermissions },
+      permission
+    );
   const canMarkRead = !readOnly && hasPermission("shift_reports.read");
   const canAcknowledge = !readOnly && hasPermission("shift_reports.acknowledge");
   const canExport = hasPermission("exports.view");
@@ -84,17 +84,17 @@ function ShiftReports({ onUnreadCountChange, permissions = null }) {
     const loadFilterOptions = async () => {
       try {
         const [sitesData, guardsData] = await Promise.all([
-          request("/sites"),
-          request("/guards"),
+          hasPermission("sites.view") ? request("/sites") : null,
+          hasPermission("guards.view") ? request("/guards") : null,
         ]);
-        setFilterSites(sitesData.sites || []);
-        setFilterGuards(guardsData.guards || []);
+        setFilterSites(sitesData?.sites || []);
+        setFilterGuards(guardsData?.guards || []);
       } catch (err) {
         setError(err.message);
       }
     };
     loadFilterOptions();
-  }, []);
+  }, [resolvedPermissions]);
 
   const availableGuards = useMemo(
     () => filters.site_id

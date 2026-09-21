@@ -2,18 +2,11 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import "./Patrols.css";
 import { API_BASE_URL } from "../config/api";
+import { getDashboardAuthHeaders } from "../utils/dashboardAuth";
 
 const GUARD_PATROL_URL =
   "https://guard.aegislink.noctuacore.ai/patrol.html";
-const getAuthHeaders = () => {
-  const currentUser = JSON.parse(
-    localStorage.getItem("aegis-current-user") || "{}"
-  );
-
-  return {
-    Authorization: `Bearer ${currentUser.session_token}`,
-  };
-};
+const getAuthHeaders = () => getDashboardAuthHeaders();
 const formatCompletedStatus = (status) => {
   if (status === "completed_late") return "Completed Late";
   return "Completed";
