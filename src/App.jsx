@@ -609,10 +609,24 @@ const handlePasswordChange = async (event) => {
       );
     }
 
-    const contextResponse = await fetch(`${API_BASE_URL}/auth/context`, {
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    });
-    const contextData = await contextResponse.json().catch(() => ({}));
+    let contextResponse;
+    let contextData;
+    try {
+      contextResponse = await fetch(`${API_BASE_URL}/auth/context`, {
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      });
+      contextData = await contextResponse.json().catch(() => ({}));
+    } catch {
+      localStorage.removeItem("aegis-current-user");
+      setCurrentUser(null);
+      setAuthorizationReady(false);
+      setShowPasswordChange(false);
+      setPasswordChangeUser(null);
+      setLoginError(
+        "Password changed successfully. Please sign in again using your new password."
+      );
+      return;
+    }
 
     if (!contextResponse.ok) {
       localStorage.removeItem("aegis-current-user");
