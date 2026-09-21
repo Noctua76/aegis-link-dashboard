@@ -2773,8 +2773,8 @@ cursor: "pointer",
 )}
 
 {selectedQrSiteDetails && (
-  <div className="report-modal-overlay">
-    <div className="report-modal">
+  <div className="report-modal-overlay qr-site-modal-overlay">
+    <div className="report-modal qr-site-modal">
       <div className="report-modal-header">
         <h2>
           QR Codes | SITE-
@@ -2790,7 +2790,7 @@ cursor: "pointer",
         </button>
       </div>
 
-      <div style={{ padding: "20px" }}>
+      <div className="qr-site-modal-content">
         <p style={{ color: "#9ca3af" }}>
           {selectedQrSiteDetails.site.site_location} ·{" "}
           {selectedQrSiteDetails.site.site_status}
@@ -2798,7 +2798,7 @@ cursor: "pointer",
 
         <h3>Checkpoint QR Codes</h3>
 
-        <div style={{ display: "grid", gap: "12px", marginTop: "16px" }}>
+        <div className="qr-site-point-list">
           {selectedQrSiteDetails.points.map((point, index) => (
             <div key={point.id} className="analytics-table-card">
               <h4>
@@ -2826,6 +2826,7 @@ cursor: "pointer",
               </div>
 
               <div
+                className="qr-site-actions"
                 style={{
                   display: "flex",
                   gap: "10px",
