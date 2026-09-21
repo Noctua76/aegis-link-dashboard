@@ -8,6 +8,31 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.qr-site-modal {
+  max-height: 92dvh;
+}
+
+.qr-site-modal-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+  scrollbar-gutter: stable;
+}
+
+.qr-site-point-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-bottom: 4px;
+}
+
+.qr-site-actions {
+  flex-wrap: wrap;
+}
+
 .random-schedule-viewer {
   margin-bottom: 18px;
 }
@@ -201,6 +226,43 @@
 }
 
 @media (max-width: 768px) {
+
+  .qr-site-modal-overlay {
+    padding: 12px;
+  }
+
+  .qr-site-modal {
+    width: min(100%, 680px);
+    height: calc(100dvh - 24px);
+    max-height: calc(100dvh - 24px);
+    border-radius: 14px;
+  }
+
+  .qr-site-modal-content {
+    padding: 16px 12px 20px;
+  }
+
+  .qr-site-modal .report-modal-header {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 56px;
+    padding: 10px 14px;
+  }
+
+  .qr-site-modal .report-modal-header h2 {
+    padding-right: 12px;
+    overflow-wrap: anywhere;
+  }
+
+  .qr-site-actions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+  }
+
+  .qr-site-actions button {
+    width: 100%;
+    min-height: 42px;
+  }
 
   .analytics-table-card {
     width: 100%;
