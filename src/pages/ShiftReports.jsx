@@ -36,9 +36,17 @@ async function request(path, init = {}) {
   return contentType.includes("application/pdf") ? response.blob() : response.json();
 }
 
-function ShiftReports({ onUnreadCountChange }) {
+function ShiftReports({ onUnreadCountChange, permissions = null }) {
   const current = JSON.parse(localStorage.getItem("aegis-current-user") || "{}");
   const readOnly = current?.user?.access_mode === "read_only";
+  const isSystemOwner = current?.user?.role === "system_owner" || current?.user?.role_code === "system_owner";
+  const resolvedPermissions = permissions || current?.user?.permissions;
+  const permissionSet = new Set(resolvedPermissions || []);
+  const hasPermission = (permission) =>
+    isSystemOwner || !Array.isArray(resolvedPermissions) || permissionSet.has(permission);
+  const canMarkRead = !readOnly && hasPermission("shift_reports.read");
+  const canAcknowledge = !readOnly && hasPermission("shift_reports.acknowledge");
+  const canExport = hasPermission("exports.view");
   const [reports, setReports] = useState([]);
   const [filterSites, setFilterSites] = useState([]);
   const [filterGuards, setFilterGuards] = useState([]);
@@ -98,19 +106,26 @@ function ShiftReports({ onUnreadCountChange }) {
   const openReport = async (report) => {
     setError("");
     try {
-      if (report.status === "NEW" && !readOnly) {
-        await request(`/shift-reports/${report.id}/read`, { method: "PATCH" });
+      let markReadError = null;
+      if (report.status === "NEW" && canMarkRead) {
+        try {
+          await request(`/shift-reports/${report.id}/read`, { method: "PATCH" });
+        } catch (err) {
+          markReadError = err;
+        }
       }
       const data = await request(`/shift-reports/${report.id}`);
       setSelected(data.report);
       setImageUrls({});
-      await loadReports();
+      if (report.status === "NEW" && canMarkRead) await loadReports();
+      if (markReadError) setError(markReadError.message);
     } catch (err) {
       setError(err.message);
     }
   };
 
   const acknowledge = async () => {
+    if (!canAcknowledge) return;
     try {
       await request(`/shift-reports/${selected.id}/acknowledge`, { method: "PATCH" });
       const data = await request(`/shift-reports/${selected.id}`);
@@ -131,6 +146,7 @@ function ShiftReports({ onUnreadCountChange }) {
   };
 
   const exportPdf = async (path, filename) => {
+    if (!canExport) return;
     try {
       const blob = await request(path);
       const url = URL.createObjectURL(blob);
@@ -145,6 +161,7 @@ function ShiftReports({ onUnreadCountChange }) {
   };
 
   const previewPdf = async (path) => {
+    if (!canExport) return;
     const previewWindow = window.open("", "_blank");
     try {
       const separator = path.includes("?") ? "&" : "?";
@@ -163,10 +180,10 @@ function ShiftReports({ onUnreadCountChange }) {
     <div className="shift-reports-page">
       <header className="shift-reports-header">
         <div><p className="shift-reports-eyebrow">OPERATIONAL NOTES</p><h1>Shift Reports</h1><p>Immutable guard observations and handover notes, owned by the active shift.</p></div>
-        <div className="shift-report-header-actions">
+        {canExport && <div className="shift-report-header-actions">
           <button type="button" onClick={() => previewPdf(`/shift-reports/report/pdf${query ? `?${query}` : ""}`)}>Preview / Print PDF</button>
           <button type="button" onClick={() => exportPdf(`/shift-reports/report/pdf${query ? `?${query}` : ""}`, "Aegis-Link-Shift-Reports.pdf")}>Download PDF</button>
-        </div>
+        </div>}
       </header>
 
       <section className="shift-report-kpis">
@@ -199,8 +216,8 @@ function ShiftReports({ onUnreadCountChange }) {
           <p className="shift-reports-eyebrow">{selected.report_number}</p><h2>{label(selected.category)}</h2>
           <div className="shift-report-detail-grid"><div><span>Status</span><strong>{label(selected.status)}</strong></div><div><span>Priority</span><strong>{label(selected.priority)}</strong></div><div><span>Company</span><strong>{selected.company_name}</strong></div><div><span>Site</span><strong>{selected.site_name}</strong></div><div><span>Guard</span><strong>{selected.guard_name}</strong></div><div><span>Session ID</span><strong>{selected.session_id}</strong></div><div><span>Created</span><strong>{when(selected.created_at)}</strong></div><div><span>Shift</span><strong>{shiftWhen(selected.scheduled_shift_start)} → {shiftWhen(selected.scheduled_shift_end)}</strong></div><div><span>Read</span><strong>{selected.read_by_admin_name || "—"} · {when(selected.read_at)}</strong></div><div><span>Acknowledged</span><strong>{selected.acknowledged_by_admin_name || "—"} · {when(selected.acknowledged_at)}</strong></div></div>
           <p className="shift-report-note">{selected.message}</p>
-          {!!selected.attachments?.length && <div className="shift-report-images">{selected.attachments.map((attachment) => imageUrls[attachment.id] ? <a key={attachment.id} href={imageUrls[attachment.id]} target="_blank" rel="noreferrer"><img src={imageUrls[attachment.id]} alt={attachment.original_filename || "Shift Report"}/></a> : <button key={attachment.id} type="button" onClick={() => showImage(attachment)}>Load secure image</button>)}</div>}
-          <div className="shift-report-actions"><button type="button" onClick={() => previewPdf(`/shift-reports/${selected.id}/report/pdf`)}>Preview / Print PDF</button><button type="button" onClick={() => exportPdf(`/shift-reports/${selected.id}/report/pdf`, `Aegis-Link-Shift-Report-${selected.report_number}.pdf`)}>Download PDF</button>{selected.status === "READ" && !readOnly && <button className="primary" type="button" onClick={acknowledge}>Acknowledge</button>}</div>
+          {!!selected.attachments?.length && canExport && <div className="shift-report-images">{selected.attachments.map((attachment) => imageUrls[attachment.id] ? <a key={attachment.id} href={imageUrls[attachment.id]} target="_blank" rel="noreferrer"><img src={imageUrls[attachment.id]} alt={attachment.original_filename || "Shift Report"}/></a> : <button key={attachment.id} type="button" onClick={() => showImage(attachment)}>Load secure image</button>)}</div>}
+          {(canExport || (selected.status === "READ" && canAcknowledge)) && <div className="shift-report-actions">{canExport && <><button type="button" onClick={() => previewPdf(`/shift-reports/${selected.id}/report/pdf`)}>Preview / Print PDF</button><button type="button" onClick={() => exportPdf(`/shift-reports/${selected.id}/report/pdf`, `Aegis-Link-Shift-Report-${selected.report_number}.pdf`)}>Download PDF</button></>}{selected.status === "READ" && canAcknowledge && <button className="primary" type="button" onClick={acknowledge}>Acknowledge</button>}</div>}
           <div className="shift-report-audit"><h3>Audit</h3>{selected.events?.map((event) => <p key={event.id}>{label(event.event_type)} · {when(event.created_at)}</p>)}</div>
         </article>
       </div>}
