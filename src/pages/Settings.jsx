@@ -18,6 +18,36 @@ const pendingDeliveryStatuses = new Set([
   "submitted", "accepted", "buffered", "started", "ringing", "answered", "unknown",
 ]);
 
+const generateGuardTemporaryPassword = () => {
+  const groups = [
+    "abcdefghijkmnopqrstuvwxyz",
+    "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    "23456789",
+    "!@#$%*-_+",
+  ];
+  const all = groups.join("");
+  const randomIndex = (length) => {
+    const values = new Uint32Array(1);
+    const unbiasedLimit = Math.floor(0x100000000 / length) * length;
+    do crypto.getRandomValues(values);
+    while (values[0] >= unbiasedLimit);
+    return values[0] % length;
+  };
+  const characters = groups.map((group) => group[randomIndex(group.length)]);
+  while (characters.length < 16) characters.push(all[randomIndex(all.length)]);
+  for (let index = characters.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1);
+    [characters[index], characters[swapIndex]] = [characters[swapIndex], characters[index]];
+  }
+  return characters.join("");
+};
+
+const guardPasswordStatusLabel = (status) => ({
+  active: "Password active",
+  temporary_pending: "Temporary password pending",
+  temporary_expired: "Temporary password expired",
+}[status] || "Password status unknown");
+
 function Settings() {
   const storedCurrentUser = (() => {
   try {
@@ -209,6 +239,10 @@ const [newGuard, setNewGuard] = useState({
   site_id: "",
 });
 const [showNewGuardPassword, setShowNewGuardPassword] = useState(false);
+const [guardCredentialResult, setGuardCredentialResult] = useState(null);
+const [guardPasswordCopied, setGuardPasswordCopied] = useState(false);
+const [guardActionError, setGuardActionError] = useState("");
+const [resettingGuardId, setResettingGuardId] = useState(null);
 
 const [newRecipient, setNewRecipient] = useState({
 full_name:"",
@@ -1535,6 +1569,7 @@ const saveGuardProfile = async () => {
 
 const addGuard = async () => {
   try {
+    setGuardActionError("");
     const storedUser = JSON.parse(
       localStorage.getItem("aegis-current-user") || "null"
     );
@@ -1563,6 +1598,14 @@ const addGuard = async () => {
       throw new Error(data.message || "Failed to add guard");
     }
 
+    setGuardCredentialResult({
+      full_name: data.guard.full_name,
+      username: data.guard.username,
+      temporary_password: data.temporary_password,
+      expires_at: data.temporary_password_expires_at,
+    });
+    setGuardPasswordCopied(false);
+
     setNewGuard({
       full_name: "",
       username: "",
@@ -1574,7 +1617,47 @@ const addGuard = async () => {
     await loadGuards();
   } catch (err) {
     console.error("Add guard error", err);
+    setGuardActionError(err.message || "Failed to add guard");
   }
+};
+
+const resetGuardPassword = async (guard) => {
+  const confirmed = window.confirm(
+    `Reset the password for ${guard.full_name}? Active guard sessions and push subscriptions will be revoked.`
+  );
+  if (!confirmed) return;
+
+  try {
+    setResettingGuardId(guard.id);
+    setGuardActionError("");
+    const response = await fetch(
+      `${API_BASE_URL}/settings/guards/${guard.id}/reset-password`,
+      { method: "POST", headers: getAuthHeaders() }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to reset guard password");
+
+    setGuardCredentialResult({
+      full_name: data.guard.full_name,
+      username: data.guard.username,
+      temporary_password: data.temporary_password,
+      expires_at: data.temporary_password_expires_at,
+    });
+    setGuardPasswordCopied(false);
+    await loadGuards();
+  } catch (error) {
+    setGuardActionError(error.message || "Failed to reset guard password");
+  } finally {
+    setResettingGuardId(null);
+  }
+};
+
+const copyGuardCredentials = async () => {
+  if (!guardCredentialResult) return;
+  await navigator.clipboard.writeText(
+    `Username: ${guardCredentialResult.username}\nTemporary password: ${guardCredentialResult.temporary_password}`
+  );
+  setGuardPasswordCopied(true);
 };
 
 
@@ -3585,6 +3668,26 @@ Manage Recipients
       {showNewGuardPassword ? "Hide" : "Show"}
     </button>
   </div>
+  <div className="guard-password-actions">
+    <button
+      type="button"
+      className="secondary-button"
+      onClick={() => setNewGuard({ ...newGuard, password: generateGuardTemporaryPassword() })}
+    >
+      Generate secure password
+    </button>
+    <button
+      type="button"
+      className="secondary-button"
+      disabled={!newGuard.password}
+      onClick={() => navigator.clipboard.writeText(newGuard.password)}
+    >
+      Copy password
+    </button>
+  </div>
+  <small className="guard-password-help">
+    Minimum 12 characters with uppercase, lowercase, number and symbol.
+  </small>
 
   <select
     value={newGuard.site_id}
@@ -3606,6 +3709,29 @@ Manage Recipients
   </select>
 
   <button onClick={addGuard}>Add Guard</button>
+
+  {guardActionError && <p className="settings-error-text">{guardActionError}</p>}
+
+  {guardCredentialResult && (
+    <div className="guard-credentials-panel" role="status">
+      <strong>Save these credentials now</strong>
+      <p>This temporary password is shown once and cannot be retrieved later.</p>
+      <dl>
+        <div><dt>Guard</dt><dd>{guardCredentialResult.full_name}</dd></div>
+        <div><dt>Username</dt><dd>{guardCredentialResult.username}</dd></div>
+        <div><dt>Temporary password</dt><dd>{guardCredentialResult.temporary_password}</dd></div>
+        <div><dt>Expires</dt><dd>{new Date(guardCredentialResult.expires_at).toLocaleString()}</dd></div>
+      </dl>
+      <div className="guard-password-actions">
+        <button type="button" onClick={copyGuardCredentials}>
+          {guardPasswordCopied ? "Copied" : "Copy credentials"}
+        </button>
+        <button type="button" className="secondary-button" onClick={() => setGuardCredentialResult(null)}>
+          Close
+        </button>
+      </div>
+    </div>
+  )}
 
   <hr />
 
@@ -3632,6 +3758,21 @@ Manage Recipients
   <strong>
     {guard.active ? "Active" : "Inactive"}
   </strong>
+  <span className={`guard-password-status ${guard.password_status || "unknown"}`}>
+    {guardPasswordStatusLabel(guard.password_status)}
+  </span>
+
+  <button
+    type="button"
+    className="secondary-button"
+    disabled={resettingGuardId === guard.id}
+    onClick={(event) => {
+      event.stopPropagation();
+      resetGuardPassword(guard);
+    }}
+  >
+    {resettingGuardId === guard.id ? "Resetting..." : "Reset password"}
+  </button>
 
   <button
   type="button"

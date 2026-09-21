@@ -1131,6 +1131,72 @@ font-size:13px;
   font-size: 12px;
 }
 
+.guard-password-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+}
+
+.settings-card .guard-password-actions button {
+  width: auto;
+  flex: 1 1 180px;
+  margin: 0;
+}
+
+.guard-password-help {
+  display: block;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+
+.guard-credentials-panel {
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 14px;
+  background: rgba(14, 116, 144, 0.12);
+}
+
+.guard-credentials-panel > p {
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+.guard-credentials-panel dl {
+  margin: 12px 0;
+}
+
+.guard-credentials-panel dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.6fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.guard-credentials-panel dt {
+  color: #94a3b8;
+}
+
+.guard-credentials-panel dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+}
+
+.guard-password-status {
+  max-width: 190px;
+  color: #cbd5e1;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.guard-password-status.active { color: #86efac; }
+.guard-password-status.temporary_pending { color: #fde68a; }
+.guard-password-status.temporary_expired { color: #fca5a5; }
+
 @media (max-width: 768px) {
   .patrol-corrections-panel {
     padding: 18px;
@@ -1144,6 +1210,15 @@ font-size:13px;
 
   .patrol-correction-reason {
     grid-column: auto;
+  }
+
+  .guard-credentials-panel dl div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
+
+  .settings-card .guard-password-actions button {
+    flex-basis: 100%;
   }
 }
 
