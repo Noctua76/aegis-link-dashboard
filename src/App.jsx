@@ -115,7 +115,27 @@ const [currentUser, setCurrentUser] = useState(() => {
   return savedUser ? JSON.parse(savedUser) : null;
 });
 
+useEffect(() => {
+  if (!currentUser || Array.isArray(currentUser?.user?.permissions)) return;
+  const token = currentUser.session_token || currentUser?.session?.token;
+  if (!token) return;
+  let cancelled = false;
+  fetch(`${API_BASE_URL}/auth/context`, { headers: { Authorization: `Bearer ${token}` } })
+    .then(async (response) => ({ response, data: await response.json().catch(() => ({})) }))
+    .then(({ response, data }) => {
+      if (cancelled || !response.ok) return;
+      const updated = { ...currentUser, user: { ...currentUser.user, ...data.auth } };
+      localStorage.setItem("aegis-current-user", JSON.stringify(updated));
+      setCurrentUser(updated);
+    })
+    .catch((error) => console.error("Authorization context refresh failed:", error));
+  return () => { cancelled = true; };
+}, [currentUser]);
+
 const isSystemOwner = currentUser?.user?.role === "system_owner";
+const permissionSet = new Set(currentUser?.user?.permissions || []);
+const hasPermission = (permission) =>
+  isSystemOwner || !Array.isArray(currentUser?.user?.permissions) || permissionSet.has(permission);
 
 const isReadOnlyAccess =
   currentUser?.user?.access_mode === "read_only";
@@ -574,20 +594,20 @@ const [liveActiveGuards, setLiveActiveGuards] = useState([]);
   const [incidentFilter, setIncidentFilter] = useState("All");
   const [resolutionForms, setResolutionForms] = useState({});
 const menuItems = [
-  "Dashboard",
-  "Live Incidents",
-  "Shift Reports",
-  "Event Logs",
-  "Admin Audit Logs",
-  "Guards",
-  "Sites",
-  "Patrols",
-  "System Status",
-  "Analytics",
-  "Settings",
-];
+  ["Dashboard", "dashboard.view"],
+  ["Live Incidents", "incidents.view"],
+  ["Shift Reports", "shift_reports.view"],
+  ["Event Logs", "audit_logs.view"],
+  ["Admin Audit Logs", "audit_logs.view"],
+  ["Guards", "guards.view"],
+  ["Sites", "sites.view"],
+  ["Patrols", "patrols.view"],
+  ["System Status", "system_status.tenant"],
+  ["Analytics", "analytics.view"],
+  ["Settings", null],
+].filter(([, permission]) => !permission || hasPermission(permission)).map(([label]) => label);
   useEffect(() => {
-    if (!currentUser) return undefined;
+    if (!currentUser || !hasPermission("shift_reports.view")) return undefined;
     const loadUnreadShiftReports = async () => {
       try {
         const response = await fetch(`${API_BASE_URL}/shift-reports/unread-count`, {
@@ -2482,12 +2502,12 @@ const renderIncidentLocation = (incident) => {
   />
 </label>
 
-<button
+{hasPermission("incidents.manage") && <button
   className="resolve-button"
   onClick={() => handleResolveIncident(incident)}
 >
   Approve & Resolve
-</button>
+</button>}
     </div>
   ))
 
@@ -2714,7 +2734,7 @@ const renderIncidentLocation = (incident) => {
           <ShiftReports onUnreadCountChange={setUnreadShiftReports} />
         )}
         {activeMenu === "Settings" && (
-<Settings/>
+<Settings permissions={currentUser?.user?.permissions || null}/>
 )}
 
 {activeMenu === "Analytics" && (

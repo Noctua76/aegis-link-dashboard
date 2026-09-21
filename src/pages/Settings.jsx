@@ -48,7 +48,7 @@ const guardPasswordStatusLabel = (status) => ({
   temporary_expired: "Temporary password expired",
 }[status] || "Password status unknown");
 
-function Settings() {
+function Settings({ permissions = null }) {
   const storedCurrentUser = (() => {
   try {
     return JSON.parse(
@@ -62,8 +62,11 @@ function Settings() {
 })();
 
 const isSystemOwner =
-  storedCurrentUser?.user?.role ===
-  "system_owner";
+  storedCurrentUser?.user?.role === "system_owner" ||
+  storedCurrentUser?.user?.role_code === "system_owner";
+const permissionSet = new Set(permissions || storedCurrentUser?.user?.permissions || []);
+const hasPermission = (permission) =>
+  isSystemOwner || (!permissions && !Array.isArray(storedCurrentUser?.user?.permissions)) || permissionSet.has(permission);
   const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
@@ -92,6 +95,11 @@ const isSystemOwner =
   const [sites, setSites] = useState([]);
 const [guards, setGuards] = useState([]);
 const [users, setUsers] = useState([]);
+const [dashboardRoles, setDashboardRoles] = useState([]);
+const [rolePermissions, setRolePermissions] = useState([]);
+const [roleManagementError, setRoleManagementError] = useState("");
+const [editingRole, setEditingRole] = useState(null);
+const [showRoleModal, setShowRoleModal] = useState(false);
 const [loadingUsers, setLoadingUsers] = useState(false);
 const [usersError, setUsersError] = useState("");
 const [selectedUser, setSelectedUser] = useState(null);
@@ -182,7 +190,7 @@ const [newUser, setNewUser] = useState({
   phone: "",
   mobile_phone: "",
   backup_phone: "",
-  role: "guard",
+  role: "viewer",
   status: "active",
   company_id: 1,
 });
@@ -380,6 +388,7 @@ const loadRecipients = async () => {
 };
 
 const loadSites = async () => {
+  if (!hasPermission("sites.view")) return;
   try {
     const storedUser = JSON.parse(
       localStorage.getItem("aegis-current-user") || "null"
@@ -417,6 +426,7 @@ const loadSites = async () => {
 };
 
 const loadGuards = async () => {
+  if (!hasPermission("guards.view")) return;
   try {
     const storedUser = JSON.parse(
       localStorage.getItem("aegis-current-user") || "null"
@@ -445,6 +455,7 @@ const loadGuards = async () => {
 };
 
 const loadUsers = async (showLoader = true) => {
+  if (!hasPermission("users.view")) return;
   if (showLoader) {
     setLoadingUsers(true);
   }
@@ -481,6 +492,71 @@ const loadUsers = async (showLoader = true) => {
       setLoadingUsers(false);
     }
   }
+};
+
+const loadDashboardRoles = async () => {
+  if (!hasPermission("users.view")) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/roles`, { headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Roles load failed");
+    setDashboardRoles(data.roles || []);
+  } catch (error) {
+    setRoleManagementError(error.message || "Roles load failed");
+  }
+};
+
+const loadRolePermissions = async () => {
+  if (!hasPermission("roles.view")) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/roles/permissions`, { headers: getAuthHeaders() });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Permissions load failed");
+    setRolePermissions(data.permissions || []);
+  } catch (error) {
+    setRoleManagementError(error.message || "Permissions load failed");
+  }
+};
+
+const openNewRole = () => {
+  setEditingRole({ name: "", description: "", permissions: [], is_active: true });
+  setShowRoleModal(true);
+};
+
+const saveDashboardRole = async () => {
+  if (!editingRole?.name?.trim()) return;
+  setRoleManagementError("");
+  try {
+    const isExisting = Boolean(editingRole.id);
+    const response = await fetch(
+      `${API_BASE_URL}/admin/roles${isExisting ? `/${editingRole.id}` : ""}`,
+      { method: isExisting ? "PUT" : "POST", headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editingRole.name, description: editingRole.description,
+          permissions: editingRole.permissions, is_active: editingRole.is_active }) }
+    );
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Role save failed");
+    setShowRoleModal(false);
+    setEditingRole(null);
+    await loadDashboardRoles();
+  } catch (error) {
+    setRoleManagementError(error.message || "Role save failed");
+  }
+};
+
+const cloneDashboardRole = async () => {
+  if (!editingRole?.id) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/roles/${editingRole.id}/clone`, {
+      method: "POST", headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ name: `${editingRole.name} Copy` }),
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Role clone failed");
+    setShowRoleModal(false);
+    setEditingRole(null);
+    await loadDashboardRoles();
+  } catch (error) { setRoleManagementError(error.message || "Role clone failed"); }
 };
 
 const loadTemporaryAccess = async () => {
@@ -880,7 +956,7 @@ const saveUserChanges = async () => {
           phone: editingUser.phone,
           mobile_phone: editingUser.mobile_phone,
           backup_phone: editingUser.backup_phone,
-          role: editingUser.role,
+          role_id: editingUser.role_id,
           status: editingUser.status,
         }),
       }
@@ -996,7 +1072,7 @@ const createNewUser = async () => {
         phone: newUser.phone.trim(),
         mobile_phone: newUser.mobile_phone.trim(),
         backup_phone: newUser.backup_phone.trim(),
-        role: newUser.role,
+        role_id: newUser.role,
         status: newUser.status,
       }),
     });
@@ -1704,6 +1780,8 @@ loadRecipients();
 loadSites();
 loadGuards();
 loadUsers();
+loadDashboardRoles();
+loadRolePermissions();
     async function loadSystemStatus() {
       try {
         const response = await fetch(`${API_BASE_URL}/system/status/tenant`, {
@@ -1738,6 +1816,7 @@ loadRecipients();
 loadSites();
 loadGuards();
 loadUsers(false);
+loadDashboardRoles();
 }, 5000);
 
     
@@ -3417,6 +3496,7 @@ Manage Recipients
 
 <div className="settings-card">
   <h3>Sites Management</h3>
+  {hasPermission("sites.manage") && <>
 
   <input
     placeholder="Site name"
@@ -3462,6 +3542,7 @@ Manage Recipients
 </label>
 
   <button onClick={addSite}>Add Site</button>
+  </>}
 
   <hr />
 
@@ -3524,7 +3605,7 @@ Manage Recipients
           flexWrap: "wrap",
         }}
       >
-        <button
+        {hasPermission("sites.manage") && <button
           type="button"
           className="secondary-button"
           onClick={() => {
@@ -3532,9 +3613,9 @@ Manage Recipients
           }}
         >
           Edit
-        </button>
+        </button>}
 
-        <button
+        {hasPermission("sites.manage") && <button
   type="button"
   className="secondary-button"
   onClick={() => {
@@ -3547,9 +3628,9 @@ Manage Recipients
   }}
 >
   Profile
-</button>
+</button>}
 
-        <button
+        {hasPermission("patrols.manage") && <button
   type="button"
   className="secondary-button"
   onClick={() => {
@@ -3561,9 +3642,9 @@ Manage Recipients
 }}
 >
   Patrols
-</button>
+</button>}
 
-        <button
+        {hasPermission("sites.manage") && <button
   type="button"
   className="secondary-button"
   onClick={async () => {
@@ -3585,9 +3666,9 @@ Manage Recipients
   {site.status === "active"
     ? "Deactivate"
     : "Activate"}
-</button>
+</button>}
 
-        <button
+        {hasPermission("sites.manage") && <button
   type="button"
   className="secondary-button danger-button"
   onClick={async () => {
@@ -3635,7 +3716,7 @@ Manage Recipients
   }}
 >
   Archive
-</button>
+</button>}
       </div>
     )}
   </div>
@@ -3646,6 +3727,7 @@ Manage Recipients
 
 <div className="settings-card">
   <h3>Guards Management</h3>
+  {hasPermission("guards.manage") && <>
 
   <input
     placeholder="Full name"
@@ -3743,6 +3825,7 @@ Manage Recipients
   </select>
 
   <button onClick={addGuard}>Add Guard</button>
+  </>}
 
   {guardActionError && <p className="settings-error-text">{guardActionError}</p>}
 
@@ -3799,7 +3882,7 @@ Manage Recipients
     {guardPasswordStatusLabel(guard.password_status)}
   </span>
 
-  <button
+  {hasPermission("guards.manage") && <button
   type="button"
   className="secondary-button"
   onClick={async (e) => {
@@ -3844,17 +3927,18 @@ Manage Recipients
   }}
 >
     {guard.active ? "Deactivate" : "Activate"}
-  </button>
+  </button>}
 </div>
     </div>
   ))}
 </div>
 
 <div className="settings-side-stack">
+  {hasPermission("users.view") && (
   <div className="settings-card users-management-card">
     <h3>Users Management</h3>
 
-    <button
+    {hasPermission("users.manage") && <button
   type="button"
   className="secondary-button"
   onClick={() => {
@@ -3866,7 +3950,7 @@ Manage Recipients
       phone: "",
       mobile_phone: "",
       backup_phone: "",
-      role: "guard",
+      role: dashboardRoles.find((role) => role.code === "viewer")?.id || "viewer",
       status: "active",
       company_id: 1,
     });
@@ -3876,7 +3960,7 @@ Manage Recipients
   }}
 >
   + New User
-</button>
+</button>}
 
 <hr />
 
@@ -3911,13 +3995,7 @@ Manage Recipients
   <br />
 
   <small>
-    {user.role === "system_owner"
-      ? "System Owner"
-      : user.role === "supervisor"
-      ? "Supervisor"
-      : user.role === "guard"
-      ? "Guard"
-      : user.role}
+    {user.role_name || formatUserRole(user.role_code || user.role)}
   </small>
 
   <br />
@@ -3939,8 +4017,42 @@ Manage Recipients
   </div>
 ))}
 </div>
-
 </div>
+  )}
+
+  {hasPermission("roles.view") && (
+    <div className="settings-card role-management-card">
+      <div className="role-management-header">
+        <div>
+          <h3>Role Management</h3>
+          <p className="settings-muted-text">Roles organize backend-enforced permissions.</p>
+        </div>
+        {hasPermission("roles.manage") && (
+          <button type="button" className="secondary-button" onClick={openNewRole}>+ New Role</button>
+        )}
+      </div>
+      {roleManagementError && <p className="settings-error-text">{roleManagementError}</p>}
+      <div className="role-management-list">
+        {dashboardRoles.map((role) => (
+          <button
+            type="button"
+            className="role-management-row"
+            key={role.id}
+            disabled={!hasPermission("roles.manage") || role.code === "system_owner"}
+            onClick={() => {
+              setEditingRole({ ...role, permissions: role.permissions || [] });
+              setShowRoleModal(true);
+            }}
+          >
+            <span><strong>{role.name}</strong><small>{role.user_count} user(s) · {role.permissions?.length || 0} permissions</small></span>
+            <span className={`status-badge ${role.is_active ? "active" : "inactive"}`}>
+              {role.code === "system_owner" ? "Protected" : role.is_active ? "Active" : "Inactive"}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
 
 <div className="settings-card">
   <h3>Incident Rules</h3>
@@ -4139,6 +4251,51 @@ Manage Recipients
         </div>
       </section>
 
+      {showRoleModal && editingRole && hasPermission("roles.manage") && (
+        <div className="modal-overlay">
+          <div className="recipients-modal role-management-modal">
+            <div className="modal-header">
+              <div><h3>{editingRole.id ? "Edit Role" : "Create Role"}</h3>
+                <p className="settings-muted-text">Permission changes revoke affected active sessions immediately.</p></div>
+              <button type="button" className="modal-close" onClick={() => setShowRoleModal(false)}>×</button>
+            </div>
+            <label className="settings-field"><span>Role name</span>
+              <input value={editingRole.name || ""} onChange={(event) => setEditingRole({ ...editingRole, name: event.target.value })} />
+            </label>
+            <label className="settings-field"><span>Description</span>
+              <textarea value={editingRole.description || ""} onChange={(event) => setEditingRole({ ...editingRole, description: event.target.value })} />
+            </label>
+            {editingRole.id && !editingRole.is_system_role && (
+              <label className="role-active-toggle"><input type="checkbox" checked={editingRole.is_active !== false}
+                onChange={(event) => setEditingRole({ ...editingRole, is_active: event.target.checked })} /> Active role</label>
+            )}
+            <div className="permission-catalogue">
+              {Object.entries(rolePermissions.reduce((groups, permission) => {
+                (groups[permission.category] ||= []).push(permission); return groups;
+              }, {})).map(([category, categoryPermissions]) => (
+                <fieldset key={category}><legend>{category}</legend>
+                  {categoryPermissions.map((permission) => (
+                    <label key={permission.code}><input type="checkbox"
+                      checked={(editingRole.permissions || []).includes(permission.code)}
+                      onChange={(event) => setEditingRole({ ...editingRole,
+                        permissions: event.target.checked
+                          ? [...new Set([...(editingRole.permissions || []), permission.code])]
+                          : (editingRole.permissions || []).filter((code) => code !== permission.code) })} />
+                      <span>{permission.name}<small>{permission.code}</small></span>
+                    </label>
+                  ))}
+                </fieldset>
+              ))}
+            </div>
+            <div className="user-modal-actions">
+              {editingRole.id && <button type="button" className="secondary-button" onClick={cloneDashboardRole}>Clone Role</button>}
+              <button type="button" className="secondary-button" onClick={() => setShowRoleModal(false)}>Cancel</button>
+              <button type="button" className="primary-button" onClick={saveDashboardRole}>Save Role</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showNewUserModal && (
   <div className="modal-overlay">
     <div className="recipients-modal new-user-modal">
@@ -4204,9 +4361,9 @@ Manage Recipients
                 })
               }
             >
-              <option value="guard">Guard</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="system_owner">System Owner</option>
+              {dashboardRoles
+                .filter((role) => role.is_active && (isSystemOwner || role.code !== "system_owner"))
+                .map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
             </select>
           </label>
 
@@ -4353,14 +4510,14 @@ Manage Recipients
 <div className="user-modal-actions">
   {!isEditingUser ? (
   <>
-    <button
+    {hasPermission("users.reset_password") && <button
       className="secondary-button"
       onClick={() => setShowResetPasswordConfirm(true)}
     >
       Reset Password
-    </button>
+    </button>}
 
-    <button
+    {hasPermission("users.manage") && <button
       className="primary-button"
       onClick={() => {
         setEditingUser({ ...selectedUser });
@@ -4368,7 +4525,7 @@ Manage Recipients
       }}
     >
       Edit User
-    </button>
+    </button>}
   </>
 ) : (
     <>
@@ -4450,21 +4607,21 @@ Manage Recipients
   {isEditingUser ? (
     <select
       className="user-edit-input"
-      value={editingUser?.role || "guard"}
+      value={editingUser?.role_id || ""}
       onChange={(e) =>
         setEditingUser({
           ...editingUser,
-          role: e.target.value,
+          role_id: e.target.value,
         })
       }
     >
-      <option value="guard">Guard</option>
-      <option value="supervisor">Supervisor</option>
-      <option value="system_owner">System Owner</option>
+      {dashboardRoles
+        .filter((role) => role.is_active && (isSystemOwner || role.code !== "system_owner"))
+        .map((role) => <option key={role.id} value={role.id}>{role.name}</option>)}
     </select>
   ) : (
     <strong className="user-detail-badge">
-      {formatUserRole(selectedUser.role)}
+      {selectedUser.role_name || formatUserRole(selectedUser.role_code || selectedUser.role)}
     </strong>
   )}
 </div>
@@ -4671,7 +4828,7 @@ Manage Recipients
 
         <div className="settings-item">
           <span>Role</span>
-          <strong>{formatUserRole(selectedUser.role)}</strong>
+          <strong>{selectedUser.role_name || formatUserRole(selectedUser.role_code || selectedUser.role)}</strong>
         </div>
       </div>
 
@@ -5816,14 +5973,16 @@ recipient-row-modal
           </div>
         )}
 
-        <button
-          type="button"
-          className="secondary-button guard-profile-reset-button"
-          disabled={resettingGuardId === profileGuard.id}
-          onClick={() => resetGuardPassword(profileGuard)}
-        >
-          {resettingGuardId === profileGuard.id ? "Resetting..." : "Reset Password"}
-        </button>
+        {hasPermission("guards.reset_password") && (
+          <button
+            type="button"
+            className="secondary-button guard-profile-reset-button"
+            disabled={resettingGuardId === profileGuard.id}
+            onClick={() => resetGuardPassword(profileGuard)}
+          >
+            {resettingGuardId === profileGuard.id ? "Resetting..." : "Reset Password"}
+          </button>
+        )}
       </div>
 
       <h4>Training & Experience</h4>
