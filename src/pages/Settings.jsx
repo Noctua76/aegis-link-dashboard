@@ -6616,8 +6616,8 @@ recipient-row-modal
             <br />
 
             <small>
-              {point.qr_token
-                ? point.qr_token
+              {point.qr_generated
+                ? "QR Generated"
                 : "QR Not Generated"}
             </small>
           </div>
@@ -6656,7 +6656,7 @@ recipient-row-modal
     }
   }}
 >
-  {point.qr_token
+  {point.qr_generated
     ? "Regenerate QR"
     : "Generate QR"}
 </button>
