@@ -30,6 +30,9 @@ import {
   readDashboardSession,
 } from "./utils/dashboardAuth";
 import {
+  classifyAuthenticatedFailure,
+} from "./utils/authenticatedResponse";
+import {
   sites as securitySites,
   guards as securityGuards,
   activeSessions,
@@ -295,7 +298,16 @@ const [readOnlyNotice, setReadOnlyNotice] =
     .json()
     .catch(() => null);
 
-  if (responseData?.code === PASSWORD_CHANGE_REQUIRED_CODE) {
+  const authFailure = classifyAuthenticatedFailure({
+    status: response.status,
+    code: responseData?.code,
+    requestPath,
+  });
+
+  if (
+    responseData?.code === PASSWORD_CHANGE_REQUIRED_CODE &&
+    authFailure === "password_change_required"
+  ) {
     const storedSession = readDashboardSession();
     const restricted = buildRestrictedPasswordSession(
       responseData,
@@ -318,6 +330,15 @@ const [readOnlyNotice, setReadOnlyNotice] =
       setCurrentUser(null);
       setAuthorizationReady(false);
     }
+  } else if (authFailure === "session_invalid") {
+    localStorage.removeItem("aegis-current-user");
+    setCurrentUser(null);
+    setAuthorizationReady(false);
+    setShowPasswordChange(false);
+    setPasswordChangeUser(null);
+    setLoginError(
+      "Your Dashboard session is no longer active. Please sign in again."
+    );
   } else if (
     isReadOnlyAccess &&
     (
@@ -2944,7 +2965,7 @@ const renderIncidentLocation = (incident) => {
 }
         {activeMenu === "Event Logs" && canRenderMenu("Event Logs") && <EventLogs permissions={currentUser.user.permissions} />}
         {activeMenu === "Sites" && canRenderMenu("Sites") && <Sites permissions={currentUser.user.permissions} />}
-        {activeMenu === "Patrols" && canRenderMenu("Patrols") && <Patrols />}
+        {activeMenu === "Patrols" && canRenderMenu("Patrols") && <Patrols permissions={currentUser.user.permissions} />}
         {activeMenu === "Shift Reports" && canRenderMenu("Shift Reports") && (
           <ShiftReports
             onUnreadCountChange={setUnreadShiftReports}

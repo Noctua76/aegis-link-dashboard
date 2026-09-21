@@ -148,7 +148,7 @@ const [sitesRes, logsRes] = await Promise.all([
       Authorization: `Bearer ${sessionToken}`,
     },
   }) : null,
-  hasDashboardPermission(user, "guards.view") ? fetch(`${API_BASE_URL}/guards/shifts/history`, {
+  hasDashboardPermission(user, "audit_logs.view") ? fetch(`${API_BASE_URL}/guards/shifts/history`, {
     headers: {
       Authorization: `Bearer ${sessionToken}`,
     },

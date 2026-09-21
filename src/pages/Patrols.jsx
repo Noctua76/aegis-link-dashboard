@@ -2,7 +2,11 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 import "./Patrols.css";
 import { API_BASE_URL } from "../config/api";
-import { getDashboardAuthHeaders } from "../utils/dashboardAuth";
+import {
+  getDashboardAuthHeaders,
+  hasDashboardPermission,
+  readDashboardSession,
+} from "../utils/dashboardAuth";
 
 const GUARD_PATROL_URL =
   "https://guard.aegislink.noctuacore.ai/patrol.html";
@@ -19,7 +23,12 @@ const formatPatrolStatus = (status) => ({
   scheduled: "Scheduled",
 })[status] || status || "-";
 
-function Patrols() {
+function Patrols({ permissions = [] }) {
+  const sessionUser = readDashboardSession()?.user || {};
+  const canManagePatrols = hasDashboardPermission(
+    { ...sessionUser, permissions },
+    "patrols.manage"
+  );
   const [patrolSites, setPatrolSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
@@ -1643,7 +1652,7 @@ shift_label: patrol.shift_label,
 
               <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
   <span className="site-status normal">
-    {point.qr_token ? "QR GENERATED" : "QR PENDING"}
+    {point.qr_generated ? "QR GENERATED" : "QR PENDING"}
   </span>
 
   <span className={point.active ? "site-status normal" : "site-status inactive"}>
@@ -2806,7 +2815,7 @@ cursor: "pointer",
                 }}
               >
                 <span className="site-status normal">
-                  {point.qr_token ? "QR GENERATED" : "QR PENDING"}
+                  {point.qr_generated ? "QR GENERATED" : "QR PENDING"}
                 </span>
 
                 <span
@@ -2818,7 +2827,7 @@ cursor: "pointer",
                 </span>
               </div>
 
-              <div
+              {canManagePatrols && point.qr_generated && <div
                 className="qr-site-actions"
                 style={{
                   display: "flex",
@@ -2856,7 +2865,7 @@ cursor: "pointer",
                 >
                   Print QR
                 </button>
-              </div>
+              </div>}
             </div>
           ))}
         </div>
