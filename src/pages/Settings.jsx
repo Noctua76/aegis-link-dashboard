@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./Settings.css";
 import { API_BASE_URL } from "../config/api";
+import { getAlertCapabilities } from "../utils/alertPermissions";
 
 const toDateInputValue = (date) => {
   const localDate = new Date(
@@ -68,6 +69,7 @@ const permissionSet = new Set(permissions || storedCurrentUser?.user?.permission
 const hasPermission = (permission) =>
   isSystemOwner || (!permissions && !Array.isArray(storedCurrentUser?.user?.permissions)) || permissionSet.has(permission);
 const canManageRoles = isSystemOwner && hasPermission("roles.manage");
+const { canViewAlerts, canManageAlerts } = getAlertCapabilities(hasPermission);
   const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
@@ -276,6 +278,7 @@ voice_enabled:true,
   const [expandedTestAlertId, setExpandedTestAlertId] = useState(null);
   const [showTestAlertHistoryModal, setShowTestAlertHistoryModal] = useState(false);
   const loadAlertConfiguration = async () => {
+  if (!canViewAlerts) return null;
   try {
     const sessionToken = getSessionToken();
     if (!sessionToken) return;
@@ -300,6 +303,7 @@ voice_enabled:true,
 };
 
 const loadTestAlertHistory = async (page = 1) => {
+  if (!canViewAlerts) return;
   setTestAlertHistoryLoading(true);
   setTestAlertHistoryError("");
 
@@ -335,6 +339,7 @@ const loadTestAlertHistory = async (page = 1) => {
 };
 
 const loadTestAlertResult = async (testId) => {
+  if (!canViewAlerts) throw new Error("Alert visibility permission required");
   const sessionToken = getSessionToken();
   if (!sessionToken) throw new Error("Authentication required");
 
@@ -352,6 +357,7 @@ const loadTestAlertResult = async (testId) => {
 };
 
 const loadRecipients = async () => {
+  if (!canViewAlerts) return;
   try {
     const storedUser = JSON.parse(
       localStorage.getItem("aegis-current-user") || "null"
@@ -1296,6 +1302,7 @@ const addPatrolPoint = async () => {
 };
 
 const addRecipient = async () => {
+  if (!canManageAlerts) return;
   try {
     const storedUser = JSON.parse(
       localStorage.getItem("aegis-current-user") || "null"
@@ -1776,9 +1783,11 @@ const downloadGuardCredentials = () => {
   useEffect(() => {
     
 
-loadAlertConfiguration();
-loadTestAlertHistory(1);
-loadRecipients();
+if (canViewAlerts) {
+  loadAlertConfiguration();
+  loadTestAlertHistory(1);
+  loadRecipients();
+}
 loadSites();
 loadGuards();
 loadUsers();
@@ -1813,8 +1822,10 @@ loadRolePermissions();
 
     const interval = setInterval(() => {
   loadSystemStatus();
-loadAlertConfiguration();
-loadRecipients();
+if (canViewAlerts) {
+  loadAlertConfiguration();
+  loadRecipients();
+}
 loadSites();
 loadGuards();
 loadUsers(false);
@@ -1823,7 +1834,7 @@ loadDashboardRoles();
 
     
     return () => clearInterval(interval);
-  }, []);
+  }, [canViewAlerts]);
 
   useEffect(() => {
   if (!isSystemOwner) {
@@ -1855,6 +1866,7 @@ loadDashboardRoles();
 }, [selectedUser?.id, isEditingUser]);
 
   const handleTestAlert = async () => {
+  if (!canManageAlerts) return;
   setIsTestingAlert(true);
   setTestAlertPhase("sending");
   setTestAlertError("");
@@ -3162,7 +3174,7 @@ const cancelManualPatrol = async (item) => {
 )}
 
       <section className="settings-grid">
-        <div className="settings-card">
+        {canViewAlerts && <div className="settings-card">
   <h3>Alert Configuration</h3>
 
   <div className="settings-item">
@@ -3209,6 +3221,7 @@ const cancelManualPatrol = async (item) => {
 
 <h4>Recipients</h4>
 
+{canManageAlerts && <>
 <input
 placeholder="Name"
 value={newRecipient.full_name}
@@ -3234,6 +3247,7 @@ phone:e.target.value
 <button onClick={addRecipient}>
 Add Recipient
 </button>
+</>}
 
 <button
 className="secondary-button"
@@ -3241,9 +3255,10 @@ onClick={()=>
 setShowRecipientsModal(true)
 }
 >
-Manage Recipients
+{canManageAlerts ? "Manage Recipients" : "View Recipients"}
 </button>
-  
+
+  {canManageAlerts && <>
   <button
   onClick={handleTestAlert}
   disabled={isTestingAlert}
@@ -3330,6 +3345,7 @@ Manage Recipients
       <small>Tested: {formatGreekDateTime(testAlertResult.tested_at)}</small>
     </div>
   )}
+  </>}
 
   <div className="alert-test-history-launcher">
     <div>
@@ -3494,7 +3510,7 @@ Manage Recipients
       </div>
     </div>
   )}
-</div>
+</div>}
 
 <div className="settings-card">
   <h3>Sites Management</h3>
@@ -4935,7 +4951,7 @@ Manage Recipients
   </div>
 )}
 
-      {showRecipientsModal && (
+      {showRecipientsModal && canViewAlerts && (
 
 <div className="modal-overlay">
 
@@ -4988,7 +5004,7 @@ recipient-row-modal
 
 </div>
 
-{item.source !== "env" && Number.isInteger(Number(item.id)) && (
+{canManageAlerts && item.source !== "env" && Number.isInteger(Number(item.id)) && (
   <button
     className="danger-btn"
     onClick={async () => {
