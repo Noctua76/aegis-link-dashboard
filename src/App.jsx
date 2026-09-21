@@ -2731,7 +2731,10 @@ const renderIncidentLocation = (incident) => {
         {activeMenu === "Sites" && <Sites />}
         {activeMenu === "Patrols" && <Patrols />}
         {activeMenu === "Shift Reports" && (
-          <ShiftReports onUnreadCountChange={setUnreadShiftReports} />
+          <ShiftReports
+            onUnreadCountChange={setUnreadShiftReports}
+            permissions={currentUser?.user?.permissions || null}
+          />
         )}
         {activeMenu === "Settings" && (
 <Settings permissions={currentUser?.user?.permissions || null}/>

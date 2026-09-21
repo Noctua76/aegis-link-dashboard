@@ -67,6 +67,7 @@ const isSystemOwner =
 const permissionSet = new Set(permissions || storedCurrentUser?.user?.permissions || []);
 const hasPermission = (permission) =>
   isSystemOwner || (!permissions && !Array.isArray(storedCurrentUser?.user?.permissions)) || permissionSet.has(permission);
+const canManageRoles = isSystemOwner && hasPermission("roles.manage");
   const getAuthHeaders = () => {
   const currentUser = JSON.parse(
     localStorage.getItem("aegis-current-user") || "{}"
@@ -495,7 +496,7 @@ const loadUsers = async (showLoader = true) => {
 };
 
 const loadDashboardRoles = async () => {
-  if (!hasPermission("users.view")) return;
+  if (!hasPermission("users.view") && !hasPermission("roles.view")) return;
   try {
     const response = await fetch(`${API_BASE_URL}/admin/roles`, { headers: getAuthHeaders() });
     const data = await response.json();
@@ -519,12 +520,13 @@ const loadRolePermissions = async () => {
 };
 
 const openNewRole = () => {
+  if (!canManageRoles) return;
   setEditingRole({ name: "", description: "", permissions: [], is_active: true });
   setShowRoleModal(true);
 };
 
 const saveDashboardRole = async () => {
-  if (!editingRole?.name?.trim()) return;
+  if (!canManageRoles || !editingRole?.name?.trim()) return;
   setRoleManagementError("");
   try {
     const isExisting = Boolean(editingRole.id);
@@ -545,7 +547,7 @@ const saveDashboardRole = async () => {
 };
 
 const cloneDashboardRole = async () => {
-  if (!editingRole?.id) return;
+  if (!canManageRoles || !editingRole?.id) return;
   try {
     const response = await fetch(`${API_BASE_URL}/admin/roles/${editingRole.id}/clone`, {
       method: "POST", headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
@@ -4027,7 +4029,7 @@ Manage Recipients
           <h3>Role Management</h3>
           <p className="settings-muted-text">Roles organize backend-enforced permissions.</p>
         </div>
-        {hasPermission("roles.manage") && (
+        {canManageRoles && (
           <button type="button" className="secondary-button" onClick={openNewRole}>+ New Role</button>
         )}
       </div>
@@ -4038,7 +4040,7 @@ Manage Recipients
             type="button"
             className="role-management-row"
             key={role.id}
-            disabled={!hasPermission("roles.manage") || role.code === "system_owner"}
+            disabled={!canManageRoles || role.code === "system_owner"}
             onClick={() => {
               setEditingRole({ ...role, permissions: role.permissions || [] });
               setShowRoleModal(true);
@@ -4251,7 +4253,7 @@ Manage Recipients
         </div>
       </section>
 
-      {showRoleModal && editingRole && hasPermission("roles.manage") && (
+      {showRoleModal && editingRole && canManageRoles && (
         <div className="modal-overlay">
           <div className="recipients-modal role-management-modal">
             <div className="modal-header">
