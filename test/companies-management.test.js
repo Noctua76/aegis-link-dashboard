@@ -43,3 +43,12 @@ test("Settings no longer defaults user creation to company 1", () => {
   assert.doesNotMatch(settingsSource, /company_id:\s*1/);
 });
 
+test("System Owner can change company lifecycle status with inactive confirmation", () => {
+  assert.match(companiesSource, /\/admin\/companies\/\$\{company\.id\}\/status/);
+  assert.match(companiesSource, /method: "PUT"/);
+  assert.match(companiesSource, /window\.confirm/);
+  assert.match(companiesSource, /will be signed out immediately/);
+  assert.match(companiesSource, /<option value="active">Active<\/option>/);
+  assert.match(companiesSource, /<option value="pilot">Pilot<\/option>/);
+  assert.match(companiesSource, /<option value="inactive">Inactive<\/option>/);
+});
