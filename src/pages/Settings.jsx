@@ -175,7 +175,6 @@ const [newUser, setNewUser] = useState({
   backup_phone: "",
   role: "viewer",
   status: "active",
-  company_id: 1,
 });
 const [loadingSelectedUser, setLoadingSelectedUser] = useState(false);
 const [selectedUserError, setSelectedUserError] = useState("");
@@ -3936,7 +3935,6 @@ setShowRecipientsModal(true)
       backup_phone: "",
       role: dashboardRoles.find((role) => role.code === "viewer")?.id || "viewer",
       status: "active",
-      company_id: 1,
     });
 
     setNewUserError("");

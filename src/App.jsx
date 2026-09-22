@@ -13,6 +13,7 @@ import EventLogs from "./pages/EventLogs";
 import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import Analytics from "./pages/Analytics";
+import Companies from "./pages/Companies";
 import { formatDateTime } from "./utils/dateTime";
 import { formatHealthTime, hasCurrentHealthError } from "./utils/systemStatus";
 import { API_BASE_URL } from "./config/api";
@@ -33,15 +34,6 @@ import {
 import {
   classifyAuthenticatedFailure,
 } from "./utils/authenticatedResponse";
-import {
-  sites as securitySites,
-  guards as securityGuards,
-  activeSessions,
-  incidents as securityIncidents,
-  getSiteById,
-  getGuardById,
-  getActiveSessionBySiteId,
-} from "./data/securityData";
 
 const STATUS_LABELS = {
   operational: "Operational",
@@ -906,22 +898,6 @@ const interval = setInterval(fetchActiveGuards, 10000);
 
 return () => clearInterval(interval);
 }, [activeMenu, currentUser, authorizationReady]);
-  const dashboardSites = securitySites.map((site) => {
-  const activeSession = getActiveSessionBySiteId(site.id);
-  const activeGuard = activeSession
-    ? getGuardById(activeSession.guardId)
-    : null;
-
-  return {
-    name: site.name,
-    location: site.location,
-    guardsAssigned: site.guardsAssigned,
-    guardsOnDuty: activeSession ? 1 : 0,
-    activeGuard: activeGuard ? activeGuard.fullName : "No active guard",
-    status: site.status === "Alert Active" ? "alert" : "normal",
-  };
-});
-
 const guardsOnDuty = liveActiveGuards.map((guard) => ({
   full_name: guard.full_name,
   site_name: guard.site_name,
@@ -2956,6 +2932,7 @@ const renderIncidentLocation = (incident) => {
 </>
 )}
 
+        {activeMenu === "Companies" && canRenderMenu("Companies") && <Companies />}
         {activeMenu === "Guards" && canRenderMenu("Guards") && <Guards permissions={currentUser.user.permissions} />}
         {activeMenu==="Admin Audit Logs" && canRenderMenu("Admin Audit Logs") &&
 <AdminAuditLogs permissions={currentUser.user.permissions}/>

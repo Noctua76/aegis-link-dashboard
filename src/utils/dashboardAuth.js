@@ -1,5 +1,6 @@
 export const DASHBOARD_MENU_RULES = [
   ["Dashboard", ["dashboard.view"]],
+  ["Companies", []],
   ["Live Incidents", ["incidents.view"]],
   ["Shift Reports", ["shift_reports.view"]],
   ["Event Logs", ["audit_logs.view"]],
@@ -60,6 +61,7 @@ export function hasDashboardPermission(user, permission) {
 }
 
 export function canAccessDashboardMenu(user, menuLabel) {
+  if (menuLabel === "Companies") return isSystemOwner(user);
   const rule = DASHBOARD_MENU_RULES.find(([label]) => label === menuLabel);
   if (!rule) return false;
   return rule[1].some((permission) => hasDashboardPermission(user, permission));
@@ -67,8 +69,10 @@ export function canAccessDashboardMenu(user, menuLabel) {
 
 export function getPermittedDashboardMenus(user) {
   return DASHBOARD_MENU_RULES
-    .filter(([, permissions]) =>
-      permissions.some((permission) => hasDashboardPermission(user, permission))
+    .filter(([label, permissions]) =>
+      label === "Companies"
+        ? isSystemOwner(user)
+        : permissions.some((permission) => hasDashboardPermission(user, permission))
     )
     .map(([label]) => label);
 }

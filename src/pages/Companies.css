@@ -1,0 +1,41 @@
+.companies-page { max-width: 1280px; margin: 0 auto; }
+.companies-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 24px; }
+.companies-header h1, .companies-modal h2 { margin: 5px 0 6px; }
+.companies-header p { margin: 0; color: #9ca3af; }
+.companies-eyebrow { color: #60a5fa; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+.companies-primary { border-color: #2563eb !important; background: #2563eb !important; color: white !important; }
+.companies-page button { cursor: pointer; border: 1px solid #374151; border-radius: 8px; background: #18181b; color: #e5e7eb; padding: 10px 14px; font-weight: 700; }
+.companies-page button:disabled { cursor: wait; opacity: .65; }
+.companies-error { margin-bottom: 16px; border: 1px solid #7f1d1d; border-radius: 10px; background: #2b1114; color: #fecaca; padding: 12px 14px; }
+.companies-table-wrap { overflow-x: auto; border: 1px solid #27272a; border-radius: 14px; background: #111113; }
+.companies-table { width: 100%; border-collapse: collapse; min-width: 920px; }
+.companies-table th { background: #18181b; color: #a1a1aa; font-size: 12px; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
+.companies-table th, .companies-table td { padding: 15px 16px; border-bottom: 1px solid #27272a; }
+.companies-table tbody tr:last-child td { border-bottom: 0; }
+.companies-table td { color: #d4d4d8; }
+.companies-table td:first-child strong, .companies-table td:first-child small { display: block; }
+.companies-table td:first-child small { margin-top: 4px; color: #71717a; }
+.companies-empty { text-align: center; color: #71717a !important; padding: 40px !important; }
+.company-status { display: inline-block; border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 800; text-transform: capitalize; }
+.company-status-active { background: #123c2a; color: #6ee7b7; }
+.company-status-pilot { background: #3b2d11; color: #fcd34d; }
+.company-status-inactive { background: #27272a; color: #a1a1aa; }
+.companies-modal-backdrop { position: fixed; z-index: 2000; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(0, 0, 0, .76); }
+.companies-modal { width: min(820px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; box-sizing: border-box; border: 1px solid #3f3f46; border-radius: 16px; background: #111113; box-shadow: 0 24px 80px rgba(0,0,0,.55); padding: 24px; }
+.companies-modal > header, .companies-modal > footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.companies-modal > header > button { padding: 6px 11px; font-size: 24px; }
+.companies-modal > footer { justify-content: flex-end; margin-top: 20px; }
+.companies-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+.companies-form-grid fieldset { display: grid; gap: 13px; margin: 0; border: 1px solid #27272a; border-radius: 12px; padding: 16px; }
+.companies-form-grid legend { padding: 0 7px; color: #f4f4f5; font-weight: 800; }
+.companies-form-grid label { display: grid; gap: 7px; color: #a1a1aa; font-size: 13px; font-weight: 700; }
+.companies-form-grid input, .companies-form-grid select { box-sizing: border-box; width: 100%; border: 1px solid #3f3f46; border-radius: 8px; background: #09090b; color: #f4f4f5; padding: 11px 12px; }
+.companies-note { margin: 18px 0 0; color: #a1a1aa; font-size: 13px; line-height: 1.5; }
+.credentials-modal { max-width: 650px; }
+.credentials-warning { border: 1px solid #854d0e; border-radius: 9px; background: #2d210b; color: #fde68a; padding: 12px; }
+.credentials-modal dl { display: grid; gap: 1px; overflow: hidden; border: 1px solid #27272a; border-radius: 10px; background: #27272a; }
+.credentials-modal dl > div { display: grid; grid-template-columns: 165px 1fr; align-items: center; background: #18181b; padding: 12px; }
+.credentials-modal dt { color: #a1a1aa; }
+.credentials-modal dd { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; }
+.credentials-modal code { overflow-wrap: anywhere; color: #f4f4f5; }
+@media (max-width: 720px) { .companies-header { align-items: stretch; flex-direction: column; } .companies-form-grid { grid-template-columns: 1fr; } .credentials-modal dl > div { grid-template-columns: 1fr; gap: 6px; } }
