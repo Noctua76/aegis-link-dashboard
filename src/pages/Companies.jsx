@@ -18,6 +18,8 @@ function Companies() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [credentials, setCredentials] = useState(null);
   const [copied, setCopied] = useState("");
+  const [statusSavingId, setStatusSavingId] = useState(null);
+  const [notice, setNotice] = useState("");
 
   const loadCompanies = async () => {
     setLoading(true);
@@ -76,6 +78,42 @@ function Companies() {
     window.setTimeout(() => setCopied(""), 1800);
   };
 
+  const changeCompanyStatus = async (company, newStatus) => {
+    if (newStatus === company.status) return;
+    if (newStatus === "inactive") {
+      const confirmed = window.confirm(
+        `Set ${company.name} to Inactive? All Dashboard users and Guards for this company will be signed out immediately, and tenant background operations will stop.`
+      );
+      if (!confirmed) return;
+    }
+
+    setStatusSavingId(company.id);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/companies/${company.id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", ...getDashboardAuthHeaders() },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Company status change failed");
+      setCompanies((current) => current.map((item) => (
+        item.id === company.id ? { ...item, status: data.company.status } : item
+      )));
+      const shutdown = data.shutdown || {};
+      setNotice(
+        newStatus === "inactive"
+          ? `${company.name} is inactive. Closed ${shutdown.dashboard_sessions || 0} Dashboard session(s), ${shutdown.guard_sessions || 0} Guard session(s), and ${shutdown.push_subscriptions || 0} push subscription(s).`
+          : `${company.name} is now ${newStatus === "pilot" ? "Pilot" : "Active"}. New sign-ins and current-time operations are enabled.`
+      );
+    } catch (statusError) {
+      setError(statusError.message || "Company status change failed");
+    } finally {
+      setStatusSavingId(null);
+    }
+  };
+
   const credentialsText = credentials
     ? `Aegis Link company: ${credentials.company.name}\nAdministrator: ${credentials.administrator.full_name}\nUsername: ${credentials.username}\nTemporary password: ${credentials.temporary_password}\nPassword change is required at first sign-in.`
     : "";
@@ -94,6 +132,7 @@ function Companies() {
       </header>
 
       {error && <div className="companies-error" role="alert">{error}</div>}
+      {notice && <div className="companies-notice" role="status">{notice}</div>}
 
       <div className="companies-table-wrap">
         <table className="companies-table">
@@ -106,7 +145,19 @@ function Companies() {
             {!loading && companies.map((company) => (
               <tr key={company.id}>
                 <td><strong>{company.name}</strong><small>Tenant #{company.id}</small></td>
-                <td><span className={`company-status company-status-${company.status}`}>{company.status}</span></td>
+                <td>
+                  <select
+                    className={`company-status-select company-status-${company.status}`}
+                    aria-label={`Status for ${company.name}`}
+                    value={company.status}
+                    disabled={statusSavingId === company.id}
+                    onChange={(event) => changeCompanyStatus(company, event.target.value)}
+                  >
+                    <option value="active">Active</option>
+                    <option value="pilot">Pilot</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </td>
                 <td>{company.timezone}</td>
                 <td>{company.sites_count}</td>
                 <td>{company.guards_count}</td>
