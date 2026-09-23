@@ -6,6 +6,7 @@ import {
   hasDashboardPermission,
   readDashboardSession,
 } from "../utils/dashboardAuth";
+import { gpsAccuracyLabel } from "../utils/gpsAccuracy";
 
 function statusClass(status = "") {
   return status.toLowerCase().replaceAll(" ", "-");
@@ -29,43 +30,6 @@ function isGpsLive(lastLocationAt) {
   const now = Date.now();
 
   return now - lastUpdate < 2 * 60 * 1000;
-}
-
-function gpsAccuracyLabel(accuracy) {
-  const value = Number(accuracy);
-
-  if (!value && value !== 0) {
-    return {
-      label: "Unknown",
-      className: "gps-accuracy-unknown",
-    };
-  }
-
-  if (value <= 20) {
-    return {
-      label: "Excellent",
-      className: "gps-accuracy-excellent",
-    };
-  }
-
-  if (value <= 50) {
-    return {
-      label: "Good",
-      className: "gps-accuracy-good",
-    };
-  }
-
-  if (value <= 100) {
-    return {
-      label: "Fair",
-      className: "gps-accuracy-fair",
-    };
-  }
-
-  return {
-    label: "Poor",
-    className: "gps-accuracy-poor",
-  };
 }
 
 export default function Sites({ permissions = [] }) {
