@@ -8,10 +8,18 @@
 .companies-page button:disabled { cursor: wait; opacity: .65; }
 .companies-error { margin-bottom: 16px; border: 1px solid #7f1d1d; border-radius: 10px; background: #2b1114; color: #fecaca; padding: 12px 14px; }
 .companies-notice { margin-bottom: 16px; border: 1px solid #14532d; border-radius: 10px; background: #10261a; color: #bbf7d0; padding: 12px 14px; }
-.companies-table-wrap { overflow-x: auto; border: 1px solid #27272a; border-radius: 14px; background: #111113; }
-.companies-table { width: 100%; border-collapse: collapse; min-width: 920px; }
+.companies-table-wrap { overflow: auto; max-height: min(62vh, 620px); border: 1px solid #27272a; border-radius: 14px; background: #111113; }
+.companies-table { width: 100%; min-width: 980px; border-collapse: collapse; table-layout: fixed; }
 .companies-table th { background: #18181b; color: #a1a1aa; font-size: 12px; letter-spacing: .04em; text-align: left; text-transform: uppercase; }
-.companies-table th, .companies-table td { padding: 15px 16px; border-bottom: 1px solid #27272a; }
+.companies-table th, .companies-table td { padding: 15px 16px; border-bottom: 1px solid #27272a; vertical-align: middle; }
+.companies-table thead th { position: sticky; top: 0; z-index: 2; background: #18181b; }
+.companies-table th:not(:first-child), .companies-table td:not(:first-child) { white-space: nowrap; }
+.companies-table th:nth-child(1), .companies-table td:nth-child(1) { width: 190px; text-align: left; }
+.companies-table th:nth-child(2), .companies-table td:nth-child(2) { width: 130px; text-align: left; }
+.companies-table th:nth-child(3), .companies-table td:nth-child(3) { width: 145px; text-align: left; }
+.companies-table th:nth-child(4), .companies-table td:nth-child(4), .companies-table th:nth-child(5), .companies-table td:nth-child(5) { width: 80px; text-align: center; }
+.companies-table th:nth-child(6), .companies-table td:nth-child(6) { width: 135px; text-align: center; }
+.companies-table th:nth-child(7), .companies-table td:nth-child(7) { width: 165px; text-align: left; }
 .companies-table tbody tr:last-child td { border-bottom: 0; }
 .companies-table td { color: #d4d4d8; }
 .companies-table td:first-child strong, .companies-table td:first-child small { display: block; }
@@ -40,4 +48,9 @@
 .credentials-modal dt { color: #a1a1aa; }
 .credentials-modal dd { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; }
 .credentials-modal code { overflow-wrap: anywhere; color: #f4f4f5; }
-@media (max-width: 720px) { .companies-header { align-items: stretch; flex-direction: column; } .companies-form-grid { grid-template-columns: 1fr; } .credentials-modal dl > div { grid-template-columns: 1fr; gap: 6px; } }
+@media (min-width: 721px) {
+  .companies-header > div { display: flex; flex-direction: column; align-items: flex-start; }
+  .companies-header h1 { margin: 6px 0 10px; line-height: 1.08; }
+  .companies-header p { margin: 0; line-height: 1.45; }
+}
+@media (max-width: 720px) { .companies-header { align-items: stretch; flex-direction: column; } .companies-table-wrap { max-height: 55vh; } .companies-form-grid { grid-template-columns: 1fr; } .credentials-modal dl > div { grid-template-columns: 1fr; gap: 6px; } }
