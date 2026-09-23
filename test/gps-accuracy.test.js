@@ -17,4 +17,6 @@ test("valid GPS accuracy thresholds remain unchanged", () => {
   assert.equal(gpsAccuracyLabel(50.1).label, "Fair");
   assert.equal(gpsAccuracyLabel(100).label, "Fair");
   assert.equal(gpsAccuracyLabel(100.1).label, "Poor");
+  assert.equal(gpsAccuracyLabel(200).label, "Poor");
+  assert.equal(gpsAccuracyLabel(200.1).label, "Very Poor / Unreliable");
 });
