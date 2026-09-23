@@ -8,6 +8,7 @@ import {
   hasDashboardPermission,
   readDashboardSession,
 } from "../utils/dashboardAuth";
+import { getTenantOperationHistory } from "../utils/systemStatus";
 
 const toDateInputValue = (date) => {
   const localDate = new Date(
@@ -2326,6 +2327,9 @@ const formatGreekDateTime = (value) => {
   });
 };
 
+const smsTenantHistory = getTenantOperationHistory(systemStatus, "sms_gateway");
+const voiceTenantHistory = getTenantOperationHistory(systemStatus, "voice_calls");
+
 const saveRecurringPatrolSchedule = async () => {
   if (!patrolSite) return;
 
@@ -3714,6 +3718,9 @@ setShowRecipientsModal(true)
   {hasPermission("guards.manage") && <>
 
   <input
+    type="text"
+    name="new_guard_full_name"
+    autoComplete="off"
     placeholder="Full name"
     value={newGuard.full_name}
     onChange={(e) =>
@@ -3725,6 +3732,9 @@ setShowRecipientsModal(true)
   />
 
   <input
+    type="text"
+    name="new_guard_username"
+    autoComplete="off"
     placeholder="Username"
     value={newGuard.username}
     onChange={(e) =>
@@ -3736,6 +3746,9 @@ setShowRecipientsModal(true)
   />
 
   <input
+    type="tel"
+    name="new_guard_phone"
+    autoComplete="tel"
     placeholder="Phone"
     value={newGuard.phone}
     onChange={(e) =>
@@ -3749,6 +3762,8 @@ setShowRecipientsModal(true)
   <div className="settings-password-row">
     <input
       type={showNewGuardPassword ? "text" : "password"}
+      name="new_guard_temporary_password"
+      autoComplete="new-password"
       placeholder="Temporary password"
       value={newGuard.password}
       onChange={(e) =>
@@ -4041,7 +4056,7 @@ setShowRecipientsModal(true)
 
   <div className="settings-item">
     <span>Timeline Reset</span>
-    <strong>1 hour</strong>
+    <strong>2 hours</strong>
   </div>
 
   <div className="settings-item">
@@ -4121,10 +4136,10 @@ setShowRecipientsModal(true)
         : "No"}
     </div>
     <div style={{ fontSize: "12px", color: "#6b7280" }}>
-      Last success: {formatGreekDateTime(systemStatus?.services?.sms_gateway?.last_success_at)}
+      Last success: {formatGreekDateTime(smsTenantHistory.last_success_at)}
     </div>
     <div style={{ fontSize: "12px", color: "#6b7280" }}>
-      Last failure: {formatGreekDateTime(systemStatus?.services?.sms_gateway?.last_failure_at)}
+      Last failure: {formatGreekDateTime(smsTenantHistory.last_failure_at)}
     </div>
   </div>
 
@@ -4145,10 +4160,10 @@ setShowRecipientsModal(true)
         : "No"}
     </div>
     <div style={{ fontSize: "12px", color: "#6b7280" }}>
-      Last success: {formatGreekDateTime(systemStatus?.services?.voice_calls?.last_success_at)}
+      Last success: {formatGreekDateTime(voiceTenantHistory.last_success_at)}
     </div>
     <div style={{ fontSize: "12px", color: "#6b7280" }}>
-      Last failure: {formatGreekDateTime(systemStatus?.services?.voice_calls?.last_failure_at)}
+      Last failure: {formatGreekDateTime(voiceTenantHistory.last_failure_at)}
     </div>
   </div>
 
