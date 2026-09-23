@@ -4,6 +4,7 @@ const GPS_ACCURACY_CLASSES = {
   Good: "gps-accuracy-good",
   Fair: "gps-accuracy-fair",
   Poor: "gps-accuracy-poor",
+  "Very Poor / Unreliable": "gps-accuracy-poor",
 };
 
 export function gpsAccuracyLabel(accuracy) {
@@ -48,8 +49,15 @@ export function gpsAccuracyLabel(accuracy) {
     };
   }
 
+  if (value <= 200) {
+    return {
+      label: "Poor",
+      className: GPS_ACCURACY_CLASSES.Poor,
+    };
+  }
+
   return {
-    label: "Poor",
-    className: GPS_ACCURACY_CLASSES.Poor,
+    label: "Very Poor / Unreliable",
+    className: GPS_ACCURACY_CLASSES["Very Poor / Unreliable"],
   };
 }
