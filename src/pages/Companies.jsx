@@ -9,6 +9,19 @@ const EMPTY_FORM = {
   administrator: { full_name: "", username: "", email: "", phone: "" },
 };
 
+function CompanyCreatedAt({ value }) {
+  if (!value) return "—";
+
+  const [date, time] = formatDateTime(value).split(", ");
+
+  return (
+    <span className="company-created-at">
+      <span>{date}</span>
+      {time && <span>{time}</span>}
+    </span>
+  );
+}
+
 function Companies() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -162,7 +175,7 @@ function Companies() {
                 <td>{company.sites_count}</td>
                 <td>{company.guards_count}</td>
                 <td>{company.dashboard_users_count}</td>
-                <td>{company.created_at ? formatDateTime(company.created_at) : "—"}</td>
+                <td><CompanyCreatedAt value={company.created_at} /></td>
               </tr>
             ))}
           </tbody>
