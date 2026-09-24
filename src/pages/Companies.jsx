@@ -5,9 +5,17 @@ import { formatDateTime } from "../utils/dateTime";
 import "./Companies.css";
 
 const EMPTY_FORM = {
-  company: { name: "", timezone: "Europe/Athens", status: "active" },
+  company: { name: "", site_prefix: "", timezone: "Europe/Athens", status: "active" },
   administrator: { full_name: "", username: "", email: "", phone: "" },
 };
+
+function suggestSitePrefix(name) {
+  if (/^DEFENSOR CIVITATIS SECURITY$/i.test(name.trim())) return "DEF";
+  const words = name.toUpperCase().match(/[A-Z0-9]+/g) || [];
+  const initials = words.slice(0, 3).map((word) => word[0]).join("");
+  const candidate = initials.length >= 2 ? initials : (words[0] || "").slice(0, 3);
+  return candidate.length >= 2 ? candidate : "CO";
+}
 
 function CompanyCreatedAt({ value }) {
   if (!value) return "—";
@@ -29,6 +37,7 @@ function Companies({ homeCompanyId, onAccessTenant }) {
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [prefixEdited, setPrefixEdited] = useState(false);
   const [credentials, setCredentials] = useState(null);
   const [copied, setCopied] = useState("");
   const [statusSavingId, setStatusSavingId] = useState(null);
@@ -78,9 +87,14 @@ function Companies({ homeCompanyId, onAccessTenant }) {
   }, []);
 
   const updateSection = (section, field, value) => {
+    if (section === "company" && field === "site_prefix") setPrefixEdited(true);
     setForm((current) => ({
       ...current,
-      [section]: { ...current[section], [field]: value },
+      [section]: {
+        ...current[section], [field]: value,
+        ...(section === "company" && field === "name" && !prefixEdited
+          ? { site_prefix: suggestSitePrefix(value) } : {}),
+      },
     }));
   };
 
@@ -98,6 +112,7 @@ function Companies({ homeCompanyId, onAccessTenant }) {
       if (!response.ok) throw new Error(data.message || "Company creation failed");
       setShowCreate(false);
       setForm(EMPTY_FORM);
+      setPrefixEdited(false);
       setCredentials({ company: data.company, administrator: data.administrator, ...data.credentials });
       await loadCompanies();
     } catch (saveError) {
@@ -161,7 +176,7 @@ function Companies({ homeCompanyId, onAccessTenant }) {
           <h1>Companies Management</h1>
           <p>Create isolated tenants and their first Company Administrator.</p>
         </div>
-        <button className="companies-primary" type="button" onClick={() => { setError(""); setShowCreate(true); }}>
+        <button className="companies-primary" type="button" onClick={() => { setError(""); setPrefixEdited(false); setForm(EMPTY_FORM); setShowCreate(true); }}>
           + New Company
         </button>
       </header>
@@ -228,6 +243,7 @@ function Companies({ homeCompanyId, onAccessTenant }) {
               <fieldset>
                 <legend>Company</legend>
                 <label>Company name *<input required value={form.company.name} onChange={(event) => updateSection("company", "name", event.target.value)} /></label>
+                <label>Operational Site Prefix *<input required minLength="2" maxLength="8" pattern="[A-Za-z0-9]{2,8}" value={form.company.site_prefix} onChange={(event) => updateSection("company", "site_prefix", event.target.value.toUpperCase())} placeholder="DEF" /></label>
                 <label>Timezone *<input required value={form.company.timezone} onChange={(event) => updateSection("company", "timezone", event.target.value)} placeholder="Europe/Athens" /></label>
                 <label>Status<select value={form.company.status} onChange={(event) => updateSection("company", "status", event.target.value)}><option value="active">Active</option><option value="pilot">Pilot</option><option value="inactive">Inactive</option></select></label>
               </fieldset>
