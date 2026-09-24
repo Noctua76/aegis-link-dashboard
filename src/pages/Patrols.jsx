@@ -861,7 +861,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   className="analytics-table-card"
 >
               <h3>
-                SITE-{String(site.site_id).padStart(3, "0")} |{" "}
+                {site.site_code} |{" "}
                 {site.site_name}
               </h3>
 
@@ -915,6 +915,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
   onClick={() =>
     setSelectedLastPatrol({
       site_id: site.site_id,
+      site_code: site.site_code,
       site_name: site.site_name,
       site_location: site.site_location,
       last_patrol: site.last_patrol,
@@ -962,6 +963,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
     site.next_patrol &&
     setSelectedNextPatrol({
       site_id: site.site_id,
+      site_code: site.site_code,
       site_name: site.site_name,
       site_location: site.site_location,
       next_patrol: site.next_patrol,
@@ -1221,6 +1223,7 @@ const visibleCompletedPatrols = completedPatrolsForSite.slice(0, 6);
 guard_session_login: patrol.guard_session_login,
 shift_label: patrol.shift_label,
       site_id: site.site_id,
+      site_code: site.site_code,
       site_name: site.site_name,
       site_location: site.site_location,
       point_name: patrol.point_name,
@@ -1623,7 +1626,7 @@ shift_label: patrol.shift_label,
     <div className="report-modal">
       <div className="report-modal-header">
         <h2>
-          SITE-{String(selectedSiteDetails.site.site_id).padStart(3, "0")} |{" "}
+          {selectedSiteDetails.site.site_code} |{" "}
           {selectedSiteDetails.site.site_name}
         </h2>
 
@@ -1680,8 +1683,7 @@ shift_label: patrol.shift_label,
     <div className="report-modal">
       <div className="report-modal-header">
         <h2>
-          Overdue Patrol | SITE-
-          {String(selectedOverduePatrol.site_id).padStart(3, "0")} |{" "}
+          Overdue Patrol | {selectedOverduePatrol.site_code} |{" "}
           {selectedOverduePatrol.site_name}
         </h2>
 
@@ -1758,8 +1760,7 @@ shift_label: patrol.shift_label,
     <div className="report-modal">
       <div className="report-modal-header">
         <h2>
-          Missed Patrol History | SITE-
-          {String(selectedMissedHistorySite.site_id).padStart(3, "0")} |{" "}
+          Missed Patrol History | {selectedMissedHistorySite.site_code} |{" "}
           {selectedMissedHistorySite.site_name}
         </h2>
 
@@ -2016,8 +2017,7 @@ shift_label: patrol.shift_label,
 >
       <div className="report-modal-header">
         <h2>
-          Completed Patrol History | SITE-
-          {String(selectedCompletedHistorySite.site_id).padStart(3, "0")} |{" "}
+          Completed Patrol History | {selectedCompletedHistorySite.site_code} |{" "}
           {selectedCompletedHistorySite.site_name}
         </h2>
 
@@ -2502,8 +2502,7 @@ cursor: "pointer",
     <div className="report-modal">
       <div className="report-modal-header">
         <h2>
-          Next Patrol | SITE-
-          {String(selectedNextPatrol.site_id).padStart(3, "0")} |{" "}
+          Next Patrol | {selectedNextPatrol.site_code} |{" "}
           {selectedNextPatrol.site_name}
         </h2>
 
@@ -2563,8 +2562,7 @@ cursor: "pointer",
     <div className="report-modal">
       <div className="report-modal-header">
         <h2>
-          Last Patrol | SITE-
-          {String(selectedLastPatrol.site_id).padStart(3, "0")} |{" "}
+          Last Patrol | {selectedLastPatrol.site_code} |{" "}
           {selectedLastPatrol.site_name}
         </h2>
 
@@ -2779,8 +2777,7 @@ cursor: "pointer",
     <div className="report-modal qr-site-modal">
       <div className="report-modal-header">
         <h2>
-          QR Codes | SITE-
-          {String(selectedQrSiteDetails.site.site_id).padStart(3, "0")} |{" "}
+          QR Codes | {selectedQrSiteDetails.site.site_code} |{" "}
           {selectedQrSiteDetails.site.site_name}
         </h2>
 
