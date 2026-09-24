@@ -22,7 +22,7 @@ function CompanyCreatedAt({ value }) {
   );
 }
 
-function Companies() {
+function Companies({ homeCompanyId, onAccessTenant }) {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -33,6 +33,28 @@ function Companies() {
   const [copied, setCopied] = useState("");
   const [statusSavingId, setStatusSavingId] = useState(null);
   const [notice, setNotice] = useState("");
+  const [accessTarget, setAccessTarget] = useState(null);
+  const [accessing, setAccessing] = useState(false);
+
+  const enterTenant = async () => {
+    if (!accessTarget) return;
+    setAccessing(true);
+    setError("");
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/tenant-context/enter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getDashboardAuthHeaders() },
+        body: JSON.stringify({ company_id: accessTarget.id }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || data.code || "Could not access tenant");
+      onAccessTenant();
+    } catch (accessError) {
+      setError(accessError.message);
+      setAccessing(false);
+      setAccessTarget(null);
+    }
+  };
 
   const loadCompanies = async () => {
     setLoading(true);
@@ -150,11 +172,11 @@ function Companies() {
       <div className="companies-table-wrap">
         <table className="companies-table">
           <thead>
-            <tr><th>Company</th><th>Status</th><th>Timezone</th><th>Sites</th><th>Guards</th><th>Dashboard users</th><th>Created</th></tr>
+            <tr><th>Company</th><th>Status</th><th>Timezone</th><th>Sites</th><th>Guards</th><th>Dashboard users</th><th>Created</th><th>Access</th></tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan="7" className="companies-empty">Loading companies…</td></tr>}
-            {!loading && companies.length === 0 && <tr><td colSpan="7" className="companies-empty">No companies have been created.</td></tr>}
+            {loading && <tr><td colSpan="8" className="companies-empty">Loading companies…</td></tr>}
+            {!loading && companies.length === 0 && <tr><td colSpan="8" className="companies-empty">No companies have been created.</td></tr>}
             {!loading && companies.map((company) => (
               <tr key={company.id}>
                 <td><strong>{company.name}</strong><small>Tenant #{company.id}</small></td>
@@ -176,11 +198,27 @@ function Companies() {
                 <td>{company.guards_count}</td>
                 <td>{company.dashboard_users_count}</td>
                 <td><CompanyCreatedAt value={company.created_at} /></td>
+                <td>{Number(company.id) === Number(homeCompanyId)
+                  ? <span>Current environment</span>
+                  : <button type="button" onClick={() => setAccessTarget(company)}>Access Tenant</button>}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {accessTarget && (
+        <div className="companies-modal-backdrop" role="presentation">
+          <div className="companies-modal company-access-modal" role="dialog" aria-modal="true" aria-labelledby="access-title">
+            <h2 id="access-title">Access {accessTarget.name}</h2>
+            <p>You will enter this tenant using your System Owner identity. Access starts in Read-only mode.</p>
+            <footer>
+              <button type="button" disabled={accessing} onClick={() => setAccessTarget(null)}>Cancel</button>
+              <button className="companies-primary" type="button" disabled={accessing} onClick={enterTenant}>{accessing ? "Entering…" : "Continue"}</button>
+            </footer>
+          </div>
+        </div>
+      )}
 
       {showCreate && (
         <div className="companies-modal-backdrop" role="presentation">
