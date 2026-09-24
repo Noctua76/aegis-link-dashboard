@@ -5114,7 +5114,7 @@ recipient-row-modal
 )}
 {profileSite && (
   <div className="modal-overlay">
-    <div className="recipients-modal">
+    <div className="recipients-modal site-profile-modal">
       <div className="modal-header">
         <h3>Site Profile</h3>
 
@@ -5307,22 +5307,20 @@ recipient-row-modal
   </div>
 )}
 
-<div className="settings-field">
+<div className="settings-field site-shift-rules">
   <span>Shift Rules</span>
+
+  <div className="site-shift-rule-header" aria-hidden="true">
+    <span>Shift</span><span>Start</span><span>End</span><span></span>
+  </div>
 
   {(profileSite.shift_rules?.shifts ||
     createDefaultShiftRules(profileSite.required_shifts || 1).shifts
   ).map((shift, index) => (
-    <div
-      key={index}
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr auto",
-        gap: "8px",
-        marginBottom: "8px",
-      }}
-    >
+    <div key={index} className="site-shift-rule-row">
       <input
+        aria-label={`Shift ${index + 1} name`}
+        placeholder="Shift name"
         value={shift.name}
         onChange={(e) => {
           const updated = [...(profileSite.shift_rules?.shifts || [])];
@@ -5342,50 +5340,60 @@ recipient-row-modal
         }}
       />
 
-      <input
-        type="time"
-        value={shift.start}
-        onChange={(e) => {
-          const updated = [...(profileSite.shift_rules?.shifts || [])];
+      <label className="site-shift-time-field">
+        <span className="site-shift-mobile-label">Start</span>
+        <input
+          type="time"
+          aria-label={`Shift ${index + 1} start time`}
+          value={shift.start}
+          onChange={(e) => {
+            const updated = [...(profileSite.shift_rules?.shifts || [])];
 
-          updated[index] = {
-            ...updated[index],
-            start: e.target.value,
-          };
+            updated[index] = {
+              ...updated[index],
+              start: e.target.value,
+            };
 
-          setProfileSite({
-            ...profileSite,
-            shift_rules: {
-              ...profileSite.shift_rules,
-              shifts: updated,
-            },
-          });
-        }}
-      />
+            setProfileSite({
+              ...profileSite,
+              shift_rules: {
+                ...profileSite.shift_rules,
+                shifts: updated,
+              },
+            });
+          }}
+        />
+      </label>
 
-      <input
-        type="time"
-        value={shift.end}
-        onChange={(e) => {
-          const updated = [...(profileSite.shift_rules?.shifts || [])];
+      <label className="site-shift-time-field">
+        <span className="site-shift-mobile-label">End</span>
+        <input
+          type="time"
+          aria-label={`Shift ${index + 1} end time`}
+          value={shift.end}
+          onChange={(e) => {
+            const updated = [...(profileSite.shift_rules?.shifts || [])];
 
-          updated[index] = {
-            ...updated[index],
-            end: e.target.value,
-          };
+            updated[index] = {
+              ...updated[index],
+              end: e.target.value,
+            };
 
-          setProfileSite({
-            ...profileSite,
-            shift_rules: {
-              ...profileSite.shift_rules,
-              shifts: updated,
-            },
-          });
-        }}
-      />
+            setProfileSite({
+              ...profileSite,
+              shift_rules: {
+                ...profileSite.shift_rules,
+                shifts: updated,
+              },
+            });
+          }}
+        />
+      </label>
 
       <button
         type="button"
+        className="site-shift-remove"
+        aria-label={`Remove shift ${index + 1}`}
         onClick={() => {
           const updated =
             profileSite.shift_rules.shifts.filter(
