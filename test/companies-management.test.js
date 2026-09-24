@@ -24,7 +24,7 @@ test("Companies navigation is visible only to the System Owner", () => {
 });
 
 test("App renders Companies only through the authorization gate", () => {
-  assert.match(appSource, /activeMenu === "Companies" && canRenderMenu\("Companies"\) && <Companies \/>/);
+  assert.match(appSource, /activeMenu === "Companies" && canRenderMenu\("Companies"\) &&\s*<Companies homeCompanyId=/);
 });
 
 test("company onboarding form creates no sample operational records", () => {
@@ -57,7 +57,7 @@ test("System Owner can change company lifecycle status with inactive confirmatio
 test("Companies table keeps headers and values on one fixed responsive grid", () => {
   const mobileStyles = companiesStyles.slice(companiesStyles.indexOf("@media (max-width: 720px)"));
   const tableRule = companiesStyles.match(/\.companies-table\s*\{([^}]*)\}/)?.[1] || "";
-  assert.match(companiesStyles, /\.companies-table\s*\{[^}]*min-width:\s*980px;[^}]*table-layout:\s*fixed;/s);
+  assert.match(companiesStyles, /\.companies-table\s*\{[^}]*min-width:\s*1100px;[^}]*table-layout:\s*fixed;/s);
   assert.match(companiesStyles, /\.companies-table-wrap\s*\{[^}]*overflow:\s*auto;[^}]*max-height:\s*min\(62vh, 620px\);/s);
   assert.match(companiesStyles, /\.companies-table th, \.companies-table td\s*\{[^}]*vertical-align:\s*middle;/s);
   assert.match(companiesStyles, /\.companies-table thead th\s*\{[^}]*position:\s*sticky;[^}]*top:\s*0;[^}]*z-index:\s*2;/s);

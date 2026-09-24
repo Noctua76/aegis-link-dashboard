@@ -60,10 +60,11 @@ function Settings({ permissions = null }) {
   const storedCurrentUser = readDashboardSession();
 
 const isSystemOwner =
-  storedCurrentUser?.user?.role === "system_owner" ||
-  storedCurrentUser?.user?.role_code === "system_owner";
+  !storedCurrentUser?.user?.tenant_context_active &&
+  (storedCurrentUser?.user?.role === "system_owner" ||
+  storedCurrentUser?.user?.role_code === "system_owner");
 const hasPermission = (permission) =>
-  isSystemOwner || hasDashboardPermission(
+  hasDashboardPermission(
     { ...storedCurrentUser?.user, permissions: permissions || storedCurrentUser?.user?.permissions },
     permission
   );
@@ -4017,7 +4018,7 @@ setShowRecipientsModal(true)
 </div>
   )}
 
-  {hasPermission("roles.view") && (
+  {hasPermission("roles.view") && !storedCurrentUser?.user?.tenant_context_active && (
     <div className="settings-card role-management-card">
       <div className="role-management-header">
         <div>

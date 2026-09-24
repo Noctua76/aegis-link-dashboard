@@ -2004,3 +2004,17 @@
     line-height: 1.2;
   }
 }
+.tenant-context-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; padding: 15px 18px; margin-bottom: 20px; border: 1px solid #60a5fa; border-radius: 12px; background: #102039; color: #eff6ff; }
+.tenant-context-banner > div:first-child { display: grid; gap: 5px; }
+.tenant-context-banner small { color: #bfdbfe; }
+.tenant-context-banner p { width: 100%; color: #fecaca; margin: 0; }
+.tenant-context-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tenant-context-actions button, .tenant-context-modal button { border: 1px solid #60a5fa; border-radius: 8px; padding: 9px 12px; background: #1d4ed8; color: white; cursor: pointer; }
+.tenant-context-actions button:disabled, .tenant-context-modal button:disabled { opacity: .55; cursor: default; }
+.tenant-context-backdrop { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(0,0,0,.78); }
+.tenant-context-modal { box-sizing: border-box; width: min(520px,100%); padding: 24px; border: 1px solid #60a5fa; border-radius: 14px; background: #111827; color: white; }
+.tenant-context-modal p { line-height: 1.5; color: #d1d5db; }
+.tenant-context-modal label { display: grid; gap: 8px; margin: 18px 0; }
+.tenant-context-modal textarea { min-height: 95px; padding: 10px; border: 1px solid #6b7280; border-radius: 8px; background: #030712; color: white; }
+.tenant-context-modal footer { display: flex; justify-content: flex-end; gap: 10px; }
+@media (max-width: 700px) { .tenant-context-banner { align-items: stretch; } .tenant-context-actions { width: 100%; } .tenant-context-actions button { flex: 1; } }

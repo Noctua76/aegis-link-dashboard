@@ -36,7 +36,8 @@ async function request(path, init = {}) {
 
 function ShiftReports({ onUnreadCountChange, permissions = null }) {
   const current = JSON.parse(localStorage.getItem("aegis-current-user") || "{}");
-  const readOnly = current?.user?.access_mode === "read_only";
+  const readOnly = current?.user?.access_mode === "read_only" ||
+    (current?.user?.tenant_context_active && !current?.user?.tenant_context_can_mutate);
   const isSystemOwner = current?.user?.role === "system_owner" || current?.user?.role_code === "system_owner";
   const resolvedPermissions = permissions || current?.user?.permissions;
   const hasPermission = (permission) =>

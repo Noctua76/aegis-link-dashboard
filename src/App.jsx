@@ -108,6 +108,10 @@ function App() {
 const getSessionToken = () => getDashboardSessionToken(readDashboardSession());
 
 const [currentUser, setCurrentUser] = useState(null);
+const [tenantReason, setTenantReason] = useState("");
+const [showTenantElevation, setShowTenantElevation] = useState(false);
+const [tenantContextBusy, setTenantContextBusy] = useState(false);
+const [tenantContextError, setTenantContextError] = useState("");
 const [authorizationReady, setAuthorizationReady] = useState(false);
 const [authorizationLoading, setAuthorizationLoading] = useState(() =>
   Boolean(startupSession && !startupSession?.user?.must_change_password)
@@ -190,9 +194,6 @@ useEffect(() => {
   return () => { cancelled = true; };
 }, [startupSession]);
 
-const isSystemOwner =
-  currentUser?.user?.role === "system_owner" ||
-  currentUser?.user?.role_code === "system_owner";
 const hasPermission = (permission) =>
   authorizationReady && hasDashboardPermission(currentUser?.user, permission);
 const pollingCapabilities = getDashboardPollingCapabilities(
@@ -202,6 +203,36 @@ const pollingCapabilities = getDashboardPollingCapabilities(
 
 const isReadOnlyAccess =
   currentUser?.user?.access_mode === "read_only";
+const isTenantReadOnly = Boolean(currentUser?.user?.tenant_context_active &&
+  !currentUser?.user?.tenant_context_can_mutate);
+
+const transitionTenant = async (action, body = null) => {
+  setTenantContextBusy(true);
+  setTenantContextError("");
+  try {
+    const response = await fetch(`${API_BASE_URL}/admin/tenant-context/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${getDashboardSessionToken(currentUser)}` },
+      body: body ? JSON.stringify(body) : "{}",
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || data.code || "Context change failed");
+    localStorage.setItem("aegis-active-menu", action === "exit" ? "Companies" : "Dashboard");
+    setAuthorizationReady(false);
+    setCurrentUser(null);
+    window.location.reload();
+  } catch (error) {
+    setTenantContextError(error.message);
+    setTenantContextBusy(false);
+  }
+};
+
+const tenantEntered = () => {
+  localStorage.setItem("aegis-active-menu", "Dashboard");
+  setAuthorizationReady(false);
+  setCurrentUser(null);
+  window.location.reload();
+};
 
 const readOnlyExpiresAt =
   currentUser?.user?.access_expires_at || null;
@@ -221,6 +252,8 @@ const [readOnlyNotice, setReadOnlyNotice] =
   const allowedMutationPaths = new Set([
     "/admin/heartbeat",
     "/admin/logout",
+    "/admin/tenant-context/elevate",
+    "/admin/tenant-context/exit",
   ]);
 
   window.fetch = async (input, init = {}) => {
@@ -244,12 +277,12 @@ const [readOnlyNotice, setReadOnlyNotice] =
     ).pathname;
 
     if (
-      isReadOnlyAccess &&
+      (isReadOnlyAccess || isTenantReadOnly) &&
       !safeMethods.has(requestMethod) &&
       !allowedMutationPaths.has(requestPath)
     ) {
       setReadOnlyNotice(
-        "Read-only preview: changes are disabled."
+        isTenantReadOnly ? "Tenant access is read-only." : "Read-only preview: changes are disabled."
       );
 
       window.setTimeout(() => {
@@ -259,9 +292,9 @@ const [readOnlyNotice, setReadOnlyNotice] =
       return new Response(
         JSON.stringify({
           status: "error",
-          code: "READ_ONLY_ACCESS",
+          code: isTenantReadOnly ? "TENANT_CONTEXT_READ_ONLY" : "READ_ONLY_ACCESS",
           message:
-            "This temporary account has read-only access",
+            isTenantReadOnly ? "Tenant access is read-only" : "This temporary account has read-only access",
         }),
         {
           status: 403,
@@ -358,7 +391,7 @@ const [readOnlyNotice, setReadOnlyNotice] =
   return () => {
     window.fetch = originalFetch;
   };
-}, [isReadOnlyAccess]);
+}, [isReadOnlyAccess, isTenantReadOnly]);
 
 useEffect(() => {
   if (
@@ -844,7 +877,19 @@ const response = await fetch(
         }
       );
 
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        const summary = data.tenant_context;
+        if (summary && (summary.tenant_context_mode !== currentUser?.user?.tenant_context_mode ||
+            summary.tenant_context_can_mutate !== currentUser?.user?.tenant_context_can_mutate)) {
+          const stored = readDashboardSession();
+          if (stored?.user) {
+            const updated = { ...stored, user: { ...stored.user, ...summary } };
+            localStorage.setItem("aegis-current-user", JSON.stringify(updated));
+            setCurrentUser(updated);
+          }
+        }
+      } else {
         const data = await response.json().catch(() => ({}));
 
         console.error(
@@ -1099,7 +1144,7 @@ useEffect(() => {
       const sessionToken = getSessionToken();
       if (!sessionToken) return;
       const response = await fetch(
-        `${API_BASE_URL}/system/status/${isSystemOwner ? "global" : "tenant"}`,
+        `${API_BASE_URL}/system/status/tenant`,
         {
           cache: "no-store",
           headers: {
@@ -2155,6 +2200,38 @@ const renderIncidentLocation = (incident) => {
   </div>
 )}
 
+{currentUser?.user?.tenant_context_active && (
+  <section className="tenant-context-banner" role="status">
+    <div>
+      <strong>SYSTEM OWNER · VIEWING {currentUser.user.tenant_context_company_name} · {currentUser.user.tenant_context_can_mutate ? "ADMINISTRATIVE ACCESS" : "READ ONLY"}</strong>
+      {currentUser.user.tenant_context_can_mutate && currentUser.user.tenant_context_elevated_until &&
+        <small>Access expires: {formatDateTime(currentUser.user.tenant_context_elevated_until)}</small>}
+      {currentUser.user.tenant_context_company_status === "inactive" && <small>COMPANY INACTIVE</small>}
+    </div>
+    <div className="tenant-context-actions">
+      {isTenantReadOnly && currentUser.user.tenant_context_company_status !== "inactive" &&
+        <button type="button" onClick={() => setShowTenantElevation(true)}>Enable Administrative Access</button>}
+      <button type="button" disabled={tenantContextBusy} onClick={() => transitionTenant("exit")}>Exit Company Context</button>
+    </div>
+    {tenantContextError && <p role="alert">{tenantContextError}</p>}
+  </section>
+)}
+
+{showTenantElevation && (
+  <div className="tenant-context-backdrop">
+    <form className="tenant-context-modal" onSubmit={(event) => {
+      event.preventDefault();
+      if (tenantReason.trim()) transitionTenant("elevate", { reason: tenantReason.trim() });
+    }}>
+      <h2>Enable Administrative Access</h2>
+      <p>Changes will be recorded as actions performed by your System Owner account. Administrative access expires automatically after 30 minutes.</p>
+      <label>Reason *<textarea required maxLength={1000} value={tenantReason} onChange={(event) => setTenantReason(event.target.value)} /></label>
+      {tenantContextError && <p role="alert">{tenantContextError}</p>}
+      <footer><button type="button" onClick={() => setShowTenantElevation(false)}>Cancel</button><button type="submit" disabled={tenantContextBusy || !tenantReason.trim()}>Confirm</button></footer>
+    </form>
+  </div>
+)}
+
 {readOnlyNotice && (
   <div
     className="read-only-access-notice"
@@ -2932,7 +3009,8 @@ const renderIncidentLocation = (incident) => {
 </>
 )}
 
-        {activeMenu === "Companies" && canRenderMenu("Companies") && <Companies />}
+        {activeMenu === "Companies" && canRenderMenu("Companies") &&
+          <Companies homeCompanyId={currentUser.user.actor_company_id || currentUser.user.company_id} onAccessTenant={tenantEntered} />}
         {activeMenu === "Guards" && canRenderMenu("Guards") && <Guards permissions={currentUser.user.permissions} />}
         {activeMenu==="Admin Audit Logs" && canRenderMenu("Admin Audit Logs") &&
 <AdminAuditLogs permissions={currentUser.user.permissions}/>
@@ -2998,39 +3076,6 @@ const renderIncidentLocation = (incident) => {
       </div>
     </section>
 
-    {systemStatus?.scope === "global" ? (
-      <section className="system-status-section">
-        <div className="system-status-section-title">
-          <div>
-            <h2>Tenant Operations</h2>
-            <p>System Owner view across all companies, kept separate by tenant.</p>
-          </div>
-          <span className="system-status-guard-count">
-            {systemStatus?.tenants?.length || 0} companies
-          </span>
-        </div>
-        <div className="system-tenant-list">
-          {(systemStatus?.tenants || []).map((tenant) => (
-            <article className="system-tenant-group" key={tenant.company_id}>
-              <div className="system-status-section-title">
-                <div>
-                  <h3>{tenant.company_name}</h3>
-                  <p>Account: {tenant.company_status || "unknown"}</p>
-                </div>
-                <span className={`system-tenant-overall status-${tenant.overall_status}`}>
-                  {STATUS_LABELS[tenant.overall_status] || tenant.overall_status}
-                </span>
-              </div>
-              <div className="system-status-grid">
-                {(tenant.services || []).map((item) => (
-                  <SystemStatusCard key={item.name} item={{ ...item, scope: "tenant" }} />
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    ) : (
       <section className="system-status-section">
         <div className="system-status-section-title">
           <div>
@@ -3047,7 +3092,7 @@ const renderIncidentLocation = (incident) => {
           ))}
         </div>
       </section>
-    )}
+
 
     <section className="system-status-ai-note">
       <div>
