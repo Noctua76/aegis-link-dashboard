@@ -1413,6 +1413,28 @@ const updateSite = async () => {
   }
 };
 
+const openPrivateSop = async (download = false) => {
+  if (!profileSite?.id) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/settings/sites/${profileSite.id}/sop/file`, {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Unable to open SOP");
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement("a");
+    link.href = url;
+    if (download) link.download = `site-${profileSite.id}-sop.pdf`;
+    else link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch (error) {
+    alert(error.message || "Unable to open SOP");
+  }
+};
+
 const uploadSopFile = async () => {
   if (!profileSite || !sopFile) return;
 
@@ -1454,12 +1476,16 @@ const uploadSopFile = async () => {
 
     setProfileSite({
       ...profileSite,
-      sop_file_url: data.sop_file_url,
+      sop_file_url: null,
+      sop_storage_path: data.sop_available ? "available" : null,
       sop_updated_at: data.site?.sop_updated_at,
     });
 
     setSopFile(null);
     await loadSites();
+    if (data.legacy_public_copy_pending) {
+      alert("The private SOP is available, but an older public copy still requires removal.");
+    }
   } catch (err) {
     console.error("SOP upload error", err);
     alert(err.message || "SOP upload failed");
@@ -2137,7 +2163,7 @@ const printSiteProfile = (site) => {
 
 <p>
   <strong>SOP File URL:</strong><br/>
-  <span class="notes">${formatValue(site.sop_file_url)}</span>
+  <span class="notes">${site.sop_storage_path ? "Private file available" : "No private file uploaded"}</span>
 </p>
 
         <div class="footer">
@@ -5626,28 +5652,26 @@ recipient-row-modal
   <div className="sop-current-file">
     <span>Current SOP File</span>
 
-    {profileSite.sop_file_url ? (
+    {profileSite.sop_storage_path ? (
       <div className="sop-actions-row">
         <button
           type="button"
           className="secondary-button"
-          onClick={() => window.open(profileSite.sop_file_url, "_blank")}
+          onClick={() => openPrivateSop(false)}
         >
           View SOP
         </button>
 
-        <a
+        <button
+          type="button"
           className="secondary-button"
-          href={profileSite.sop_file_url}
-          target="_blank"
-          rel="noreferrer"
-          download
+          onClick={() => openPrivateSop(true)}
         >
           Download PDF
-        </a>
+        </button>
       </div>
     ) : (
-      <small>No SOP PDF uploaded</small>
+      <small>No private SOP PDF uploaded</small>
     )}
   </div>
 
