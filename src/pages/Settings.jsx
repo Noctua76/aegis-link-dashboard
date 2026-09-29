@@ -1483,6 +1483,9 @@ const uploadSopFile = async () => {
 
     setSopFile(null);
     await loadSites();
+    if (data.legacy_public_copy_pending) {
+      alert("The private SOP is available, but an older public copy still requires removal.");
+    }
   } catch (err) {
     console.error("SOP upload error", err);
     alert(err.message || "SOP upload failed");
