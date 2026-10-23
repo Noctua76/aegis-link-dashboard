@@ -14,6 +14,7 @@ import Settings from "./pages/Settings";
 import AdminAuditLogs from "./pages/AdminAuditLogs";
 import Analytics from "./pages/Analytics";
 import Companies from "./pages/Companies";
+import DemoGuidance from "./components/DemoGuidance";
 import { formatDateTime } from "./utils/dateTime";
 import { formatHealthTime, hasCurrentHealthError } from "./utils/systemStatus";
 import { API_BASE_URL } from "./config/api";
@@ -2198,6 +2199,14 @@ const renderIncidentLocation = (incident) => {
       </small>
     )}
   </div>
+)}
+
+{isReadOnlyAccess && (
+  <DemoGuidance
+    preview
+    activeMenu={activeMenu}
+    sessionIdentity={readOnlyExpiresAt}
+  />
 )}
 
 {currentUser?.user?.tenant_context_active && (
