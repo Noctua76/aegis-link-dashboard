@@ -143,3 +143,10 @@ export function resolveDemoLanguage(value) {
 export function isDashboardPreviewUser(user) {
   return user?.access_mode === "read_only";
 }
+
+// Only the desktop Greek Demo Guidance heading display uses this form.
+export function desktopDemoHeading(title, language) {
+  return language === "gr" && typeof title === "string"
+    ? title.normalize("NFD").replace(/\u0301/g, "").toUpperCase().normalize("NFC")
+    : title;
+}

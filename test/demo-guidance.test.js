@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   dashboardDemoGuides,
+  desktopDemoHeading,
   dashboardMenuGuideIds,
   isDashboardPreviewUser,
   resolveDemoLanguage,
@@ -77,4 +78,25 @@ test("guidance remains presentation-only and does not alter Dashboard authorizat
   assert.doesNotMatch(componentSource, /fetch\s*\(/);
   assert.doesNotMatch(componentSource, /localStorage/);
   assert.match(appSource, /const isReadOnlyAccess =\s*currentUser\?\.user\?\.access_mode === "read_only"/);
+});
+
+test("Greek desktop headings are deterministic and preserve original mobile/English text", () => {
+  assert.equal(desktopDemoHeading(undefined, "gr"), undefined);
+  const examples = [
+    ["Τι βλέπετε", "ΤΙ ΒΛΕΠΕΤΕ"],
+    ["Πώς λειτουργεί", "ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ"],
+    ["Επιχειρησιακή αξία", "ΕΠΙΧΕΙΡΗΣΙΑΚΗ ΑΞΙΑ"],
+    ["Λειτουργία επίδειξης", "ΛΕΙΤΟΥΡΓΙΑ ΕΠΙΔΕΙΞΗΣ"],
+  ];
+  for (const [original, expected] of examples) {
+    assert.equal(desktopDemoHeading(original, "gr"), expected);
+    assert.equal(desktopDemoHeading(original.normalize("NFD"), "gr"), expected);
+    assert.equal(desktopDemoHeading(original, "en"), original);
+  }
+  assert.equal(desktopDemoHeading("What you're seeing", "en"), "What you're seeing");
+  assert.equal(desktopDemoHeading("How it works", "en"), "How it works");
+  assert.equal(desktopDemoHeading("Operational value", "en"), "Operational value");
+  assert.match(cssSource, /@media \(min-width: 769px\)\s*\{\s*\.demo-heading-mobile \{ display: none; \}/);
+  assert.match(cssSource, /\.demo-heading-desktop \{ display: none; \}/);
+  assert.match(cssSource, /\.demo-heading-desktop \{ display: inline; text-transform: none; \}/);
 });
