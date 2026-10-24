@@ -179,3 +179,10 @@
   .demo-guidance-welcome { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); padding: 20px 17px max(20px, env(safe-area-inset-bottom)); border-radius: 20px; }
   .demo-guidance-close span { display: none; }
 }
+
+/* Keep the existing mobile heading untouched; desktop Greek is explicit text. */
+.demo-heading-desktop { display: none; }
+@media (min-width: 769px) {
+  .demo-heading-mobile { display: none; }
+  .demo-heading-desktop { display: inline; text-transform: none; }
+}

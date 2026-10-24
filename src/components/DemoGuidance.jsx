@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   dashboardDemoGuides,
+  desktopDemoHeading,
   dashboardMenuGuideIds,
   resolveDemoLanguage,
 } from "../demoGuides/dashboard";
@@ -90,9 +91,14 @@ function LanguageSwitch({ language, onChange }) {
   );
 }
 
-function BulletSection({ title, items }) {
+function GuideHeading({ title, language }) {
+  if (language !== "gr") return <h3>{title}</h3>;
+  return <h3><span className="demo-heading-mobile">{title}</span><span className="demo-heading-desktop">{desktopDemoHeading(title, language)}</span></h3>;
+}
+
+function BulletSection({ title, items, language }) {
   if (!items?.length) return null;
-  return <section><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></section>;
+  return <section><GuideHeading title={title} language={language} /><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></section>;
 }
 
 function DialogFrame({ open, onClose, returnFocusRef, labelledBy, className = "", children }) {
@@ -149,11 +155,11 @@ export default function DemoGuidance({ preview, activeMenu, sessionIdentity }) {
           <p className="demo-guidance-eyebrow">AEGIS LINK · DEMO GUIDE</p>
           <h2 id="demo-guide-title">{guide?.title?.[language]}</h2>
           <p className="demo-guidance-intro">{guide?.intro?.[language]}</p>
-          <BulletSection title={copy.seeing} items={guide?.seeing?.[language]} />
-          <BulletSection title={copy.works} items={guide?.howItWorks?.[language]} />
-          <BulletSection title={copy.value} items={guide?.value?.[language]} />
+          <BulletSection language={language} title={copy.seeing} items={guide?.seeing?.[language]} />
+          <BulletSection language={language} title={copy.works} items={guide?.howItWorks?.[language]} />
+          <BulletSection language={language} title={copy.value} items={guide?.value?.[language]} />
           <section className="demo-guidance-limitations">
-            <h3>{guide?.demoLimitations?.[language]?.title}</h3>
+            <GuideHeading title={guide?.demoLimitations?.[language]?.title} language={language} />
             <p>{guide?.demoLimitations?.[language]?.body}</p>
           </section>
         </div>
