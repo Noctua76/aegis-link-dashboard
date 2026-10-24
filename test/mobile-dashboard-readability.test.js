@@ -23,11 +23,18 @@ const analyticsCss = fs.readFileSync(
 test("Admin Audit Logs uses page-scoped mobile title spacing without changing its copy", () => {
   assert.match(auditSource, /<h1 className="admin-audit-title">\s*Admin Audit Logs\s*<\/h1>/);
   assert.match(auditSource, /<p className="admin-audit-subtitle">/);
-  assert.match(appCss, /\.admin-audit-title\s*\{[^}]*font-size:\s*42px/s);
-  assert.match(
-    appCss,
-    /@media \(max-width: 768px\)[\s\S]*?\.admin-audit-title\s*\{[^}]*font-size:\s*34px;[^}]*line-height:\s*1\.12;[^}]*margin-bottom:\s*12px/s
-  );
+  const auditStyles = appCss.slice(appCss.indexOf(".admin-audit-page"));
+  const desktopTitleRule = auditStyles.match(/\.admin-audit-title\s*\{([^}]*)\}/)?.[1] || "";
+  const mobileTitleRule = auditStyles.match(
+    /@media \(max-width: 768px\)[\s\S]*?\.admin-audit-title\s*\{([^}]*)\}/
+  )?.[1] || "";
+
+  assert.match(desktopTitleRule, /font-size:\s*42px/);
+  assert.match(desktopTitleRule, /margin-bottom:\s*8px/);
+  assert.doesNotMatch(desktopTitleRule, /margin:\s*0 0 8px/);
+  assert.match(mobileTitleRule, /font-size:\s*34px/);
+  assert.match(mobileTitleRule, /line-height:\s*1\.12/);
+  assert.match(mobileTitleRule, /margin:\s*0 0 12px/);
   assert.match(
     appCss,
     /@media \(max-width: 768px\)[\s\S]*?\.admin-audit-subtitle\s*\{[^}]*line-height:\s*1\.5/s

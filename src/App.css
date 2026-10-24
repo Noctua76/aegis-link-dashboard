@@ -1404,8 +1404,8 @@
 }
 
 .admin-audit-title {
-  margin: 0 0 8px;
   font-size: 42px;
+  margin-bottom: 8px;
 }
 
 .admin-audit-subtitle {
@@ -1431,7 +1431,7 @@
     font-size: 34px;
     line-height: 1.12;
     letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    margin: 0 0 12px;
   }
 
   .admin-audit-subtitle {
