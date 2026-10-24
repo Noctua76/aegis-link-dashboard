@@ -72,6 +72,15 @@
   text-transform: uppercase;
 }
 
+.analytics-mobile-label {
+  display: none;
+}
+
+.analytics-metric-cell > .badge {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .badge {
   display: inline-flex;
   justify-content: center;
@@ -114,5 +123,38 @@
 
   .analytics-row-head {
     display: none;
+  }
+
+  .analytics-row:not(.analytics-row-head) {
+    gap: 0;
+    padding: 4px 14px;
+  }
+
+  .analytics-metric-cell {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .analytics-metric-cell:last-child {
+    border-bottom: 0;
+  }
+
+  .analytics-mobile-label {
+    display: inline;
+    flex: 0 0 auto;
+    color: #9ca3af;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .analytics-metric-cell > .badge {
+    width: auto;
   }
 }
