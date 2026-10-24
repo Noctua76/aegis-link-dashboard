@@ -1403,6 +1403,16 @@
   box-sizing: border-box;
 }
 
+.admin-audit-title {
+  margin: 0 0 8px;
+  font-size: 42px;
+}
+
+.admin-audit-subtitle {
+  margin: 0 0 24px;
+  color: #b8c2cc;
+}
+
 .audit-toolbar {
   display: flex;
   min-width: 0;
@@ -1417,6 +1427,18 @@
 }
 
 @media (max-width: 768px) {
+  .admin-audit-title {
+    font-size: 34px;
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .admin-audit-subtitle {
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
   .audit-toolbar {
     overflow-x: auto;
     flex-wrap: nowrap;

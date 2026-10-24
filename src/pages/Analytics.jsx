@@ -104,34 +104,50 @@ function Analytics() {
           </div>
 
           <div className="analytics-row">
-            <span>
-  {analytics?.company?.total_sites ?? "No Data"} Sites
-</span>
-
-            <span>{analytics?.alerts?.count ?? "No Data"}</span>
-
-            <span>
-              {analytics?.readiness?.assigned_guards ?? "No Data"}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Company</span>
+              <span>{analytics?.company?.total_sites ?? "No Data"} Sites</span>
             </span>
 
-            <span>
-              {analytics?.readiness?.required_shifts ?? "No Data"}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Alerts</span>
+              <span>{analytics?.alerts?.count ?? "No Data"}</span>
             </span>
 
-            <span>
-              {analytics?.readiness?.ratio ?? "No Data"}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Guards</span>
+              <span>{analytics?.readiness?.assigned_guards ?? "No Data"}</span>
             </span>
 
-            <span className={`badge ${riskLevel.toLowerCase().replace(" ", "-")}`}>
-              {riskLevel}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Shifts</span>
+              <span>{analytics?.readiness?.required_shifts ?? "No Data"}</span>
             </span>
 
-            <span className={`badge ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
-              {readinessLevel}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Ratio</span>
+              <span>{analytics?.readiness?.ratio ?? "No Data"}</span>
             </span>
 
-            <span className={`badge ${fatigueLevel.toLowerCase().replace(" ", "-")}`}>
-              {fatigueLevel}
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Risk</span>
+              <span className={`badge ${riskLevel.toLowerCase().replace(" ", "-")}`}>
+                {riskLevel}
+              </span>
+            </span>
+
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Readiness</span>
+              <span className={`badge ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
+                {readinessLevel}
+              </span>
+            </span>
+
+            <span className="analytics-metric-cell">
+              <span className="analytics-mobile-label">Fatigue</span>
+              <span className={`badge ${fatigueLevel.toLowerCase().replace(" ", "-")}`}>
+                {fatigueLevel}
+              </span>
             </span>
           </div>
         </div>

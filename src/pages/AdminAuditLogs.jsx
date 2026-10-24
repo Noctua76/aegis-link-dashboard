@@ -250,11 +250,11 @@ function AdminAuditLogs({ permissions = [] }) {
 
   return (
         <section className="admin-audit-page">
-      <h1 style={{ fontSize: "42px", marginBottom: "8px" }}>
+      <h1 className="admin-audit-title">
         Admin Audit Logs
       </h1>
 
-      <p style={{ marginBottom: "24px", color: "#b8c2cc" }}>
+      <p className="admin-audit-subtitle">
         View and monitor Dashboard and Preview access sessions.
       </p>
 
