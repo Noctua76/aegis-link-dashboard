@@ -46,6 +46,22 @@ function formatDuration(value) {
   return parts.join(" ");
 }
 
+function getSurfaceDetails(surface) {
+  return surface === "guard_web_app"
+    ? { label: "GUARD WEB APP", tone: "guard" }
+    : { label: "DASHBOARD", tone: "dashboard" };
+}
+
+function getAccessLabel(session) {
+  if (session.surface === "guard_web_app") {
+    return "TEMPORARY GUARD PREVIEW";
+  }
+
+  return session.is_temporary
+    ? "TEMPORARY PREVIEW"
+    : "STANDARD";
+}
+
 function getSessionEndDetails(
   session,
   activeNow
@@ -102,6 +118,24 @@ function getSessionEndDetails(
               )}`
             : null,
         tone: "revoked",
+      };
+
+    case "auto_closed":
+      return {
+        label: "Closed automatically",
+        detail: session.logout_time
+          ? `Ended ${formatDate(session.logout_time)}`
+          : null,
+        tone: "inactive",
+      };
+
+    case "stale":
+      return {
+        label: "No recent heartbeat",
+        detail: session.last_seen
+          ? `Last seen ${formatDate(session.last_seen)}`
+          : null,
+        tone: "inactive",
       };
 
     default:
@@ -221,7 +255,7 @@ function AdminAuditLogs({ permissions = [] }) {
       </h1>
 
       <p style={{ marginBottom: "24px", color: "#b8c2cc" }}>
-        View and monitor admin user sessions and activity.
+        View and monitor Dashboard and Preview access sessions.
       </p>
 
       <div className="audit-toolbar">
@@ -339,6 +373,7 @@ function AdminAuditLogs({ permissions = [] }) {
       <tr>
         <th>Date / Login</th>
         <th>User</th>
+        <th>Surface</th>
         <th>Role</th>
         <th>Access</th>
         <th>Logout</th>
@@ -352,10 +387,10 @@ function AdminAuditLogs({ permissions = [] }) {
       {filteredSessions.length === 0 ? (
         <tr>
           <td
-            colSpan={8}
+            colSpan={9}
             className="audit-empty-state"
           >
-            No admin sessions found for the
+            No access sessions found for the
             selected period.
           </td>
         </tr>
@@ -369,10 +404,12 @@ function AdminAuditLogs({ permissions = [] }) {
               session,
               activeNow
             );
+          const surfaceDetails =
+            getSurfaceDetails(session.surface);
 
           return (
             <tr
-              key={session.id}
+              key={session.session_key || `${session.surface || "dashboard"}:${session.id}`}
               className={
                 session.is_temporary
                   ? "audit-row-temporary"
@@ -385,6 +422,12 @@ function AdminAuditLogs({ permissions = [] }) {
 
               <td>{session.username}</td>
 
+              <td>
+                <span className={`audit-surface-badge ${surfaceDetails.tone}`}>
+                  {surfaceDetails.label}
+                </span>
+              </td>
+
               <td>{session.role || "-"}</td>
 
               <td>
@@ -395,9 +438,7 @@ function AdminAuditLogs({ permissions = [] }) {
                       : "standard"
                   }`}
                 >
-                  {session.is_temporary
-                    ? "TEMPORARY PREVIEW"
-                    : "STANDARD"}
+                  {getAccessLabel(session)}
                 </span>
 
                 {session.is_temporary &&

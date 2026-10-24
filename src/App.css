@@ -1491,6 +1491,7 @@
 }
 
 .audit-access-badge,
+.audit-surface-badge,
 .audit-status-badge,
 .audit-session-end {
   display: inline-flex;
@@ -1507,6 +1508,22 @@
 
 .audit-access-badge {
   padding: 5px 8px;
+}
+
+.audit-surface-badge {
+  padding: 5px 8px;
+}
+
+.audit-surface-badge.dashboard {
+  border-color: rgba(96,165,250,0.38);
+  background: rgba(37,99,235,0.12);
+  color: #bfdbfe;
+}
+
+.audit-surface-badge.guard {
+  border-color: rgba(45,212,191,0.38);
+  background: rgba(13,148,136,0.12);
+  color: #99f6e4;
 }
 
 .audit-access-badge.standard {

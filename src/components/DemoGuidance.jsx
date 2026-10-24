@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   dashboardDemoGuides,
-  desktopDemoHeading,
+  displayDemoHeading,
   dashboardMenuGuideIds,
   resolveDemoLanguage,
 } from "../demoGuides/dashboard";
@@ -92,8 +92,7 @@ function LanguageSwitch({ language, onChange }) {
 }
 
 function GuideHeading({ title, language }) {
-  if (language !== "gr") return <h3>{title}</h3>;
-  return <h3><span className="demo-heading-mobile">{title}</span><span className="demo-heading-desktop">{desktopDemoHeading(title, language)}</span></h3>;
+  return <h3>{displayDemoHeading(title, language)}</h3>;
 }
 
 function BulletSection({ title, items, language }) {

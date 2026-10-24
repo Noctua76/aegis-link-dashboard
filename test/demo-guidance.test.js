@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   dashboardDemoGuides,
-  desktopDemoHeading,
+  displayDemoHeading,
   dashboardMenuGuideIds,
   isDashboardPreviewUser,
   resolveDemoLanguage,
@@ -80,8 +80,8 @@ test("guidance remains presentation-only and does not alter Dashboard authorizat
   assert.match(appSource, /const isReadOnlyAccess =\s*currentUser\?\.user\?\.access_mode === "read_only"/);
 });
 
-test("Greek desktop headings are deterministic and preserve original mobile/English text", () => {
-  assert.equal(desktopDemoHeading(undefined, "gr"), undefined);
+test("Greek headings are deterministic across viewports and preserve English text", () => {
+  assert.equal(displayDemoHeading(undefined, "gr"), undefined);
   const examples = [
     ["Τι βλέπετε", "ΤΙ ΒΛΕΠΕΤΕ"],
     ["Πώς λειτουργεί", "ΠΩΣ ΛΕΙΤΟΥΡΓΕΙ"],
@@ -89,14 +89,17 @@ test("Greek desktop headings are deterministic and preserve original mobile/Engl
     ["Λειτουργία επίδειξης", "ΛΕΙΤΟΥΡΓΙΑ ΕΠΙΔΕΙΞΗΣ"],
   ];
   for (const [original, expected] of examples) {
-    assert.equal(desktopDemoHeading(original, "gr"), expected);
-    assert.equal(desktopDemoHeading(original.normalize("NFD"), "gr"), expected);
-    assert.equal(desktopDemoHeading(original, "en"), original);
+    assert.equal(displayDemoHeading(original, "gr"), expected);
+    assert.equal(displayDemoHeading(original.normalize("NFD"), "gr"), expected);
+    assert.equal(displayDemoHeading(original, "en"), original);
   }
-  assert.equal(desktopDemoHeading("What you're seeing", "en"), "What you're seeing");
-  assert.equal(desktopDemoHeading("How it works", "en"), "How it works");
-  assert.equal(desktopDemoHeading("Operational value", "en"), "Operational value");
-  assert.match(cssSource, /@media \(min-width: 769px\)\s*\{\s*\.demo-heading-mobile \{ display: none; \}/);
-  assert.match(cssSource, /\.demo-heading-desktop \{ display: none; \}/);
-  assert.match(cssSource, /\.demo-heading-desktop \{ display: inline; text-transform: none; \}/);
+  assert.equal(displayDemoHeading("What you're seeing", "en"), "What you're seeing");
+  assert.equal(displayDemoHeading("How it works", "en"), "How it works");
+  assert.equal(displayDemoHeading("Operational value", "en"), "Operational value");
+  assert.doesNotMatch(componentSource, /demo-heading-(mobile|desktop)/);
+  assert.doesNotMatch(cssSource, /demo-heading-(mobile|desktop)/);
+  assert.match(componentSource, /<BulletSection language=\{language\} title=\{copy\.seeing\}/);
+  assert.match(componentSource, /<GuideHeading title=\{title\} language=\{language\}/);
+  assert.match(componentSource, /<h2 id="demo-guide-title">\{guide\?\.title\?\.\[language\]\}<\/h2>/);
+  assert.match(componentSource, /<p className="demo-guidance-intro">\{guide\?\.intro\?\.\[language\]\}<\/p>/);
 });
