@@ -2,7 +2,7 @@ import Patrols from "./pages/Patrols";
 import ShiftReports from "./pages/ShiftReports";
 import { APP_VERSION, APP_BUILD } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import SiteCard from "./components/SiteCard";
 import GuardStatus from "./components/GuardStatus";
@@ -574,6 +574,8 @@ localStorage.setItem(
   JSON.stringify(loginData)
 );
 
+localStorage.setItem("aegis-active-menu", "Dashboard");
+setActiveMenu("Dashboard");
 setCurrentUser(loginData);
 setAuthorizationReady(true);
   } catch (error) {
@@ -706,6 +708,8 @@ const handlePasswordChange = async (event) => {
       JSON.stringify(loginData)
     );
 
+    localStorage.setItem("aegis-active-menu", "Dashboard");
+    setActiveMenu("Dashboard");
     setCurrentUser(loginData);
     setAuthorizationReady(true);
 
@@ -776,6 +780,8 @@ const handleLogout = async () => {
     console.error("Logout tracking failed", err);
   } finally {
     localStorage.removeItem("aegis-current-user");
+    localStorage.setItem("aegis-active-menu", "Dashboard");
+    setActiveMenu("Dashboard");
     setCurrentUser(null);
     setAuthorizationReady(false);
   }
@@ -783,6 +789,7 @@ const handleLogout = async () => {
   const [activeMenu, setActiveMenu] = useState(() => {
   return localStorage.getItem("aegis-active-menu") || "Dashboard";
 });
+const sidebarMenuRef = useRef(null);
 const [liveActiveGuards, setLiveActiveGuards] = useState([]);
   const [unreadShiftReports, setUnreadShiftReports] = useState(0);
   const [incidentFilter, setIncidentFilter] = useState("All");
@@ -797,6 +804,25 @@ useEffect(() => {
   if (!authorizationReady || !currentUser || menuItems.length === 0) return;
   if (!menuItems.includes(activeMenu)) setActiveMenu(menuItems[0]);
 }, [authorizationReady, currentUser, activeMenu, menuItems.join("|")]);
+
+useEffect(() => {
+  if (
+    !authorizationReady ||
+    !currentUser ||
+    !activeMenu ||
+    !window.matchMedia("(max-width: 768px)").matches
+  ) return;
+
+  const menu = sidebarMenuRef.current;
+  const activeItem = menu?.querySelector(".sidebar-item.active");
+  if (!menu || !activeItem) return;
+
+  const menuRect = menu.getBoundingClientRect();
+  const activeRect = activeItem.getBoundingClientRect();
+  const targetLeft = menu.scrollLeft + activeRect.left - menuRect.left - menu.clientLeft -
+    (menu.clientWidth - activeRect.width) / 2;
+  menu.scrollTo({ left: Math.max(0, targetLeft), behavior: "auto" });
+}, [activeMenu, authorizationReady, currentUser]);
 
   useEffect(() => {
     if (!currentUser || !pollingCapabilities.shiftReports) return undefined;
@@ -2155,7 +2181,7 @@ const renderIncidentLocation = (incident) => {
   </div>
 
         <nav>
-  <ul className="sidebar-menu">
+  <ul ref={sidebarMenuRef} className="sidebar-menu">
     {menuItems.map((item) => (
       <li
         key={item}
