@@ -47,6 +47,25 @@ jobs:
         with:
           path: ./dist
 
+      - name: Wait for uploaded Pages artifact metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for AegisAttempt in $(seq 1 15); do
+            AegisArtifactCount=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length')
+            if [ "$AegisArtifactCount" = 1 ]; then
+              echo "Pages artifact metadata verified"
+              exit 0
+            fi
+            if [ "$AegisArtifactCount" -gt 1 ]; then
+              echo "AEGIS_STOP: MULTIPLE_PAGES_ARTIFACTS"
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "AEGIS_STOP: PAGES_ARTIFACT_METADATA_DEADLINE"
+          exit 1
+
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
