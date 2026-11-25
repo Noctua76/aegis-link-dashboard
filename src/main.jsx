@@ -9,7 +9,7 @@ if ("serviceWorker" in navigator) {
       .register("./service-worker.js")
       .then((registration) => registration.update())
       .catch((error) => {
-        console.error("Dashboard service worker registration failed:", error);
+        console.error("Dashboard service worker registration failed:", {code: /^[0-9A-Z]{5}$/.test(error?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(error?.code) ? error.code : 'INTERNAL'});
       });
   });
 }

@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "test": "node --test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:security-browser": "node --test security-tests/*.browser.mjs"
   },
   "dependencies": {
     "qrcode": "^1.5.4",

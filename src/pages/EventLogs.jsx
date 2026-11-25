@@ -61,13 +61,7 @@ function calculateDelayFromTimes(scheduledStart, loginTime) {
 
   const diffMinutes = Math.floor((login - start) / 60000);
 
-  console.log("SHIFT DELAY DEBUG", {
-  scheduledStart,
-  loginTime,
-  start,
-  login,
-  diffMinutes,
-});
+  console.log("SHIFT DELAY DEBUG");
 
   return formatMinutesDelay(diffMinutes);
 }
@@ -218,7 +212,7 @@ loginDelayMinutes: shift.login_delay_minutes,
 
       setLogs(mappedLogs);
     } catch (err) {
-      console.error("Event logs load error:", err);
+      console.error("Event logs load error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 

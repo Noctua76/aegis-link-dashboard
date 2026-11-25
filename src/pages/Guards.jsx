@@ -71,7 +71,7 @@ export default function Guards({ permissions = [] }) {
     setActiveGuards(activeData.guards || []);
     setSystemStatus(statusData);
   } catch (err) {
-    console.error("Failed loading guards data:", err);
+    console.error("Failed loading guards data:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 

@@ -83,7 +83,7 @@ const [randomScheduleMessage, setRandomScheduleMessage] = useState("");
         setPatrolSites(data.sites || []);
       }
     } catch (err) {
-      console.error("Failed loading patrol sites:", err);
+      console.error("Failed loading patrol sites:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ const [randomScheduleMessage, setRandomScheduleMessage] = useState("");
         setPatrolHistory(data.history || []);
       }
     } catch (err) {
-      console.error("Failed loading patrol history:", err);
+      console.error("Failed loading patrol history:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     } finally {
       setHistoryLoading(false);
     }
@@ -135,7 +135,7 @@ const [randomScheduleMessage, setRandomScheduleMessage] = useState("");
       setSelectedSiteDetails(data);
     }
   } catch (err) {
-    console.error("Failed loading patrol site details:", err);
+    console.error("Failed loading patrol site details:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   } finally {
     setDetailsLoading(false);
   }
@@ -158,7 +158,7 @@ const openQrSiteDetails = async (siteId) => {
       setSelectedQrSiteDetails(data);
     }
   } catch (err) {
-    console.error("Failed loading QR site details:", err);
+    console.error("Failed loading QR site details:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   } finally {
     setDetailsLoading(false);
   }
@@ -189,7 +189,7 @@ const openQrModal = async (pointId) => {
 
     setQrImageUrl(imageUrl);
   } catch (err) {
-    console.error("Failed opening QR modal:", err);
+    console.error("Failed opening QR modal:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to load QR");
   }
 };
@@ -314,7 +314,7 @@ const printQrCard = async (pointId) => {
 
     printWindow.document.close();
   } catch (err) {
-    console.error("Failed printing QR:", err);
+    console.error("Failed printing QR:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to print QR");
   }
 };
@@ -404,7 +404,7 @@ const downloadQr = async (pointId) => {
     link.click();
     document.body.removeChild(link);
   } catch (err) {
-    console.error("Failed downloading QR:", err);
+    console.error("Failed downloading QR:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to download QR");
   }
 };
@@ -427,14 +427,7 @@ const loadMissedHistory = async ({
     if (pointId) params.append("point_id", pointId);
     if (type) params.append("type", type);
 
-    console.log("MISSED HISTORY REQUEST:", {
-  siteId,
-  from,
-  to,
-  pointId,
-  type,
-  url: `${API_BASE_URL}/patrols/missed-history?${params.toString()}`,
-});
+    console.log("MISSED HISTORY REQUEST:");
 
     const response = await fetch(
   `${API_BASE_URL}/patrols/missed-history?${params.toString()}`,
@@ -449,7 +442,7 @@ const loadMissedHistory = async ({
       setMissedHistory(data.history || []);
     }
   } catch (err) {
-    console.error("Failed loading missed patrol history:", err);
+    console.error("Failed loading missed patrol history:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   } finally {
     setMissedHistoryLoading(false);
   }
@@ -488,7 +481,7 @@ const loadCompletedHistory = async ({
       setCompletedHistory(data.history || []);
     }
   } catch (err) {
-    console.error("Failed loading completed patrol history:", err);
+    console.error("Failed loading completed patrol history:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   } finally {
     setCompletedHistoryLoading(false);
   }
@@ -534,7 +527,7 @@ const openMissedReportPreview = async () => {
     setMissedReportPreviewUrl(previewUrl);
     setMissedReportPreviewOpen(true);
   } catch (err) {
-    console.error("Failed loading missed patrol report:", err);
+    console.error("Failed loading missed patrol report:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to load missed patrol report");
   }
 };
@@ -580,7 +573,7 @@ const downloadMissedReport = async () => {
 
     URL.revokeObjectURL(downloadUrl);
   } catch (err) {
-    console.error("Failed downloading missed patrol report:", err);
+    console.error("Failed downloading missed patrol report:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to download missed patrol report");
   }
 };
@@ -646,10 +639,7 @@ const openCompletedReportPreview = async () => {
     setCompletedReportPreviewUrl(previewUrl);
     setCompletedReportPreviewOpen(true);
   } catch (err) {
-    console.error(
-      "Failed loading completed patrol report:",
-      err
-    );
+    console.error("Failed loading completed patrol report:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     alert("Failed to load completed patrol report");
   }
@@ -717,10 +707,7 @@ const downloadCompletedReport = async () => {
 
     URL.revokeObjectURL(downloadUrl);
   } catch (err) {
-    console.error(
-      "Failed downloading completed patrol report:",
-      err
-    );
+    console.error("Failed downloading completed patrol report:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     alert(
       "Failed to download completed patrol report"

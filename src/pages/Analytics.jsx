@@ -26,7 +26,7 @@ function Analytics() {
         setLastChecked(new Date());
       }
     } catch (err) {
-      console.error("Analytics load error:", err);
+      console.error("Analytics load error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 
