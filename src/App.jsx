@@ -2,6 +2,8 @@ import Patrols from "./pages/Patrols";
 import ShiftReports from "./pages/ShiftReports";
 import { APP_VERSION, APP_BUILD } from "./config/version";
 import aegisLogo from "./assets/aegis-logo.png";
+import reportLogoDataUrl from "./assets/aegis-logo.png?inline";
+import { createIncidentReportHtml } from "./utils/incidentReportHtml.js";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import SiteCard from "./components/SiteCard";
@@ -481,10 +483,7 @@ const response = await fetch(
   setRecentAlertsCheckedAt(new Date());
 }
     } catch (err) {
-      console.error(
-        "Recent alert activity error:",
-        err
-      );
+      console.error("Recent alert activity error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
     };
 
@@ -770,14 +769,11 @@ const handleLogout = async () => {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
 
-        console.error(
-          "Logout tracking failed:",
-          data.message || response.statusText
-        );
+        console.error("Logout tracking failed:");
       }
     }
   } catch (err) {
-    console.error("Logout tracking failed", err);
+    console.error("Logout tracking failed", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   } finally {
     localStorage.removeItem("aegis-current-user");
     localStorage.setItem("aegis-active-menu", "Dashboard");
@@ -794,6 +790,7 @@ const [liveActiveGuards, setLiveActiveGuards] = useState([]);
   const [unreadShiftReports, setUnreadShiftReports] = useState(0);
   const [incidentFilter, setIncidentFilter] = useState("All");
   const [resolutionForms, setResolutionForms] = useState({});
+  const [guardQuestionnaireResponses, setGuardQuestionnaireResponses] = useState({});
 const menuItems = authorizationReady
   ? getPermittedDashboardMenus(currentUser?.user)
   : [];
@@ -834,7 +831,7 @@ useEffect(() => {
         const data = await response.json();
         if (response.ok) setUnreadShiftReports(data.unread || 0);
       } catch (error) {
-        console.error("Shift Report badge refresh failed:", error);
+        console.error("Shift Report badge refresh failed:", {code: /^[0-9A-Z]{5}$/.test(error?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(error?.code) ? error.code : 'INTERNAL'});
       }
     };
     loadUnreadShiftReports();
@@ -874,7 +871,7 @@ const response = await fetch(
       }
 
     } catch (err) {
-      console.error(err);
+      console.error("DASHBOARD_SRC_APP_JSX_DIAG_001", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 
@@ -919,13 +916,10 @@ const response = await fetch(
       } else {
         const data = await response.json().catch(() => ({}));
 
-        console.error(
-          "Heartbeat failed:",
-          data.message || response.statusText
-        );
+        console.error("Heartbeat failed:");
       }
     } catch (err) {
-      console.error("Heartbeat failed", err);
+      console.error("Heartbeat failed", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 
@@ -960,7 +954,7 @@ const response = await fetch(
 
     setLiveActiveGuards(data.guards || []);
   } catch (err) {
-    console.error("Failed loading active guards:", err);
+    console.error("Failed loading active guards:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -980,6 +974,10 @@ const [dashboardIncidents, setDashboardIncidents] = useState([]);
 const [systemStatus, setSystemStatus] = useState(null);
 const [resolvedIncidents, setResolvedIncidents] = useState([]);
 const [reportPreviewHtml, setReportPreviewHtml] = useState(null);
+const reportIdentityRef = useRef(null);
+const reportIdentity = JSON.stringify([getDashboardSessionToken(currentUser), currentUser?.user?.effective_company_id, currentUser?.user?.tenant_context_company_id]);
+reportIdentityRef.current = reportIdentity;
+useEffect(() => { setReportPreviewHtml(null); setGuardQuestionnaireResponses({}); }, [reportIdentity]);
 
 const [resolvedFilters, setResolvedFilters] = useState({
   date: "",
@@ -1008,7 +1006,7 @@ const res = await fetch(
       setDashboardMetrics(data);
 
     } catch (err) {
-      console.error("Dashboard metrics error:", err);
+      console.error("Dashboard metrics error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   }
 
@@ -1041,7 +1039,7 @@ const res = await fetch(
 
       setIncidentTimeline(data);
     } catch (err) {
-      console.error("Incident timeline load error:", err);
+      console.error("Incident timeline load error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
       setIncidentTimeline({
         status: "normal",
@@ -1084,7 +1082,7 @@ useEffect(() => {
 
     setLiveSites(data.sites || []);
   } catch (err) {
-    console.error("Sites load error:", err);
+    console.error("Sites load error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 }
 
@@ -1117,7 +1115,7 @@ const response = await fetch(
         setResolvedIncidents(data.incidents || []);
       }
     } catch (err) {
-      console.error("Failed loading resolved incidents:", err);
+      console.error("Failed loading resolved incidents:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 
@@ -1149,7 +1147,7 @@ const response = await fetch(
 
       setDashboardIncidents(data.cards || []);
     } catch (err) {
-      console.error("Failed loading site monitoring:", err);
+      console.error("Failed loading site monitoring:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   };
 
@@ -1189,7 +1187,7 @@ useEffect(() => {
       const data = await response.json();
       setSystemStatus(data);
     } catch (err) {
-      console.error("Failed loading system status:", err);
+      console.error("Failed loading system status:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
       setSystemStatus({
         overall_status: backendResponded ? "degraded" : "offline",
         critical_issue: !backendResponded,
@@ -1491,6 +1489,7 @@ const updateResolutionForm = (incidentDbId, field, value) => {
 
 const loadGuardNotesForIncident = async (incidentDbId) => {
   if (!incidentDbId) return;
+  const requestIdentity = reportIdentityRef.current;
 
   try {
     const response = await fetch(
@@ -1505,14 +1504,11 @@ const loadGuardNotesForIncident = async (incidentDbId) => {
     const data = await response.json();
 
     if (data.status === "ok") {
-      updateResolutionForm(
-        incidentDbId,
-        "guard_notes",
-        data.guard_notes || ""
-      );
+      if (requestIdentity !== reportIdentityRef.current) return;
+      setGuardQuestionnaireResponses(previous => ({...previous, [incidentDbId]: data.responses || []}));
     }
   } catch (err) {
-    console.error("Failed loading guard notes:", err);
+    console.error("GUARD_QUESTIONNAIRE_READ_FAILED");
   }
 };
 
@@ -1550,12 +1546,13 @@ const handleDownloadIncidentReport = async (incident) => {
 
     window.URL.revokeObjectURL(downloadUrl);
   } catch (err) {
-    console.error("Incident PDF download failed:", err);
+    console.error("Incident PDF download failed:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert("Failed to download PDF");
   }
 };
 
 const handlePreviewIncidentReport = async (incident) => {
+  const reportIdentity = reportIdentityRef.current;
   try {
     const sessionToken = getSessionToken();
 
@@ -1579,350 +1576,13 @@ const response = await fetch(
     }
 
     
-    const logoUrl = new URL(aegisLogo, window.location.href).href;
-
-    const timelineHtml = data.timeline
-      .map(
-        (item) => `
-          <tr>
-            <td>${item.display_time}</td>
-            <td>
-  ${
-    item.event === "Voice Call online"
-      ? "Voice Call Completed"
-      : item.event
-  }
-</td>
-          </tr>
-        `
-      )
-      .join("");
-
-    const responsesHtml = data.guard_responses
-      .map(
-        (item) => `
-          <div style="margin-bottom:12px">
-            <strong>${item.question_text}</strong><br/>
-            ${item.answer}
-          </div>
-        `
-      )
-      .join("");
-
-      const incidentLocationHtml =
-  data.incident?.incident_latitude && data.incident?.incident_longitude
-    ? `
-      <h2>Incident Location</h2>
-
-      <div class="summary-grid">
-        <div class="summary-item">
-          <span class="label">Address</span>
-          <span class="value">${data.incident.incident_address || "-"}</span>
-        </div>
-
-        <div class="summary-item">
-          <span class="label">Coordinates</span>
-          <span class="value">
-            ${data.incident.incident_latitude}, ${data.incident.incident_longitude}
-          </span>
-        </div>
-
-        <div class="summary-item">
-          <span class="label">Accuracy</span>
-          <span class="value">${data.incident.incident_accuracy || "-"}m</span>
-        </div>
-
-        <div class="summary-item">
-          <span class="label">Battery</span>
-          <span class="value">${data.incident.incident_battery_level || "-"}%</span>
-        </div>
-
-        <div class="summary-item">
-          <span class="label">Snapshot Time</span>
-          <span class="value">${data.incident.incident_location_timestamp_display || "-"}</span>
-        </div>
-
-        <div class="summary-item">
-          <span class="label">Map</span>
-          <span class="value">
-            https://www.google.com/maps?q=${data.incident.incident_latitude},${data.incident.incident_longitude}
-          </span>
-        </div>
-      </div>
-    `
-    : "";
-
-    const reportHtml = `
-      <html>
-  <head>
-    <title>${data.report_title}</title>
-
-    <style>
-      @page {
-        margin: 16mm;
-      }
-
-      body {
-  font-family: Arial, sans-serif;
-  color: #111;
-  margin: 0;
-  padding: 28px 34px;
-  box-sizing: border-box;
-}
-
-      .report-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 3px solid #111827;
-        padding-bottom: 18px;
-        margin-bottom: 28px;
-      }
-
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-      }
-
-      .brand img {
-        width: 58px;
-        height: 58px;
-        object-fit: contain;
-      }
-
-      .brand-title h1 {
-        margin: 0;
-        font-size: 28px;
-        letter-spacing: 1px;
-      }
-
-      .brand-title p {
-        margin: 4px 0 0;
-        color: #555;
-        font-size: 14px;
-      }
-
-      .report-meta {
-        text-align: right;
-        font-size: 13px;
-        color: #444;
-      }
-
-      .summary-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px 28px;
-        margin-bottom: 28px;
-      }
-
-      .summary-item {
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-      }
-
-      .label {
-        display: block;
-        font-size: 11px;
-        text-transform: uppercase;
-        color: #666;
-        letter-spacing: .6px;
-        margin-bottom: 3px;
-      }
-
-      .value {
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      h2 {
-        margin-top: 30px;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 8px;
-        font-size: 18px;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 10px;
-      }
-
-      td {
-        border-bottom: 1px solid #eee;
-        padding: 9px 8px;
-        font-size: 14px;
-        vertical-align: top;
-      }
-
-      .notes {
-        white-space: pre-line;
-        line-height: 1.5;
-      }
-
-      .footer {
-        margin-top: 36px;
-        padding-top: 14px;
-        border-top: 1px solid #ddd;
-        font-size: 12px;
-        color: #555;
-        display: flex;
-        justify-content: space-between;
-      }
-
-      .preview-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background: #111827;
-  padding: 12px;
-  text-align: right;
-  margin: -28px -34px 24px;
-}
-
-.preview-toolbar button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-      @media print {
-      .preview-toolbar {
-  display: none;
-}
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-          padding: 0;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-  <div class="preview-toolbar">
-  <button onclick="window.print()">Print / Save as PDF</button>
-</div>
-    <div class="report-header">
-      <div class="brand">
-      <img src="${logoUrl}" alt="Aegis Link Logo" />
-        <div class="brand-title">
-          <h1>AEGIS LINK</h1>
-          <p>Security Operations Platform</p>
-        </div>
-      </div>
-
-      <div class="report-meta">
-        <strong>Security Incident Report</strong><br/>
-        Report ID: ${data.report_id}<br/>
-        Generated: ${data.generated_at_display}<br/>
-        Generated By: ${currentUser?.user?.username || currentUser?.username || "-"}
-      </div>
-    </div>
-
-    <div class="summary-grid">
-      <div class="summary-item">
-        <span class="label">Incident Ref</span>
-        <span class="value">${data.incident.incident_ref}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Duration</span>
-        <span class="value">${data.incident.duration_display}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Site</span>
-        <span class="value">${data.incident.site}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Guard</span>
-        <span class="value">${data.incident.guard}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Status</span>
-        <span class="value">${data.incident.status}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Priority</span>
-        <span class="value">${data.incident.priority}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Triggered</span>
-        <span class="value">${data.incident.trigger_time_display}</span>
-      </div>
-
-      <div class="summary-item">
-        <span class="label">Resolved</span>
-        <span class="value">${data.incident.resolved_time_display}</span>
-      </div>
-    </div>
-
-    ${incidentLocationHtml}
-
-    <h2>Incident Timeline</h2>
-    <table>
-      ${timelineHtml}
-    </table>
-
-    <h2>Guard Responses</h2>
-    ${responsesHtml}
-
-    <h2>Investigation Notes</h2>
-
-    <p><strong>Supervisor:</strong> ${data.investigation?.supervisor_name || "-"}</p>
-
-    <p>
-      <strong>Supervisor Notes:</strong><br/>
-      <span class="notes">${data.investigation?.supervisor_notes || "-"}</span>
-    </p>
-
-    <p>
-      <strong>Guard Notes:</strong><br/>
-      <span class="notes">${data.investigation?.guard_notes || "-"}</span>
-    </p>
-
-    <p>
-      <strong>Residence Notes:</strong><br/>
-      <span class="notes">${data.investigation?.residence_notes || "-"}</span>
-    </p>
-
-    <p>
-      <strong>Admin Notes:</strong><br/>
-      <span class="notes">${data.investigation?.admin_notes || "-"}</span>
-    </p>
-
-    <h2>Resolution Summary</h2>
-
-    <p><strong>Approved By:</strong> ${data.investigation?.approved_by || "-"}</p>
-    <p><strong>Approved At:</strong> ${data.investigation?.approved_at_display || "-"}</p>
-
-    <div class="footer">
-      <span>Aegis Link Security Operations Platform</span>
-      <span>Generated Automatically</span>
-    </div>
-
-    <script>
-  window.onload = function() {
-    document.title = "${data.report_title}";
-  };
-</script>
-  </body>
-</html>
-        `;
+    const reportHtml = createIncidentReportHtml(data, currentUser, reportLogoDataUrl);
+    if (reportIdentity !== reportIdentityRef.current) return;
 
     setReportPreviewHtml(reportHtml);
 
   } catch (err) {
-    console.error(err);
+    console.error("DASHBOARD_SRC_APP_JSX_DIAG_002", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     alert("Failed to generate report");
   }
@@ -1975,7 +1635,7 @@ const handleResolveIncident = async (incident) => {
       prev.filter((item) => item.incidentDbId !== incident.incidentDbId)
     );
   } catch (err) {
-    console.error("Resolve incident failed:", err);
+    console.error("Resolve incident failed:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -2732,36 +2392,23 @@ const renderIncidentLocation = (incident) => {
 />
 </label>
 
+<section aria-label="Guard Questionnaire Responses">
+  <h4>Guard Questionnaire Responses</h4>
+  <button type="button" onClick={() => loadGuardNotesForIncident(incident.incidentDbId)}>Load questionnaire answers</button>
+  {(guardQuestionnaireResponses[incident.incidentDbId] || []).map((row,index) => <div key={row.question_key || index}>
+    <strong>{row.position || index+1}. {row.question_text}</strong>
+    <p style={{whiteSpace:"pre-wrap"}}>{row.answer}</p>
+    {row.provenance && <small>{row.provenance} · {row.omitted ? "Optional omission" : row.submitted === false ? "Not submitted" : "Guard response"}</small>}
+  </div>)}
+</section>
 <label>
-  Guard Notes
+  Independent Guard Notes
   <textarea
   rows="4"
   placeholder="Guard report / incident description"
   value={
     resolutionForms[incident.incidentDbId]?.guard_notes || ""
   }
-  onFocus={async () => {
-    try {
-      const response = await fetch(
-  `${API_BASE_URL}/incidents/${incident.incidentDbId}/guard-responses`,
-  {
-    headers: {
-      Authorization: `Bearer ${getDashboardSessionToken(currentUser) || ""}`,
-    },
-  }
-);
-
-      const data = await response.json();
-
-      updateResolutionForm(
-        incident.incidentDbId,
-        "guard_notes",
-        data.guard_notes || ""
-      );
-    } catch (err) {
-      console.error("Failed loading guard responses:", err);
-    }
-  }}
   onChange={(e) =>
     updateResolutionForm(
       incident.incidentDbId,
@@ -3155,6 +2802,8 @@ const renderIncidentLocation = (incident) => {
 
       <iframe
         title="Incident Report Preview"
+        sandbox="allow-scripts allow-modals"
+        referrerPolicy="no-referrer"
         className="report-preview-frame"
         srcDoc={reportPreviewHtml}
       />

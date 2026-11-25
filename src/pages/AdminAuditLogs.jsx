@@ -244,7 +244,7 @@ function AdminAuditLogs({ permissions = [] }) {
 
     window.URL.revokeObjectURL(downloadUrl);
   } catch (error) {
-    console.error("Admin session export error:", error);
+    console.error("Admin session export error:", {code: /^[0-9A-Z]{5}$/.test(error?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(error?.code) ? error.code : 'INTERNAL'});
   }
 };
 

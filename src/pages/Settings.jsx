@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SiteIncidentQuestionnaire from "../components/SiteIncidentQuestionnaire";
 import "./Settings.css";
 import { API_BASE_URL } from "../config/api";
 import { getAlertCapabilities } from "../utils/alertPermissions";
@@ -278,7 +279,7 @@ voice_enabled:true,
     setAlertConfig(data);
     return data;
   } catch (err) {
-    console.error("Alert configuration error", err);
+    console.error("Alert configuration error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     return null;
   }
 };
@@ -312,7 +313,7 @@ const loadTestAlertHistory = async (page = 1) => {
     setTestAlertHistoryPage(page);
     setExpandedTestAlertId(null);
   } catch (err) {
-    console.error("Test alert history error", err);
+    console.error("Test alert history error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setTestAlertHistoryError(err.message || "Failed to load test alert history");
   } finally {
     setTestAlertHistoryLoading(false);
@@ -370,7 +371,7 @@ const loadRecipients = async () => {
 
     setRecipients(data.recipients || []);
   } catch (err) {
-    console.error("Recipients load error", err);
+    console.error("Recipients load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -407,7 +408,7 @@ const loadSites = async () => {
 
     setSites(data.sites || []);
   } catch (err) {
-    console.error("Sites load error", err);
+    console.error("Sites load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -435,7 +436,7 @@ const loadGuards = async () => {
 
     setGuards(data.guards || []);
   } catch (err) {
-    console.error("Guards load error", err);
+    console.error("Guards load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -462,7 +463,7 @@ const loadUsers = async (showLoader = true) => {
 
     const data = await response.json();
 
-    console.log("Users API:", data);
+    console.log("Users API:");
 
     if (!response.ok) {
       throw new Error(data.message || "Users load failed");
@@ -470,7 +471,7 @@ const loadUsers = async (showLoader = true) => {
 
     setUsers(data.users || []);
   } catch (err) {
-    console.error("Users load error", err);
+    console.error("Users load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setUsersError(err.message || "Users load failed");
   } finally {
     if (showLoader) {
@@ -571,10 +572,7 @@ const loadTemporaryAccess = async () => {
       data.temporary_access || []
     );
   } catch (err) {
-    console.error(
-      "Temporary access load error",
-      err
-    );
+    console.error("Temporary access load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -712,10 +710,7 @@ const createTemporaryAccess = async () => {
 
     await loadTemporaryAccess();
   } catch (err) {
-    console.error(
-      "Temporary access creation error",
-      err
-    );
+    console.error("Temporary access creation error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     setTemporaryAccessError(
       err.message ||
@@ -770,10 +765,7 @@ const copyTemporaryAccessCredentials =
 
       setTemporaryAccessCopied(true);
     } catch (err) {
-      console.error(
-        "Temporary credentials copy error",
-        err
-      );
+      console.error("Temporary credentials copy error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
       setTemporaryAccessError(
         "Unable to copy credentials."
@@ -802,10 +794,7 @@ const copyTemporaryAccessValue = async (
       );
     }, 2000);
   } catch (err) {
-    console.error(
-      "Temporary credential value copy error",
-      err
-    );
+    console.error("Temporary credential value copy error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     setTemporaryAccessError(
       "Unable to copy credential."
@@ -849,10 +838,7 @@ const copyTemporaryAccessValue = async (
 
     await loadTemporaryAccess();
   } catch (err) {
-    console.error(
-      "Temporary access revoke error",
-      err
-    );
+    console.error("Temporary access revoke error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     setTemporaryAccessError(
       err.message ||
@@ -902,7 +888,7 @@ const loadUserDetails = async (
       setIsEditingUser(false);
     }
   } catch (err) {
-    console.error("User details load error", err);
+    console.error("User details load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     if (showLoader) {
       setSelectedUserError(
@@ -960,7 +946,7 @@ const saveUserChanges = async () => {
 
     await loadUsers(false);
   } catch (err) {
-    console.error("User update error", err);
+    console.error("User update error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert(err.message || "User update failed");
   }
 };
@@ -1002,7 +988,7 @@ const resetUserPassword = async () => {
 
     setShowTemporaryPasswordModal(true);
   } catch (err) {
-    console.error("Password reset error", err);
+    console.error("Password reset error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert(err.message || "Password reset failed");
   } finally {
     setIsResettingPassword(false);
@@ -1020,7 +1006,7 @@ const copyTemporaryPassword = async () => {
       setPasswordCopied(false);
     }, 2000);
   } catch (err) {
-    console.error("Password copy error", err);
+    console.error("Password copy error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1077,7 +1063,7 @@ const createNewUser = async () => {
 
     await loadUsers(false);
   } catch (err) {
-    console.error("Create user error", err);
+    console.error("Create user error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setNewUserError(err.message || "User creation failed");
   } finally {
     setIsCreatingUser(false);
@@ -1135,7 +1121,7 @@ const loadPatrolPoints = async (siteId) => {
 
     setPatrolPoints(data.points || []);
   } catch (err) {
-    console.error("Patrol points load error", err);
+    console.error("Patrol points load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1157,7 +1143,7 @@ const loadRandomPatrolConfig = async (siteId) => {
     setRandomPatrolConfig(configData.points || []);
     setRandomPatrolHistory(historyResponse.ok ? historyData.history || [] : []);
   } catch (err) {
-    console.error("Random Patrol configuration load error", err);
+    console.error("Random Patrol configuration load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setRandomPatrolSaveStatus(err.message || "Load failed");
   }
 };
@@ -1233,7 +1219,7 @@ const loadManualPatrolHistory = async (siteId) => {
       setManualPatrolHistory(data.manual_history || []);
     }
   } catch (err) {
-    console.error("Manual patrol history load error", err);
+    console.error("Manual patrol history load error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setManualPatrolHistory([]);
   }
 };
@@ -1275,7 +1261,7 @@ const addPatrolPoint = async () => {
 
     await loadPatrolPoints(patrolSite.id);
   } catch (err) {
-    console.error("Add patrol point error", err);
+    console.error("Add patrol point error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1322,7 +1308,7 @@ const addRecipient = async () => {
 
     await loadRecipients();
   } catch (err) {
-    console.error("Add recipient error", err);
+    console.error("Add recipient error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1367,7 +1353,7 @@ const addSite = async () => {
 
     await loadSites();
   } catch (err) {
-    console.error("Add site error", err);
+    console.error("Add site error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1409,7 +1395,7 @@ const updateSite = async () => {
     setEditingSite(null);
     await loadSites();
   } catch (err) {
-    console.error("Update site error", err);
+    console.error("Update site error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1487,7 +1473,7 @@ const uploadSopFile = async () => {
       alert("The private SOP is available, but an older public copy still requires removal.");
     }
   } catch (err) {
-    console.error("SOP upload error", err);
+    console.error("SOP upload error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert(err.message || "SOP upload failed");
   } finally {
     setIsUploadingSop(false);
@@ -1544,7 +1530,7 @@ const uploadSiteDocument = async (slot, file) => {
 
     await loadSites();
   } catch (err) {
-    console.error("Document upload error:", err);
+    console.error("Document upload error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert(err.message || "Upload failed");
   } finally {
     setIsUploadingDocument1(false);
@@ -1590,7 +1576,7 @@ const updateSiteProfile = async () => {
     setProfileSite(null);
     await loadSites();
   } catch (err) {
-    console.error("Update site profile error", err);
+    console.error("Update site profile error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
@@ -1642,7 +1628,7 @@ const saveGuardProfile = async () => {
     setProfileGuard(data.guard);
     setGuardProfileSaveStatus("Saved");
   } catch (err) {
-    console.error("Guard profile save error:", err);
+    console.error("Guard profile save error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
     setGuardProfileSaveStatus("Save failed");
     alert(err.message);
@@ -1697,7 +1683,7 @@ const addGuard = async () => {
 
     await loadGuards();
   } catch (err) {
-    console.error("Add guard error", err);
+    console.error("Add guard error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setGuardActionError(err.message || "Failed to add guard");
   }
 };
@@ -1799,7 +1785,7 @@ loadRolePermissions();
 
         setSystemStatus(data);
       } catch (err) {
-        console.error("Settings system status error:", err);
+        console.error("Settings system status error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
 
         setSystemStatus({
           overall_status: "offline",
@@ -1922,7 +1908,7 @@ loadDashboardRoles();
       loadTestAlertHistory(1),
     ]);
   } catch (err) {
-    console.error("Test alert error", err);
+    console.error("Test alert error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setTestAlertError(err.message || "Test alert failed");
   } finally {
     setIsTestingAlert(false);
@@ -2399,7 +2385,7 @@ const saveRecurringPatrolSchedule = async () => {
 
     setPatrolScheduleSaveStatus("Saved");
   } catch (err) {
-    console.error("Save recurring patrol schedule error", err);
+    console.error("Save recurring patrol schedule error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setPatrolScheduleSaveStatus("Save failed");
     alert(err.message || "Failed to save patrol schedule");
   }
@@ -2440,7 +2426,7 @@ const loadActiveRecurringSchedule = async (siteId) => {
 
     setActiveRecurringSchedule(activeRecurring || null);
   } catch (err) {
-    console.error("Load active recurring schedule error", err);
+    console.error("Load active recurring schedule error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setActiveRecurringSchedule(null);
   }
 };
@@ -2493,7 +2479,7 @@ const addManualPatrolSchedule = async () => {
     await loadPatrolPoints(patrolSite.id);
     await loadManualPatrolHistory(patrolSite.id);
   } catch (err) {
-    console.error("Add manual patrol error", err);
+    console.error("Add manual patrol error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     setManualPatrolSaveStatus("Save failed");
     alert(err.message || "Failed to add manual patrol.");
   }
@@ -2540,7 +2526,7 @@ const cancelManualPatrol = async (item) => {
 
     await loadManualPatrolHistory(patrolSite.id);
   } catch (err) {
-    console.error("Cancel manual patrol error", err);
+    console.error("Cancel manual patrol error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     alert(err.message || "Failed to cancel manual patrol.");
   }
 };
@@ -3621,6 +3607,7 @@ setShowRecipientsModal(true)
           flexWrap: "wrap",
         }}
       >
+        <SiteIncidentQuestionnaire key={`${storedCurrentUser?.user?.effective_company_id}:${storedCurrentUser?.user?.tenant_context_company_id}:${site.id}`} site={site} session={storedCurrentUser} />
         {hasPermission("sites.manage") && <button
           type="button"
           className="secondary-button"
@@ -3675,7 +3662,7 @@ setShowRecipientsModal(true)
 
       await loadSites();
     } catch (err) {
-      console.error("Toggle site active error", err);
+      console.error("Toggle site active error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   }}
 >
@@ -3726,7 +3713,7 @@ setShowRecipientsModal(true)
 
       await loadSites();
     } catch (err) {
-      console.error("Archive site error", err);
+      console.error("Archive site error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   }}
 >
@@ -3946,7 +3933,7 @@ setShowRecipientsModal(true)
 
       await loadGuards();
     } catch (err) {
-      console.error("Toggle guard active error", err);
+      console.error("Toggle guard active error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
       alert(err.message);
     }
   }}
@@ -5046,7 +5033,7 @@ recipient-row-modal
 
         await loadRecipients();
       } catch (err) {
-        console.error("Delete recipient error", err);
+        console.error("Delete recipient error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
       }
     }}
   >
@@ -6290,7 +6277,7 @@ recipient-row-modal
       await loadPatrolPoints(patrolSite.id);
       await loadManualPatrolHistory(patrolSite.id);
     } catch (err) {
-      console.error("Deactivate patrol point error", err);
+      console.error("Deactivate patrol point error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   }}
 >
@@ -6710,7 +6697,7 @@ recipient-row-modal
 
       await loadPatrolPoints(patrolSite.id);
     } catch (err) {
-      console.error("Generate QR error", err);
+      console.error("Generate QR error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
     }
   }}
 >

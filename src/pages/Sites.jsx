@@ -102,7 +102,7 @@ const [liveLocations, setLiveLocations] = useState([]);
     setIncidents(incidentsData.cards || []);
     setLiveLocations(locationsData.locations || []);
   } catch (err) {
-    console.error("Sites load error:", err);
+    console.error("Sites load error:", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
   }
 };
 
