@@ -5,7 +5,7 @@ import vm from 'node:vm';
 import { getDashboardSessionToken, hydrateDashboardSession, getPermittedDashboardMenus } from '../src/utils/dashboardAuth.js';
 import { buildPasswordChangedSession, buildRestrictedPasswordSession, PASSWORD_CHANGE_REQUIRED_CODE } from '../src/utils/passwordChangeSession.js';
 
-const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 function section(start, end) {
   const a = source.indexOf(start);
   const b = source.indexOf(end, a + start.length);
