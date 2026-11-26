@@ -3588,11 +3588,19 @@ setShowRecipientsModal(true)
         <br />
 
         <small>
-          {site.status === "active"
-  ? "Active"
-  : site.status === "inactive"
-    ? "Inactive"
-    : "Unknown status"}
+          <span className={
+  site.status === "active"
+    ? "status-badge active"
+    : site.status === "inactive"
+      ? "status-badge inactive"
+      : ""
+}>
+  {site.status === "active"
+    ? "Active"
+    : site.status === "inactive"
+      ? "Inactive"
+      : "Unknown status"}
+</span>
           {" • "}
           {site.required_shifts || 1}
           {" "}
