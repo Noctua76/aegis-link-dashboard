@@ -1322,7 +1322,7 @@ const addSite = async () => {
       getDashboardSessionToken(storedUser);
 
     if (!sessionToken) {
-      return;
+      throw new Error("Authentication required");
     }
 
     const response = await fetch(
@@ -1352,8 +1352,12 @@ const addSite = async () => {
     });
 
     await loadSites();
+
+    alert("Site created successfully.");
+
   } catch (err) {
     console.error("Add site error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
+    alert(err.message || "Unable to create site.");
   }
 };
 
@@ -3548,7 +3552,7 @@ setShowRecipientsModal(true)
 
   <hr />
 
-  {sites.map((site, index) => (
+  {sites.filter((site) => site.status !== "archived").map((site) => (
   <div
     key={site.id}
     className="settings-item"
@@ -3584,7 +3588,11 @@ setShowRecipientsModal(true)
         <br />
 
         <small>
-          {site.status === "active" ? "Active" : "Inactive"}
+          {site.status === "active"
+  ? "Active"
+  : site.status === "inactive"
+    ? "Inactive"
+    : "Unknown status"}
           {" • "}
           {site.required_shifts || 1}
           {" "}
@@ -3647,22 +3655,42 @@ setShowRecipientsModal(true)
   Patrols
 </button>}
 
-        {hasPermission("sites.manage") && <button
+        {hasPermission("sites.manage") && ["active", "inactive"].includes(site.status) && <button
   type="button"
   className="secondary-button"
   onClick={async () => {
     try {
-      await fetch(
-  `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
-  {
-    method: "PUT",
-    headers: getAuthHeaders(),
-  }
-);
+      const response = await fetch(
+        `${API_BASE_URL}/settings/sites/${site.id}/toggle-active`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to change site status");
+      }
+
+      if (data.site?.id !== site.id || !["active", "inactive"].includes(data.site.status)) {
+        throw new Error("Unexpected site status. Refresh before trying again.");
+      }
+
+      setSites((current) => current.map((item) =>
+        item.id === site.id ? { ...item, ...data.site } : item
+      ));
 
       await loadSites();
+
+      alert(data.site.status === "active"
+        ? "Site activated successfully."
+        : "Site deactivated successfully.");
+
     } catch (err) {
       console.error("Toggle site active error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
+      alert(err.message || "Unable to change site status.");
     }
   }}
 >
@@ -3671,12 +3699,12 @@ setShowRecipientsModal(true)
     : "Activate"}
 </button>}
 
-        {hasPermission("sites.manage") && <button
+{hasPermission("sites.manage") && <button
   type="button"
   className="secondary-button danger-button"
   onClick={async () => {
     const confirmed = window.confirm(
-      "Archive this site? It will be removed from operational views, but historical incidents and reports will remain available."
+      "Archive this site? It will be moved to Archived Sites in Settings. Historical records will not be deleted."
     );
 
     if (!confirmed) return;
@@ -3690,7 +3718,7 @@ setShowRecipientsModal(true)
         getDashboardSessionToken(storedUser);
 
       if (!sessionToken) {
-        return;
+        throw new Error("Authentication required");
       }
 
       const response = await fetch(
@@ -3706,14 +3734,25 @@ setShowRecipientsModal(true)
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          data.message || "Unable to archive site"
-        );
+        throw new Error(data.message || "Unable to archive site");
       }
 
+      if (data.site?.id !== site.id || data.site.status !== "archived") {
+        throw new Error("Archive status could not be confirmed. Refresh before trying again.");
+      }
+
+      setSites((current) => current.map((item) =>
+        item.id === site.id ? { ...item, ...data.site } : item
+      ));
+
+      setExpandedSiteId(null);
       await loadSites();
+
+      alert("Site archived successfully.");
+
     } catch (err) {
       console.error("Archive site error", {code: /^[0-9A-Z]{5}$/.test(err?.code || '') || ['ECONNREFUSED','ECONNRESET','ETIMEDOUT','ENOTFOUND'].includes(err?.code) ? err.code : 'INTERNAL'});
+      alert(err.message || "Unable to archive site. Please refresh before trying again.");
     }
   }}
 >
@@ -3723,6 +3762,28 @@ setShowRecipientsModal(true)
     )}
   </div>
 ))}
+
+<details className="settings-field" style={{ marginTop: "16px" }}>
+  <summary style={{ cursor: "pointer", fontWeight: 600 }}>
+    Archived Sites ({sites.filter((site) => site.status === "archived").length})
+  </summary>
+
+  {sites.filter((site) => site.status === "archived").length === 0 && (
+    <small>No archived sites.</small>
+  )}
+
+  {sites.filter((site) => site.status === "archived").map((site) => (
+    <div key={site.id} className="settings-item" style={{ marginTop: "10px" }}>
+      <div>
+        <strong>{site.site_code} | {site.name}</strong>
+        <br />
+        <small>{site.location}</small>
+        <br />
+        <small style={{ color: "#94a3b8" }}>Archived</small>
+      </div>
+    </div>
+  ))}
+</details>
 </div>
 
 <div className="settings-users-layout">
