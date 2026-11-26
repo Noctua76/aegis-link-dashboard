@@ -1,0 +1,447 @@
+/* Incident Questionnaire — isolated editor styles */
+
+.iq-dialog {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: min(1000px, calc(100vw - 32px));
+  height: min(850px, calc(100vh - 40px));
+  height: min(850px, calc(100dvh - 40px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: #e2e8f0;
+  background: #181e29;
+  border: 1px solid #374151;
+  border-radius: 16px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.5);
+  color-scheme: dark;
+  text-align: left;
+}
+
+.iq-dialog[open] {
+  display: flex;
+}
+
+.iq-dialog::backdrop {
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(4px);
+}
+
+.iq-editor {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.iq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 22px 28px;
+  border-bottom: 1px solid #303743;
+}
+
+.iq-header h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 600;
+}
+
+.iq-header p {
+  margin: 5px 0 0;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.iq-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 24px 28px;
+}
+
+.iq-summary {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.iq-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  background: #212a38;
+  border: 1px solid #303b4b;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.iq-metric span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.iq-metric strong {
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.iq-configuration {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.iq-configuration > .iq-field {
+  flex: 1 1 230px;
+  margin: 0;
+}
+
+.iq-toolbar,
+.iq-question-actions,
+.iq-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.iq-note {
+  padding: 12px 14px;
+  margin: 16px 0 24px;
+  background: #1c2a3a;
+  border-left: 3px solid #60a5fa;
+  border-radius: 5px;
+  color: #b6c8dd;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.iq-section-heading,
+.iq-question-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.iq-editor .iq-section-heading h3,
+.iq-editor .iq-question-heading h4 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.iq-section-heading h3 {
+  font-size: 18px;
+}
+
+.iq-section-heading > span {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.iq-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.iq-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  margin-bottom: 16px;
+}
+
+.iq-field > span {
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.iq-dialog .iq-field input,
+.iq-dialog .iq-field textarea,
+.iq-dialog .iq-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  margin: 0;
+  padding: 10px 12px;
+  background: #111827;
+  border: 1px solid #3b4658;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 14px;
+}
+
+.iq-dialog .iq-field textarea {
+  min-height: 88px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.iq-dialog .iq-field :is(input,textarea,select):disabled {
+  opacity: 1;
+  color: #aebccd;
+  cursor: default;
+}
+
+.iq-dialog :is(input,textarea,select,button,summary):focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+}
+
+.iq-question {
+  min-width: 0;
+  padding: 20px;
+  margin-bottom: 14px;
+  background: #1e2633;
+  border: 1px solid #374151;
+  border-radius: 12px;
+}
+
+.iq-question-heading h4 {
+  font-size: 15px;
+}
+
+.iq-question-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+}
+
+.iq-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.iq-dialog .iq-checkbox input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #3b82f6;
+}
+
+.iq-dialog .iq-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 38px;
+  margin: 0;
+  padding: 8px 14px;
+  color: #e2e8f0;
+  background: transparent;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.iq-dialog .iq-button:hover:not(:disabled) {
+  background: #293548;
+  border-color: #64748b;
+}
+
+.iq-dialog .iq-button:disabled,
+.iq-dialog fieldset:disabled .iq-button {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.iq-dialog .iq-close {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 23px;
+  line-height: 1;
+}
+
+.iq-dialog .iq-question-actions .iq-button {
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.iq-dialog .iq-danger {
+  color: #fca5a5;
+}
+
+.iq-dialog .iq-add {
+  width: 100%;
+  min-height: 44px;
+  border-style: dashed;
+  color: #93c5fd;
+}
+
+.iq-dialog .iq-primary {
+  background: #2563eb;
+  border-color: #3b82f6;
+  color: #ffffff;
+}
+
+.iq-dialog .iq-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.iq-history,
+.iq-preview {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  background: #1e2633;
+}
+
+.iq-preview {
+  margin: 0 0 24px;
+}
+
+.iq-preview h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.iq-preview > p {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.iq-history summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.iq-history[open] summary {
+  margin-bottom: 16px;
+}
+
+.iq-dialog .iq-version,
+.settings-card .iq-dialog .iq-version {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.iq-version strong {
+  font-weight: 500;
+}
+
+.iq-version span,
+.iq-audit-row span {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.iq-history-content,
+.iq-audit-row {
+  padding: 12px;
+  margin-top: 10px;
+  background: #111827;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+
+.iq-audit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.iq-error {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #391e27;
+  border: 1px solid #7f3546;
+  border-radius: 8px;
+  color: #fecaca;
+  overflow-wrap: anywhere;
+}
+
+.iq-loading {
+  color: #94a3b8;
+}
+
+.iq-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 28px;
+  border-top: 1px solid #374151;
+  background: #181e29;
+}
+
+.iq-draft-status {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+@media (max-width: 600px) {
+  .iq-dialog {
+    width: calc(100vw - 16px);
+    height: calc(100dvh - 16px);
+    border-radius: 12px;
+  }
+
+  .iq-header,
+  .iq-body,
+  .iq-footer {
+    padding: 16px;
+  }
+
+  .iq-header h2 {
+    font-size: 19px;
+  }
+
+  .iq-summary,
+  .iq-question-grid {
+    grid-template-columns: minmax(0,1fr);
+  }
+
+  .iq-question {
+    padding: 14px;
+  }
+
+  .iq-footer-actions {
+    width: 100%;
+  }
+
+  .iq-dialog .iq-footer-actions .iq-button {
+    flex: 1 1 auto;
+  }
+}
