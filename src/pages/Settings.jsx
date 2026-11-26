@@ -79,6 +79,7 @@ const { canViewAlerts, canManageAlerts } = getAlertCapabilities(hasPermission);
   const [recipients, setRecipients] = useState([]);
   const [showRecipientsModal, setShowRecipientsModal] = useState(false);
   const [sites, setSites] = useState([]);
+const [restoringSiteId, setRestoringSiteId] = useState(null);
 const [guards, setGuards] = useState([]);
 const [users, setUsers] = useState([]);
 const [dashboardRoles, setDashboardRoles] = useState([]);
@@ -3788,7 +3789,89 @@ setShowRecipientsModal(true)
         <small>{site.location}</small>
         <br />
         <small style={{ color: "#94a3b8" }}>Archived</small>
-      </div>
+</div>
+
+{hasPermission("sites.manage") && (
+  <button
+    type="button"
+    className="secondary-button"
+    disabled={restoringSiteId !== null}
+    onClick={async () => {
+      const confirmed = window.confirm(
+        `Restore ${site.site_code} | ${site.name}? The site will remain inactive until you activate it.`
+      );
+
+      if (!confirmed) return;
+
+      setRestoringSiteId(site.id);
+
+      try {
+        const sessionToken = getSessionToken();
+
+        if (!sessionToken) {
+          throw new Error("Authentication required");
+        }
+
+        const response = await fetch(
+          `${API_BASE_URL}/settings/sites/${site.id}/restore`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${sessionToken}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Unable to restore site"
+          );
+        }
+
+        if (
+          data.status !== "ok" ||
+          data.site?.id !== site.id ||
+          data.site.status !== "inactive"
+        ) {
+          throw new Error(
+            "Restore status could not be confirmed. Refresh before trying again."
+          );
+        }
+
+        setSites((current) =>
+          current.map((item) =>
+            item.id === site.id
+              ? { ...item, ...data.site }
+              : item
+          )
+        );
+
+        setExpandedSiteId(null);
+        await loadSites();
+
+        alert(
+          "Site restored successfully as Inactive. Review its configuration before activation."
+        );
+      } catch (err) {
+        console.error("Site restore failed", {
+          code: "RESTORE_FAILED",
+        });
+
+        alert(
+          err.message || "Unable to restore site."
+        );
+      } finally {
+        setRestoringSiteId(null);
+      }
+    }}
+  >
+    {restoringSiteId === site.id
+      ? "Restoring..."
+      : "Restore Site"}
+  </button>
+)}
     </div>
   ))}
 </details>

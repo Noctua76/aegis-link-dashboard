@@ -77,7 +77,7 @@ function Analytics() {
           <strong>{riskLevel}</strong>
         </div>
 
-        <div className={`analytics-card ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
+        <div className={`analytics-card readiness-card ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
           <span>Guard Readiness</span>
           <strong>{readinessLevel}</strong>
         </div>
@@ -138,7 +138,7 @@ function Analytics() {
 
             <span className="analytics-metric-cell">
               <span className="analytics-mobile-label">Readiness</span>
-              <span className={`badge ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
+              <span className={`badge readiness-badge ${readinessLevel.toLowerCase().replace(" ", "-")}`}>
                 {readinessLevel}
               </span>
             </span>
